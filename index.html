@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=5">
+    <link rel="stylesheet" href="styles.css?v=6">
   </head>
   <body>
     <main id="app" class="app-shell" aria-live="polite">
@@ -90,13 +90,6 @@
           <div class="quiz-grid" id="assignedQuizGrid"></div>
         </section>
 
-        <section>
-          <div class="section-heading">
-            <p class="section-label">Progress</p>
-            <h2>Recent results</h2>
-          </div>
-          <div class="progress-list" id="progressList"></div>
-        </section>
       </section>
     </template>
 
@@ -161,11 +154,19 @@
             <div id="adminUsersList" class="admin-users-list"></div>
           </section>
         </section>
+
+        <section class="admin-card activity-card">
+          <div>
+            <p class="section-label">Activity</p>
+            <h2>Quiz results by user</h2>
+          </div>
+          <div id="adminActivityList" class="activity-list"></div>
+        </section>
       </section>
     </template>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js?v=4"></script>
-    <script src="script.js?v=6"></script>
+    <script src="script.js?v=7"></script>
   </body>
 </html>

@@ -155,9 +155,8 @@ async function renderDashboard() {
   adminButton.addEventListener("click", renderAdmin);
   document.querySelector("#logoutButton").addEventListener("click", logout);
 
-  const [assignments, progress] = await Promise.all([fetchAssignments(currentProfile.id), fetchProgress(currentProfile.id)]);
+  const assignments = await fetchAssignments(currentProfile.id);
   renderAssignedQuizzes(assignments.map((item) => item.quiz_id));
-  renderProgress(progress);
 }
 
 async function fetchAssignments(userId) {
@@ -166,21 +165,6 @@ async function fetchAssignments(userId) {
     .select("quiz_id")
     .eq("user_id", userId)
     .order("quiz_id");
-
-  if (error) {
-    return [];
-  }
-
-  return data || [];
-}
-
-async function fetchProgress(userId) {
-  const { data, error } = await supabaseClient
-    .from("quiz_progress")
-    .select("quiz_id, score, total, level, completed_at")
-    .eq("user_id", userId)
-    .order("completed_at", { ascending: false })
-    .limit(10);
 
   if (error) {
     return [];
@@ -211,36 +195,6 @@ function createQuizTile(quiz) {
   return tile;
 }
 
-function renderProgress(progress) {
-  const list = document.querySelector("#progressList");
-
-  if (!progress.length) {
-    list.replaceChildren(createEmptyState("No quiz results yet."));
-    return;
-  }
-
-  progress.forEach((item) => {
-    const quiz = quizCatalog.find((entry) => entry.id === item.quiz_id);
-    const row = document.createElement("article");
-    row.className = "progress-item";
-
-    const content = document.createElement("div");
-    const title = document.createElement("strong");
-    title.textContent = quiz?.title || item.quiz_id;
-    const meta = document.createElement("div");
-    meta.className = "progress-meta";
-    meta.textContent = `${item.level || "Practice"} · ${new Date(item.completed_at).toLocaleString()}`;
-    content.append(title, meta);
-
-    const score = document.createElement("div");
-    score.className = "progress-score";
-    score.textContent = `${item.score}/${item.total}`;
-
-    row.append(content, score);
-    list.append(row);
-  });
-}
-
 async function renderAdmin() {
   renderTemplate("adminTemplate");
   document.querySelector("#backToDashboardButton").addEventListener("click", renderDashboard);
@@ -248,6 +202,7 @@ async function renderAdmin() {
   renderAssignmentCheckboxes(document.querySelector("#newUserAssignments"), []);
   document.querySelector("#createUserForm").addEventListener("submit", createUser);
   await renderAdminUsers();
+  await renderAdminActivity();
 }
 
 function renderAssignmentCheckboxes(container, selectedIds) {
@@ -357,15 +312,21 @@ async function renderAdminUsers() {
     passwordButton.className = "mini-action";
     passwordButton.type = "button";
     passwordButton.textContent = "Change password";
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "mini-action danger-action";
+    deleteButton.type = "button";
+    deleteButton.textContent = "Delete account";
+    deleteButton.hidden = user.id === currentProfile.id;
     const passwordMessage = document.createElement("p");
     passwordMessage.className = "form-message compact-message";
-    actions.append(saveButton, passwordButton);
+    actions.append(saveButton, passwordButton, deleteButton);
     content.append(name, meta, fieldset, passwordReset, actions, passwordMessage);
     row.append(content);
 
     renderAssignmentCheckboxes(fieldset, selectedIds);
     saveButton.addEventListener("click", () => saveAssignments(user.id, fieldset));
     passwordButton.addEventListener("click", () => updateUserPassword(user.id, passwordInput, passwordMessage));
+    deleteButton.addEventListener("click", () => deleteUserAccount(user, passwordMessage));
     list.append(row);
   }
 }
@@ -423,6 +384,130 @@ async function updateUserPassword(userId, input, message) {
   } catch (error) {
     setMessage(message, error.message || "Could not change password.", true);
   }
+}
+
+async function deleteUserAccount(user, message) {
+  const confirmed = window.confirm(`Delete ${user.display_name}'s account and all stored progress?`);
+  if (!confirmed) return;
+
+  setMessage(message, "Deleting account...");
+
+  try {
+    const { error } = await supabaseClient.rpc("admin_delete_user", {
+      target_user_id: user.id
+    });
+
+    if (error) {
+      throw error;
+    }
+
+    await renderAdminUsers();
+    await renderAdminActivity();
+  } catch (error) {
+    setMessage(message, error.message || "Could not delete account.", true);
+  }
+}
+
+async function renderAdminActivity() {
+  const list = document.querySelector("#adminActivityList");
+  list.replaceChildren(createEmptyState("Loading activity..."));
+
+  const { data: progress, error } = await supabaseClient
+    .from("quiz_progress")
+    .select("user_id, quiz_id, score, total, level, details, completed_at")
+    .order("completed_at", { ascending: false })
+    .limit(50);
+
+  if (error) {
+    list.replaceChildren(createEmptyState("Could not load activity."));
+    return;
+  }
+
+  if (!progress?.length) {
+    list.replaceChildren(createEmptyState("No quiz activity yet."));
+    return;
+  }
+
+  const [profiles, quizzes] = await Promise.all([fetchProfilesForActivity(), fetchQuizzesForActivity()]);
+  const profileMap = new Map(profiles.map((profile) => [profile.id, profile]));
+  const quizMap = new Map(quizzes.map((quiz) => [quiz.id, quiz]));
+
+  list.replaceChildren();
+  progress.forEach((item) => {
+    list.append(createActivityItem(item, profileMap.get(item.user_id), quizMap.get(item.quiz_id)));
+  });
+}
+
+async function fetchProfilesForActivity() {
+  const { data, error } = await supabaseClient
+    .from("profiles")
+    .select("id, username, display_name")
+    .order("display_name");
+
+  return error ? [] : data || [];
+}
+
+async function fetchQuizzesForActivity() {
+  const { data, error } = await supabaseClient
+    .from("quizzes")
+    .select("id, title")
+    .order("sort_order");
+
+  return error ? [] : data || [];
+}
+
+function createActivityItem(item, profile, quiz) {
+  const row = document.createElement("article");
+  row.className = "activity-item";
+
+  const header = document.createElement("div");
+  const title = document.createElement("strong");
+  title.textContent = `${profile?.display_name || "Deleted user"} · ${quiz?.title || item.quiz_id}`;
+  const meta = document.createElement("div");
+  meta.className = "progress-meta";
+  meta.textContent = `${profile?.username ? `@${profile.username} · ` : ""}${item.level || "Practice"} · ${new Date(item.completed_at).toLocaleString()}`;
+  header.append(title, meta);
+
+  const score = document.createElement("div");
+  score.className = "progress-score";
+  score.textContent = `${item.score}/${item.total}`;
+
+  const summary = document.createElement("p");
+  summary.className = "activity-summary";
+  summary.textContent = summarizeProgressDetails(item.details);
+
+  row.append(header, score, summary);
+
+  if (item.details && Object.keys(item.details).length) {
+    const details = document.createElement("details");
+    details.className = "activity-details";
+    const detailsSummary = document.createElement("summary");
+    detailsSummary.textContent = "Answer details";
+    const pre = document.createElement("pre");
+    pre.textContent = JSON.stringify(item.details, null, 2);
+    details.append(detailsSummary, pre);
+    row.append(details);
+  }
+
+  return row;
+}
+
+function summarizeProgressDetails(details) {
+  if (!details || typeof details !== "object") {
+    return "No answer details recorded.";
+  }
+
+  if (Array.isArray(details.answers)) {
+    const correct = details.answers.filter((answer) => answer.correct).length;
+    const wrong = details.answers.length - correct;
+    return `${details.answers.length} answers tracked: ${correct} correct, ${wrong} wrong.`;
+  }
+
+  if (Number.isFinite(details.wrongCount)) {
+    return `${details.wrongCount} wrong answers recorded.`;
+  }
+
+  return "Details recorded for review.";
 }
 
 async function logout() {

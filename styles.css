@@ -345,13 +345,15 @@ code {
 }
 
 .progress-list,
-.admin-users-list {
+.admin-users-list,
+.activity-list {
   display: grid;
   gap: 12px;
 }
 
 .progress-item,
-.user-row {
+.user-row,
+.activity-item {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 12px;
@@ -384,6 +386,10 @@ code {
 .admin-card {
   display: grid;
   gap: 16px;
+}
+
+.activity-card {
+  align-self: start;
 }
 
 fieldset {
@@ -460,6 +466,43 @@ legend {
   cursor: pointer;
   font-weight: 800;
   padding: 0 12px 2px;
+}
+
+.danger-action {
+  background: #ffe7e2;
+  color: #9f1d12;
+}
+
+.activity-item {
+  align-items: start;
+}
+
+.activity-summary,
+.activity-details {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.activity-summary {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.activity-details summary {
+  cursor: pointer;
+  font-weight: 900;
+}
+
+.activity-details pre {
+  max-height: 260px;
+  overflow: auto;
+  border-radius: 18px;
+  background: rgba(22, 26, 50, 0.06);
+  color: var(--ink);
+  font-size: 0.84rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  padding: 12px;
 }
 
 .setup-card p {

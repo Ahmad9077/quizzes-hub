@@ -6,7 +6,7 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
 
-type CreateUserBody = {
+type AdminUsersBody = {
   action?: "create" | "update-password";
   username?: string;
   displayName?: string;
@@ -54,18 +54,13 @@ Deno.serve(async (request) => {
     return json({ error: "Admin access required." }, 403);
   }
 
-  const body = await request.json() as CreateUserBody;
+  const body = await request.json() as AdminUsersBody;
 
   if (body.action === "update-password") {
     const targetUserId = String(body.userId || "").trim();
-    const newPassword = String(body.password || "");
 
     if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(targetUserId)) {
       return json({ error: "Valid user ID is required." }, 400);
-    }
-
-    if (newPassword.length < 8) {
-      return json({ error: "Password must be at least 8 characters." }, 400);
     }
 
     const { data: targetProfile, error: targetError } = await adminClient
@@ -76,6 +71,12 @@ Deno.serve(async (request) => {
 
     if (targetError || !targetProfile) {
       return json({ error: "User profile was not found." }, 404);
+    }
+
+    const newPassword = String(body.password || "");
+
+    if (newPassword.length < 8) {
+      return json({ error: "Password must be at least 8 characters." }, 400);
     }
 
     const { error: updateError } = await adminClient.auth.admin.updateUserById(targetUserId, {

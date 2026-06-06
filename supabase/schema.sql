@@ -87,8 +87,39 @@ as $$
   limit 1;
 $$;
 
+create or replace function public.admin_delete_user(target_user_id uuid)
+returns boolean
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required.';
+  end if;
+
+  if target_user_id = auth.uid() then
+    raise exception 'You cannot delete the account you are signed in with.';
+  end if;
+
+  if not exists (
+    select 1
+    from public.profiles
+    where id = target_user_id
+  ) then
+    raise exception 'User profile was not found.';
+  end if;
+
+  delete from auth.users
+  where id = target_user_id;
+
+  return true;
+end;
+$$;
+
 grant execute on function public.resolve_login(text) to anon, authenticated;
 grant execute on function public.is_admin() to authenticated;
+grant execute on function public.admin_delete_user(uuid) to authenticated;
 
 drop policy if exists "profiles self or admin select" on public.profiles;
 create policy "profiles self or admin select"
