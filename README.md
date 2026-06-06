@@ -4,10 +4,9 @@ Public GitHub Pages URL:
 
 `https://ahmad9077.github.io/quizzes-hub/`
 
-Local file:
+Quizzes Hub is a simple public homepage for the kids' quiz websites.
 
-`/Users/macserver/Documents/Codex/2026-06-06/i-have-multiple-projects-that-they/index.html`
+- Humoud: World Flags Quiz, Country Map Quiz, Spelling Quiz
+- Deema: Picture Reading Quiz
 
-The quiz cards are managed in `script.js` inside the `quizProjects` array. To add another quiz website, add a new object with its title, category, live URL, local file URL, and project path.
-
-The linked quiz projects were not modified.
+The homepage is static HTML, CSS, and JavaScript.
