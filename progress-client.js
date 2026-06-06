@@ -14,7 +14,13 @@
     !config.supabaseUrl.includes("YOUR_") &&
     !config.supabaseAnonKey.includes("YOUR_")
   );
-  const client = configured ? window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey) : null;
+  const client = configured
+    ? window.QuizzesHubSupabaseClient || window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey)
+    : null;
+
+  if (client) {
+    window.QuizzesHubSupabaseClient = client;
+  }
 
   window.QuizzesHubProgress = {
     async record(result) {
