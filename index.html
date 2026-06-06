@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Quizzes Hub collects the existing quiz websites in one shareable launcher.">
+    <title>Quizzes Hub</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <header class="workspace-header">
+        <div>
+          <p class="eyebrow">Quizzes Hub</p>
+          <h1>Choose a quiz website</h1>
+          <p class="intro">One place for the quiz projects you already have. Additions and categories can be edited from the quiz list in <code>script.js</code>.</p>
+        </div>
+        <div class="path-panel" aria-label="Local landing page path">
+          <span>Local page</span>
+          <button class="copy-button" id="copyLandingPath" type="button">Copy path</button>
+          <code id="landingPath">/Users/macserver/Documents/Codex/2026-06-06/i-have-multiple-projects-that-they/index.html</code>
+        </div>
+      </header>
+
+      <section class="controls" aria-label="Quiz filters">
+        <label class="search-box">
+          <span>Search</span>
+          <input id="searchInput" type="search" placeholder="Find a quiz, topic, or category">
+        </label>
+        <div class="category-tabs" id="categoryTabs" role="tablist" aria-label="Quiz categories"></div>
+      </section>
+
+      <section class="summary-strip" aria-label="Project summary">
+        <article>
+          <span id="visibleCount">0</span>
+          <strong>visible quizzes</strong>
+        </article>
+        <article>
+          <span id="categoryCount">0</span>
+          <strong>categories</strong>
+        </article>
+        <article>
+          <span>0</span>
+          <strong>projects changed</strong>
+        </article>
+      </section>
+
+      <section class="quiz-grid" id="quizGrid" aria-live="polite"></section>
+
+      <section class="additions">
+        <div>
+          <p class="eyebrow">Next additions</p>
+          <h2>Keep adding quiz websites here</h2>
+        </div>
+        <p>When you add another quiz, add one object to the <code>quizProjects</code> array in <code>script.js</code>. Use a new category name if you want another tab.</p>
+      </section>
+    </main>
+
+    <template id="quizCardTemplate">
+      <article class="quiz-card">
+        <div class="card-media" aria-hidden="true">
+          <span class="media-mark"></span>
+        </div>
+        <div class="card-body">
+          <div class="card-topline">
+            <span class="category-pill"></span>
+            <span class="status-pill"></span>
+          </div>
+          <h2></h2>
+          <p class="description"></p>
+          <dl class="meta-list">
+            <div>
+              <dt>Questions</dt>
+              <dd class="questions"></dd>
+            </div>
+            <div>
+              <dt>Project</dt>
+              <dd class="repo"></dd>
+            </div>
+          </dl>
+          <div class="card-actions">
+            <a class="primary-link" target="_blank" rel="noreferrer">Open website</a>
+            <a class="secondary-link local-link" target="_blank" rel="noreferrer">Open local</a>
+          </div>
+          <details>
+            <summary>Project path</summary>
+            <div class="path-row">
+              <code class="project-path"></code>
+              <button class="copy-button path-copy" type="button">Copy</button>
+            </div>
+          </details>
+        </div>
+      </article>
+    </template>
+
+    <script src="script.js"></script>
+  </body>
+</html>
