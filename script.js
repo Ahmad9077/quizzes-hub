@@ -286,6 +286,7 @@ async function createUser(event) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
+        action: "create",
         username: String(formData.get("username")).trim().toLowerCase(),
         displayName: String(formData.get("displayName")).trim(),
         password: String(formData.get("password")),
@@ -336,18 +337,35 @@ async function renderAdminUsers() {
     meta.className = "progress-meta";
     meta.textContent = `@${user.username} · ${user.role}`;
     const fieldset = document.createElement("fieldset");
+    const passwordReset = document.createElement("label");
+    passwordReset.className = "password-reset";
+    const passwordText = document.createElement("span");
+    passwordText.textContent = "New password";
+    const passwordInput = document.createElement("input");
+    passwordInput.type = "password";
+    passwordInput.minLength = 8;
+    passwordInput.autocomplete = "new-password";
+    passwordInput.placeholder = "At least 8 characters";
+    passwordReset.append(passwordText, passwordInput);
     const actions = document.createElement("div");
     actions.className = "assignment-actions";
     const saveButton = document.createElement("button");
     saveButton.className = "mini-action save-access";
     saveButton.type = "button";
     saveButton.textContent = "Save access";
-    actions.append(saveButton);
-    content.append(name, meta, fieldset, actions);
+    const passwordButton = document.createElement("button");
+    passwordButton.className = "mini-action";
+    passwordButton.type = "button";
+    passwordButton.textContent = "Change password";
+    const passwordMessage = document.createElement("p");
+    passwordMessage.className = "form-message compact-message";
+    actions.append(saveButton, passwordButton);
+    content.append(name, meta, fieldset, passwordReset, actions, passwordMessage);
     row.append(content);
 
     renderAssignmentCheckboxes(fieldset, selectedIds);
     saveButton.addEventListener("click", () => saveAssignments(user.id, fieldset));
+    passwordButton.addEventListener("click", () => updateUserPassword(user.id, passwordInput, passwordMessage));
     list.append(row);
   }
 }
@@ -370,6 +388,41 @@ async function saveAssignments(userId, fieldset) {
   }
 
   await renderAdminUsers();
+}
+
+async function updateUserPassword(userId, input, message) {
+  const password = input.value;
+  setMessage(message, "Changing password...");
+
+  if (password.length < 8) {
+    setMessage(message, "Password must be at least 8 characters.", true);
+    return;
+  }
+
+  try {
+    const response = await fetch(`${config.supabaseUrl}/functions/v1/admin-users`, {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${currentSession.access_token}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        action: "update-password",
+        userId,
+        password
+      })
+    });
+
+    const payload = await response.json();
+    if (!response.ok) {
+      throw new Error(payload.error || "Could not change password.");
+    }
+
+    input.value = "";
+    setMessage(message, "Password changed.");
+  } catch (error) {
+    setMessage(message, error.message || "Could not change password.", true);
+  }
 }
 
 async function logout() {

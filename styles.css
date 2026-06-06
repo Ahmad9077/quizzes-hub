@@ -426,6 +426,31 @@ legend {
   margin-top: 10px;
 }
 
+.password-reset {
+  display: grid;
+  gap: 7px;
+  max-width: 340px;
+  margin-top: 12px;
+}
+
+.password-reset span {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 900;
+}
+
+.password-reset input {
+  min-height: 42px;
+  border-radius: 16px;
+  padding: 0 12px;
+}
+
+.compact-message {
+  min-height: 1.2em;
+  margin-top: 8px;
+  font-size: 0.86rem;
+}
+
 .mini-action {
   min-height: 34px;
   border: 0;
