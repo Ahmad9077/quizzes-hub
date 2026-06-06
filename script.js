@@ -324,7 +324,7 @@ async function renderAdminUsers() {
     row.append(content);
 
     renderAssignmentCheckboxes(fieldset, selectedIds);
-    saveButton.addEventListener("click", () => saveAssignments(user.id, fieldset));
+    saveButton.addEventListener("click", () => saveAssignments(user.id, fieldset, saveButton));
     passwordButton.addEventListener("click", () => updateUserPassword(user.id, passwordInput, passwordMessage));
     deleteButton.addEventListener("click", () => deleteUserAccount(user, passwordMessage));
     list.append(row);
@@ -338,14 +338,22 @@ function createEmptyState(message) {
   return empty;
 }
 
-async function saveAssignments(userId, fieldset) {
+async function saveAssignments(userId, fieldset, button) {
   const selectedIds = [...fieldset.querySelectorAll("input:checked")].map((input) => input.value);
-  await supabaseClient.from("quiz_assignments").delete().eq("user_id", userId);
+  const originalText = button.textContent;
+  button.disabled = true;
+  button.textContent = "Saving...";
 
-  if (selectedIds.length) {
-    await supabaseClient
-      .from("quiz_assignments")
-      .insert(selectedIds.map((quizId) => ({ user_id: userId, quiz_id: quizId })));
+  const { error } = await supabaseClient.rpc("admin_set_assignments", {
+    target_user_id: userId,
+    selected_quiz_ids: selectedIds
+  });
+
+  if (error) {
+    button.disabled = false;
+    button.textContent = originalText;
+    window.alert(error.message || "Could not save quiz access.");
+    return;
   }
 
   await renderAdminUsers();

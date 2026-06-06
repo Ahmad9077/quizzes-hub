@@ -36,7 +36,9 @@ create table if not exists public.quiz_progress (
   total integer not null check (total > 0),
   level text not null default 'Practice',
   details jsonb not null default '{}'::jsonb,
-  completed_at timestamptz not null default now()
+  completed_at timestamptz not null default now(),
+  constraint quiz_progress_score_range check (score <= total),
+  constraint quiz_progress_details_size check (octet_length(details::text) <= 65536)
 );
 
 insert into public.quizzes (id, title, url, icon, color, sort_order)
@@ -117,9 +119,59 @@ begin
 end;
 $$;
 
+create or replace function public.admin_set_assignments(target_user_id uuid, selected_quiz_ids text[])
+returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if not public.is_admin() then
+    raise exception 'Admin access required.';
+  end if;
+
+  if not exists (
+    select 1
+    from public.profiles
+    where id = target_user_id
+  ) then
+    raise exception 'User profile was not found.';
+  end if;
+
+  if exists (
+    select 1
+    from unnest(coalesce(selected_quiz_ids, '{}'::text[])) as selected(quiz_id)
+    left join public.quizzes on quizzes.id = selected.quiz_id
+    where quizzes.id is null
+  ) then
+    raise exception 'Unknown quiz assignment.';
+  end if;
+
+  delete from public.quiz_assignments
+  where user_id = target_user_id;
+
+  insert into public.quiz_assignments (user_id, quiz_id)
+  select target_user_id, selected.quiz_id
+  from (
+    select distinct quiz_id
+    from unnest(coalesce(selected_quiz_ids, '{}'::text[])) as selected(quiz_id)
+    where quiz_id is not null
+  ) as selected;
+end;
+$$;
+
 grant execute on function public.resolve_login(text) to anon, authenticated;
 grant execute on function public.is_admin() to authenticated;
 grant execute on function public.admin_delete_user(uuid) to authenticated;
+grant execute on function public.admin_set_assignments(uuid, text[]) to authenticated;
+
+alter table public.quiz_progress
+drop constraint if exists quiz_progress_score_range,
+add constraint quiz_progress_score_range check (score <= total);
+
+alter table public.quiz_progress
+drop constraint if exists quiz_progress_details_size,
+add constraint quiz_progress_details_size check (octet_length(details::text) <= 65536);
 
 drop policy if exists "profiles self or admin select" on public.profiles;
 create policy "profiles self or admin select"
