@@ -180,11 +180,12 @@ with check (
 );
 
 drop policy if exists "quiz progress self or admin select" on public.quiz_progress;
-create policy "quiz progress self or admin select"
+drop policy if exists "quiz progress admin select" on public.quiz_progress;
+create policy "quiz progress admin select"
 on public.quiz_progress
 for select
 to authenticated
-using (user_id = auth.uid() or public.is_admin());
+using (public.is_admin());
 
 -- Bootstrap the first admin after creating the Auth user in Supabase Dashboard.
 -- Replace the placeholders and run once:
