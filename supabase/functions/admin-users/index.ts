@@ -24,8 +24,8 @@ Deno.serve(async (request) => {
   }
 
   const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const anonKey = Deno.env.get("SUPABASE_ANON_KEY") || getDefaultKey("SUPABASE_PUBLISHABLE_KEYS");
+  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || getDefaultKey("SUPABASE_SECRET_KEYS");
 
   if (!supabaseUrl || !anonKey || !serviceRoleKey) {
     return json({ error: "Function environment is not configured." }, 500);
@@ -117,4 +117,16 @@ function json(payload: unknown, status = 200) {
     status,
     headers: { ...corsHeaders, "Content-Type": "application/json" }
   });
+}
+
+function getDefaultKey(name: string) {
+  const value = Deno.env.get(name);
+  if (!value) return undefined;
+
+  try {
+    const keys = JSON.parse(value) as Record<string, string>;
+    return keys.default || Object.values(keys)[0];
+  } catch {
+    return value;
+  }
 }

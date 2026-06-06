@@ -1,6 +1,6 @@
 (async () => {
   if (!window.QUIZZES_HUB_CONFIG) {
-    await loadScript("https://ahmad9077.github.io/quizzes-hub/config.js?v=3");
+    await loadScript("https://ahmad9077.github.io/quizzes-hub/config.js?v=4");
   }
 
   if (!window.supabase) {
