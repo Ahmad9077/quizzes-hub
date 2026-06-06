@@ -192,7 +192,7 @@ function renderAssignedQuizzes(assignedIds) {
   const allowed = quizCatalog.filter((quiz) => assignedIds.includes(quiz.id));
 
   if (!allowed.length) {
-    grid.innerHTML = `<p class="empty-state">No quizzes are assigned yet.</p>`;
+    grid.replaceChildren(createEmptyState("No quizzes are assigned yet."));
     return;
   }
 
@@ -213,7 +213,7 @@ function renderProgress(progress) {
   const list = document.querySelector("#progressList");
 
   if (!progress.length) {
-    list.innerHTML = `<p class="empty-state">No quiz results yet.</p>`;
+    list.replaceChildren(createEmptyState("No quiz results yet."));
     return;
   }
 
@@ -221,13 +221,20 @@ function renderProgress(progress) {
     const quiz = quizCatalog.find((entry) => entry.id === item.quiz_id);
     const row = document.createElement("article");
     row.className = "progress-item";
-    row.innerHTML = `
-      <div>
-        <strong>${quiz?.title || item.quiz_id}</strong>
-        <div class="progress-meta">${item.level || "Practice"} · ${new Date(item.completed_at).toLocaleString()}</div>
-      </div>
-      <div class="progress-score">${item.score}/${item.total}</div>
-    `;
+
+    const content = document.createElement("div");
+    const title = document.createElement("strong");
+    title.textContent = quiz?.title || item.quiz_id;
+    const meta = document.createElement("div");
+    meta.className = "progress-meta";
+    meta.textContent = `${item.level || "Practice"} · ${new Date(item.completed_at).toLocaleString()}`;
+    content.append(title, meta);
+
+    const score = document.createElement("div");
+    score.className = "progress-score";
+    score.textContent = `${item.score}/${item.total}`;
+
+    row.append(content, score);
     list.append(row);
   });
 }
@@ -249,10 +256,13 @@ function renderAssignmentCheckboxes(container, selectedIds) {
   quizCatalog.forEach((quiz) => {
     const label = document.createElement("label");
     label.className = "checkbox-row";
-    label.innerHTML = `
-      <input type="checkbox" value="${quiz.id}" ${selectedIds.includes(quiz.id) ? "checked" : ""}>
-      <span>${quiz.icon} ${quiz.title}</span>
-    `;
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = quiz.id;
+    input.checked = selectedIds.includes(quiz.id);
+    const text = document.createElement("span");
+    text.textContent = `${quiz.icon} ${quiz.title}`;
+    label.append(input, text);
     container.append(label);
   });
 }
@@ -297,7 +307,7 @@ async function createUser(event) {
 
 async function renderAdminUsers() {
   const list = document.querySelector("#adminUsersList");
-  list.innerHTML = `<p class="empty-state">Loading users...</p>`;
+  list.replaceChildren(createEmptyState("Loading users..."));
 
   const { data: users, error } = await supabaseClient
     .from("profiles")
@@ -305,7 +315,7 @@ async function renderAdminUsers() {
     .order("display_name");
 
   if (error) {
-    list.innerHTML = `<p class="empty-state">Could not load users.</p>`;
+    list.replaceChildren(createEmptyState("Could not load users."));
     return;
   }
 
@@ -316,21 +326,35 @@ async function renderAdminUsers() {
     const selectedIds = assignments.map((item) => item.quiz_id);
     const row = document.createElement("article");
     row.className = "user-row";
-    row.innerHTML = `
-      <div>
-        <strong>${user.avatar || "⭐"} ${user.display_name}</strong>
-        <div class="progress-meta">@${user.username} · ${user.role}</div>
-        <fieldset></fieldset>
-        <div class="assignment-actions">
-          <button class="mini-action save-access" type="button">Save access</button>
-        </div>
-      </div>
-    `;
-    const fieldset = row.querySelector("fieldset");
+
+    const content = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = `${user.avatar || "⭐"} ${user.display_name}`;
+    const meta = document.createElement("div");
+    meta.className = "progress-meta";
+    meta.textContent = `@${user.username} · ${user.role}`;
+    const fieldset = document.createElement("fieldset");
+    const actions = document.createElement("div");
+    actions.className = "assignment-actions";
+    const saveButton = document.createElement("button");
+    saveButton.className = "mini-action save-access";
+    saveButton.type = "button";
+    saveButton.textContent = "Save access";
+    actions.append(saveButton);
+    content.append(name, meta, fieldset, actions);
+    row.append(content);
+
     renderAssignmentCheckboxes(fieldset, selectedIds);
-    row.querySelector(".save-access").addEventListener("click", () => saveAssignments(user.id, fieldset));
+    saveButton.addEventListener("click", () => saveAssignments(user.id, fieldset));
     list.append(row);
   }
+}
+
+function createEmptyState(message) {
+  const empty = document.createElement("p");
+  empty.className = "empty-state";
+  empty.textContent = message;
+  return empty;
 }
 
 async function saveAssignments(userId, fieldset) {
