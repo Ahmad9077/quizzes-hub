@@ -8,7 +8,12 @@
   }
 
   const config = window.QUIZZES_HUB_CONFIG || {};
-  const configured = config.supabaseUrl && config.supabaseAnonKey && !config.supabaseUrl.includes("YOUR_");
+  const configured = Boolean(
+    config.supabaseUrl &&
+    config.supabaseAnonKey &&
+    !config.supabaseUrl.includes("YOUR_") &&
+    !config.supabaseAnonKey.includes("YOUR_")
+  );
   const client = configured ? window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey) : null;
 
   window.QuizzesHubProgress = {

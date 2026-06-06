@@ -32,7 +32,12 @@ const quizCatalog = [
 ];
 
 const config = window.QUIZZES_HUB_CONFIG || {};
-const isConfigured = Boolean(config.supabaseUrl && config.supabaseAnonKey && !config.supabaseUrl.includes("YOUR_"));
+const isConfigured = Boolean(
+  config.supabaseUrl &&
+  config.supabaseAnonKey &&
+  !config.supabaseUrl.includes("YOUR_") &&
+  !config.supabaseAnonKey.includes("YOUR_")
+);
 const supabaseClient = isConfigured
   ? window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey, {
       auth: {
@@ -242,11 +247,10 @@ function renderAssignmentCheckboxes(container, selectedIds) {
   container.replaceChildren(legend);
 
   quizCatalog.forEach((quiz) => {
-    const id = `quiz-${container.id || "assignment"}-${quiz.id}`;
     const label = document.createElement("label");
     label.className = "checkbox-row";
     label.innerHTML = `
-      <input id="${id}" type="checkbox" value="${quiz.id}" ${selectedIds.includes(quiz.id) ? "checked" : ""}>
+      <input type="checkbox" value="${quiz.id}" ${selectedIds.includes(quiz.id) ? "checked" : ""}>
       <span>${quiz.icon} ${quiz.title}</span>
     `;
     container.append(label);

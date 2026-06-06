@@ -138,7 +138,15 @@ create policy "quiz progress self insert"
 on public.quiz_progress
 for insert
 to authenticated
-with check (user_id = auth.uid());
+with check (
+  user_id = auth.uid()
+  and exists (
+    select 1
+    from public.quiz_assignments
+    where quiz_assignments.user_id = auth.uid()
+      and quiz_assignments.quiz_id = quiz_progress.quiz_id
+  )
+);
 
 drop policy if exists "quiz progress self or admin select" on public.quiz_progress;
 create policy "quiz progress self or admin select"

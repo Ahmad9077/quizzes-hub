@@ -104,6 +104,7 @@ Deno.serve(async (request) => {
       .insert(quizIds.map((quizId) => ({ user_id: created.user.id, quiz_id: quizId })));
 
     if (assignmentError) {
+      await adminClient.auth.admin.deleteUser(created.user.id);
       return json({ error: assignmentError.message }, 400);
     }
   }
