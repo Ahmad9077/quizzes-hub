@@ -3,49 +3,104 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Quizzes Hub is a friendly homepage for kids to choose their quiz.">
+    <meta name="description" content="Quizzes Hub gives each child a private quiz dashboard.">
     <title>Quizzes Hub</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Quicksand:wght@600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=2">
+    <link rel="stylesheet" href="styles.css?v=3">
   </head>
   <body>
-    <main class="page-shell">
-      <section class="hero" aria-labelledby="pageTitle">
-        <div class="hero-copy">
-          <p class="eyebrow">Quizzes Hub</p>
-          <h1 id="pageTitle">Pick your quiz and start playing.</h1>
-          <p>Choose a name, choose a quiz, and jump straight into practice.</p>
-        </div>
-        <div class="hero-art" aria-hidden="true">
-          <span class="spark spark-one"></span>
-          <span class="spark spark-two"></span>
-          <span class="spark spark-three"></span>
-          <div class="hero-badge">
-            <span>ABC</span>
-            <strong>123</strong>
-          </div>
-        </div>
+    <main id="app" class="app-shell" aria-live="polite">
+      <section class="loading-screen">
+        <div class="brand-orb">QH</div>
+        <p>Loading Quizzes Hub...</p>
       </section>
-
-      <section class="kids-grid" id="kidsGrid" aria-label="Kids and quizzes"></section>
     </main>
 
-    <template id="kidTemplate">
-      <section class="kid-panel">
-        <header class="kid-header">
-          <div class="avatar" aria-hidden="true"></div>
-          <div>
-            <p class="section-label">Quizzes for</p>
-            <h2></h2>
-          </div>
-        </header>
-        <div class="quiz-list"></div>
+    <template id="setupTemplate">
+      <section class="auth-layout">
+        <div class="welcome-panel">
+          <p class="eyebrow">Quizzes Hub</p>
+          <h1>Private quiz dashboards for each child.</h1>
+          <p>Secure login is ready, but the Supabase backend still needs to be connected before usernames and progress can work online.</p>
+        </div>
+        <article class="auth-card setup-card">
+          <h2>Backend setup needed</h2>
+          <p>Add your Supabase URL and anon key in <code>config.js</code>, then run the SQL and Edge Function in the <code>supabase</code> folder.</p>
+          <a class="primary-action" href="README.md">Open setup notes</a>
+        </article>
       </section>
     </template>
 
-    <template id="quizTemplate">
+    <template id="loginTemplate">
+      <section class="auth-layout">
+        <div class="welcome-panel">
+          <p class="eyebrow">Quizzes Hub</p>
+          <h1>Pick your name, sign in, and start playing.</h1>
+          <p>Each account opens only the quizzes assigned by the admin account.</p>
+        </div>
+
+        <form class="auth-card" id="loginForm">
+          <div>
+            <p class="eyebrow">Login</p>
+            <h2>Welcome back</h2>
+          </div>
+          <label>
+            <span>Username</span>
+            <input name="username" autocomplete="username" required>
+          </label>
+          <label>
+            <span>Password</span>
+            <input name="password" type="password" autocomplete="current-password" required>
+          </label>
+          <button class="primary-action" type="submit">Open my quizzes</button>
+          <p class="form-message" id="loginMessage"></p>
+        </form>
+      </section>
+    </template>
+
+    <template id="dashboardTemplate">
+      <section class="dashboard">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Quizzes Hub</p>
+            <h1 id="dashboardTitle"></h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-action" id="adminViewButton" type="button" hidden>Admin</button>
+            <button class="ghost-action" id="logoutButton" type="button">Sign out</button>
+          </div>
+        </header>
+
+        <section class="profile-card">
+          <div class="profile-avatar" id="profileAvatar" aria-hidden="true"></div>
+          <div>
+            <p class="section-label">Profile</p>
+            <h2 id="profileName"></h2>
+            <p id="profileSummary"></p>
+          </div>
+        </section>
+
+        <section>
+          <div class="section-heading">
+            <p class="section-label">Assigned quizzes</p>
+            <h2>Start a quiz</h2>
+          </div>
+          <div class="quiz-grid" id="assignedQuizGrid"></div>
+        </section>
+
+        <section>
+          <div class="section-heading">
+            <p class="section-label">Progress</p>
+            <h2>Recent results</h2>
+          </div>
+          <div class="progress-list" id="progressList"></div>
+        </section>
+      </section>
+    </template>
+
+    <template id="quizTileTemplate">
       <a class="quiz-tile">
         <span class="quiz-icon" aria-hidden="true"></span>
         <span class="quiz-name"></span>
@@ -53,6 +108,64 @@
       </a>
     </template>
 
-    <script src="script.js?v=2"></script>
+    <template id="adminTemplate">
+      <section class="dashboard admin-dashboard">
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">Admin</p>
+            <h1>Manage users and quiz access.</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-action" id="backToDashboardButton" type="button">My dashboard</button>
+            <button class="ghost-action" id="adminLogoutButton" type="button">Sign out</button>
+          </div>
+        </header>
+
+        <section class="admin-grid">
+          <form class="admin-card" id="createUserForm">
+            <div>
+              <p class="section-label">Create account</p>
+              <h2>New user</h2>
+            </div>
+            <label>
+              <span>Username</span>
+              <input name="username" required>
+            </label>
+            <label>
+              <span>Display name</span>
+              <input name="displayName" required>
+            </label>
+            <label>
+              <span>Password</span>
+              <input name="password" type="password" minlength="8" required>
+            </label>
+            <label>
+              <span>Role</span>
+              <select name="role">
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
+            </label>
+            <fieldset id="newUserAssignments">
+              <legend>Quiz access</legend>
+            </fieldset>
+            <button class="primary-action" type="submit">Create user</button>
+            <p class="form-message" id="createUserMessage"></p>
+          </form>
+
+          <section class="admin-card users-card">
+            <div>
+              <p class="section-label">Existing accounts</p>
+              <h2>Profiles</h2>
+            </div>
+            <div id="adminUsersList" class="admin-users-list"></div>
+          </section>
+        </section>
+      </section>
+    </template>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="config.js?v=3"></script>
+    <script src="script.js?v=3"></script>
   </body>
 </html>
