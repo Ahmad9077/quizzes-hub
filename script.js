@@ -99,12 +99,14 @@ function renderLogin() {
         requested_username: username
       });
 
-      if (resolveError || !loginData?.login_email) {
+      const loginEmail = Array.isArray(loginData) ? loginData[0]?.login_email : loginData?.login_email;
+
+      if (resolveError || !loginEmail) {
         throw new Error("Username was not found.");
       }
 
       const { data, error } = await supabaseClient.auth.signInWithPassword({
-        email: loginData.login_email,
+        email: loginEmail,
         password
       });
 
