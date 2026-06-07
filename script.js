@@ -31,12 +31,6 @@ const quizCatalog = [
   }
 ];
 
-const difficultyOptions = [
-  { id: "easy", label: "Easy" },
-  { id: "medium", label: "Medium" },
-  { id: "hard", label: "Hard" }
-];
-
 const config = window.QUIZZES_HUB_CONFIG || {};
 const isConfigured = Boolean(
   config.supabaseUrl &&
@@ -168,7 +162,7 @@ async function renderDashboard() {
 async function fetchAssignments(userId) {
   const { data, error } = await supabaseClient
     .from("quiz_assignments")
-    .select("quiz_id, difficulty")
+    .select("quiz_id")
     .eq("user_id", userId)
     .order("quiz_id");
 
@@ -182,9 +176,7 @@ async function fetchAssignments(userId) {
 function renderAssignedQuizzes(assignments) {
   const grid = document.querySelector("#assignedQuizGrid");
   const assignmentMap = createAssignmentMap(assignments);
-  const allowed = quizCatalog
-    .filter((quiz) => assignmentMap.has(quiz.id))
-    .map((quiz) => ({ ...quiz, difficulty: assignmentMap.get(quiz.id) }));
+  const allowed = quizCatalog.filter((quiz) => assignmentMap.has(quiz.id));
 
   if (!allowed.length) {
     grid.replaceChildren(createEmptyState("No quizzes are assigned yet."));
@@ -201,10 +193,6 @@ function createQuizTile(quiz) {
   tile.setAttribute("aria-label", `Start ${quiz.title}`);
   tile.querySelector(".quiz-icon").textContent = quiz.icon;
   tile.querySelector(".quiz-name").textContent = quiz.title;
-  const difficulty = document.createElement("span");
-  difficulty.className = "quiz-difficulty";
-  difficulty.textContent = `${getDifficultyLabel(quiz.difficulty)} level`;
-  tile.querySelector(".quiz-name").after(difficulty);
   return tile;
 }
 
@@ -227,24 +215,13 @@ function renderAssignmentCheckboxes(container, assignments) {
   quizCatalog.forEach((quiz) => {
     const label = document.createElement("label");
     label.className = "checkbox-row";
-    const selectedDifficulty = assignmentMap.get(quiz.id) || "medium";
     const input = document.createElement("input");
     input.type = "checkbox";
     input.value = quiz.id;
     input.checked = assignmentMap.has(quiz.id);
     const text = document.createElement("span");
     text.textContent = `${quiz.icon} ${quiz.title}`;
-    const select = document.createElement("select");
-    select.className = "difficulty-select";
-    select.setAttribute("aria-label", `${quiz.title} difficulty`);
-    difficultyOptions.forEach((difficulty) => {
-      const option = document.createElement("option");
-      option.value = difficulty.id;
-      option.textContent = difficulty.label;
-      option.selected = difficulty.id === selectedDifficulty;
-      select.append(option);
-    });
-    label.append(input, text, select);
+    label.append(input, text);
     container.append(label);
   });
 }
@@ -340,16 +317,26 @@ async function renderAdminUsers() {
     deleteButton.type = "button";
     deleteButton.textContent = "Delete account";
     deleteButton.hidden = user.id === currentProfile.id;
+    const adaptiveButton = document.createElement("button");
+    adaptiveButton.className = "mini-action";
+    adaptiveButton.type = "button";
+    adaptiveButton.textContent = "Adaptive levels";
     const passwordMessage = document.createElement("p");
     passwordMessage.className = "form-message compact-message";
-    actions.append(saveButton, passwordButton, deleteButton);
+    actions.append(saveButton, passwordButton, deleteButton, adaptiveButton);
     content.append(name, meta, fieldset, passwordReset, actions, passwordMessage);
-    row.append(content);
+
+    const adaptivePanel = createAdaptivePanel(user.id, assignments);
+    row.append(content, adaptivePanel);
 
     renderAssignmentCheckboxes(fieldset, assignments);
     saveButton.addEventListener("click", () => saveAssignments(user.id, fieldset, saveButton));
     passwordButton.addEventListener("click", () => updateUserPassword(user.id, passwordInput, passwordMessage));
     deleteButton.addEventListener("click", () => deleteUserAccount(user, passwordMessage));
+    adaptiveButton.addEventListener("click", () => {
+      adaptivePanel.hidden = !adaptivePanel.hidden;
+      if (!adaptivePanel.hidden) loadAdaptiveAnalytics(user.id, adaptivePanel);
+    });
     list.append(row);
   }
 }
@@ -384,10 +371,9 @@ async function saveAssignments(userId, fieldset, button) {
 
 function getAssignmentConfigs(container) {
   return [...container.querySelectorAll("input[type='checkbox']:checked")].map((input) => {
-    const row = input.closest(".checkbox-row");
     return {
       quiz_id: input.value,
-      difficulty: normalizeDifficulty(row?.querySelector("select")?.value)
+      difficulty: "medium"
     };
   });
 }
@@ -395,19 +381,11 @@ function getAssignmentConfigs(container) {
 function createAssignmentMap(assignments) {
   return new Map((assignments || []).map((assignment) => {
     if (typeof assignment === "string") {
-      return [assignment, "medium"];
+      return [assignment, true];
     }
 
-    return [assignment.quiz_id, normalizeDifficulty(assignment.difficulty)];
+    return [assignment.quiz_id, true];
   }));
-}
-
-function normalizeDifficulty(value) {
-  return difficultyOptions.some((difficulty) => difficulty.id === value) ? value : "medium";
-}
-
-function getDifficultyLabel(value) {
-  return difficultyOptions.find((difficulty) => difficulty.id === value)?.label || "Medium";
 }
 
 async function updateUserPassword(userId, input, message) {
@@ -574,4 +552,210 @@ async function logout() {
   currentSession = null;
   currentProfile = null;
   renderLogin();
+}
+
+// ─────────────────────────────────────────────────────────────────
+// ADAPTIVE LEVEL ADMIN UI
+// Only rendered inside the admin panel. Never shown to child users.
+// ─────────────────────────────────────────────────────────────────
+
+function createAdaptivePanel(userId, assignments) {
+  const panel = document.createElement("div");
+  panel.className = "adaptive-panel";
+  panel.hidden = true;
+  panel.dataset.userId = userId;
+
+  const heading = document.createElement("h4");
+  heading.textContent = "Adaptive level monitor";
+  panel.append(heading);
+
+  if (!assignments.length) {
+    panel.append(createEmptyState("No quizzes assigned."));
+    return panel;
+  }
+
+  const tabBar = document.createElement("div");
+  tabBar.className = "adaptive-tab-bar";
+
+  const content = document.createElement("div");
+  content.className = "adaptive-tab-content";
+
+  assignments.forEach((a, i) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "mini-action" + (i === 0 ? " active-tab" : "");
+    btn.textContent = a.quiz_id;
+    btn.dataset.quizId = a.quiz_id;
+    btn.addEventListener("click", () => {
+      tabBar.querySelectorAll("button").forEach(b => b.classList.remove("active-tab"));
+      btn.classList.add("active-tab");
+      renderAdaptiveTabContent(content, userId, a.quiz_id);
+    });
+    tabBar.append(btn);
+  });
+
+  panel.append(tabBar, content);
+  return panel;
+}
+
+async function loadAdaptiveAnalytics(userId, panel) {
+  const firstTab = panel.querySelector(".adaptive-tab-bar button");
+  if (!firstTab) return;
+  const content = panel.querySelector(".adaptive-tab-content");
+  renderAdaptiveTabContent(content, userId, firstTab.dataset.quizId);
+}
+
+async function renderAdaptiveTabContent(container, userId, quizId) {
+  container.replaceChildren(createEmptyState("Loading..."));
+
+  const { data, error } = await supabaseClient.rpc("admin_get_adaptive_analytics", {
+    p_user_id: userId,
+    p_quiz_id: quizId
+  });
+
+  if (error || !data) {
+    container.replaceChildren(createEmptyState("No adaptive data yet for this quiz."));
+    return;
+  }
+
+  container.replaceChildren();
+
+  // Level + EMA row
+  const stats = document.createElement("div");
+  stats.className = "adaptive-stats";
+
+  const lvl = createAdaptiveStat("Level", `${data.current_level ?? "-"} / 100`);
+  const ema = createAdaptiveStat(
+    "EMA score",
+    data.ema_score != null ? `${Math.round(data.ema_score * 100)}%` : "-"
+  );
+  const conf = createAdaptiveStat(
+    "Confidence",
+    data.confidence != null ? `${Math.round(data.confidence * 100)}%` : "-"
+  );
+  const sessions = createAdaptiveStat("Sessions evaluated", data.total_sessions ?? 0);
+
+  stats.append(lvl, ema, conf, sessions);
+  container.append(stats);
+
+  // Weak / strong topics
+  if (data.weak_topics?.length) {
+    const wt = document.createElement("p");
+    wt.className = "progress-meta";
+    wt.textContent = `Weak topics: ${data.weak_topics.join(", ")}`;
+    container.append(wt);
+  }
+  if (data.strong_topics?.length) {
+    const st = document.createElement("p");
+    st.className = "progress-meta";
+    st.textContent = `Strong topics: ${data.strong_topics.join(", ")}`;
+    container.append(st);
+  }
+
+  // Today's aggregate
+  if (data.today_aggregate) {
+    const agg = data.today_aggregate;
+    const today = document.createElement("p");
+    today.className = "progress-meta";
+    today.textContent = `Today: ${agg.attempt_count} attempts · ${agg.correct_qs}/${agg.total_qs} correct${agg.evaluated ? " (evaluated)" : " (pending, needs 5)"}`;
+    container.append(today);
+  }
+
+  // Override control
+  const overrideSection = document.createElement("div");
+  overrideSection.className = "adaptive-override";
+  const overrideLabel = document.createElement("label");
+  overrideLabel.textContent = "Override level (1-100): ";
+  const overrideInput = document.createElement("input");
+  overrideInput.type = "number";
+  overrideInput.min = 1;
+  overrideInput.max = 100;
+  overrideInput.value = data.current_level ?? 50;
+  overrideInput.style.width = "4rem";
+  const noteInput = document.createElement("input");
+  noteInput.type = "text";
+  noteInput.placeholder = "Reason (optional)";
+  noteInput.style.marginLeft = "0.5rem";
+  const overrideBtn = document.createElement("button");
+  overrideBtn.type = "button";
+  overrideBtn.className = "mini-action";
+  overrideBtn.textContent = "Apply override";
+  const overrideMsg = document.createElement("span");
+  overrideMsg.className = "form-message compact-message";
+  overrideBtn.addEventListener("click", async () => {
+    const level = parseInt(overrideInput.value, 10);
+    if (!level || level < 1 || level > 100) {
+      overrideMsg.textContent = "Enter a number between 1 and 100.";
+      return;
+    }
+    overrideBtn.disabled = true;
+    overrideMsg.textContent = "Saving...";
+    const { error: overrideError } = await supabaseClient.rpc("admin_override_quiz_level", {
+      p_user_id: userId,
+      p_quiz_id: quizId,
+      p_level:   level,
+      p_note:    noteInput.value || null
+    });
+    overrideBtn.disabled = false;
+    if (overrideError) {
+      overrideMsg.textContent = overrideError.message || "Could not apply override.";
+    } else {
+      overrideMsg.textContent = `Level set to ${level}.`;
+      renderAdaptiveTabContent(container, userId, quizId);
+    }
+  });
+  overrideLabel.append(overrideInput);
+  overrideSection.append(overrideLabel, noteInput, overrideBtn, overrideMsg);
+  container.append(overrideSection);
+
+  // Adjustment history table
+  if (data.recent_adjustments?.length) {
+    const histHeading = document.createElement("h5");
+    histHeading.textContent = "Adjustment history";
+    const table = document.createElement("table");
+    table.className = "adaptive-history-table";
+    const thead = document.createElement("thead");
+    const headRow = document.createElement("tr");
+    ["Date", "Before", "After", "Trigger", "Accuracy", "Note"].forEach(label => {
+      const th = document.createElement("th");
+      th.textContent = label;
+      headRow.append(th);
+    });
+    thead.append(headRow);
+    const tbody = document.createElement("tbody");
+    data.recent_adjustments.forEach(adj => {
+      const tr = document.createElement("tr");
+      appendTableCell(tr, new Date(adj.date).toLocaleDateString());
+      appendTableCell(tr, adj.previous_level);
+      appendTableCell(tr, adj.new_level);
+      appendTableCell(tr, adj.trigger);
+      appendTableCell(tr, adj.accuracy != null ? `${Math.round(adj.accuracy * 100)}%` : "-");
+      appendTableCell(tr, adj.admin_note || "");
+      tbody.append(tr);
+    });
+    table.append(thead, tbody);
+    container.append(histHeading, table);
+  }
+}
+
+function createAdaptiveStat(label, value) {
+  const stat = document.createElement("div");
+  stat.className = "adaptive-stat";
+
+  const labelEl = document.createElement("span");
+  labelEl.className = "stat-label";
+  labelEl.textContent = label;
+
+  const valueEl = document.createElement("span");
+  valueEl.className = "stat-value";
+  valueEl.textContent = String(value);
+
+  stat.append(labelEl, valueEl);
+  return stat;
+}
+
+function appendTableCell(row, value) {
+  const cell = document.createElement("td");
+  cell.textContent = value == null ? "" : String(value);
+  row.append(cell);
 }

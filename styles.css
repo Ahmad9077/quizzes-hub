@@ -328,14 +328,6 @@ code {
   line-height: 1.08;
 }
 
-.quiz-difficulty {
-  align-self: start;
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-weight: 900;
-  text-transform: uppercase;
-}
-
 .start-pill {
   display: inline-flex;
   align-items: center;
@@ -433,18 +425,6 @@ legend {
   min-height: 18px;
 }
 
-.difficulty-select {
-  min-height: 36px;
-  border-radius: 12px;
-  padding: 0 28px 0 10px;
-  border: 1px solid rgba(22, 26, 50, 0.12);
-  background: #fff;
-  color: var(--ink);
-  font: inherit;
-  font-size: 0.86rem;
-  font-weight: 800;
-}
-
 .user-row {
   align-items: start;
 }
@@ -510,6 +490,100 @@ legend {
 .activity-summary {
   color: var(--muted);
   font-weight: 800;
+}
+
+/* ── Adaptive level admin panel ─────────────────────────────────── */
+.adaptive-panel {
+  grid-column: 1 / -1;
+  background: #f8f7ff;
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 4px;
+  border: 1.5px solid #e0ddf8;
+}
+
+.adaptive-panel h4 {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.adaptive-panel h5 {
+  margin: 12px 0 4px;
+  font-size: 0.85rem;
+}
+
+.adaptive-tab-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
+.active-tab {
+  background: #d7d2ff;
+}
+
+.adaptive-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.adaptive-stat {
+  background: #fff;
+  border-radius: 8px;
+  padding: 6px 12px;
+  display: flex;
+  flex-direction: column;
+  min-width: 90px;
+  border: 1px solid #e8e6f5;
+}
+
+.stat-label {
+  font-size: 0.72rem;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.stat-value {
+  font-size: 1.1rem;
+  font-weight: 800;
+}
+
+.adaptive-override {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin: 10px 0 6px;
+  font-size: 0.9rem;
+}
+
+.adaptive-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+
+.adaptive-history-table th,
+.adaptive-history-table td {
+  text-align: left;
+  padding: 4px 8px;
+  border-bottom: 1px solid #e8e6f5;
+}
+
+.adaptive-history-table thead th {
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.72rem;
 }
 
 .activity-details summary {
@@ -608,10 +682,6 @@ legend {
     max-width: none;
     margin: 0;
     font-size: 1.45rem;
-  }
-
-  .quiz-difficulty {
-    align-self: center;
   }
 
   .start-pill {
