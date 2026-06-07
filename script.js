@@ -657,7 +657,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
     const agg = data.today_aggregate;
     const today = document.createElement("p");
     today.className = "progress-meta";
-    today.textContent = `Today: ${agg.attempt_count} attempts · ${agg.correct_qs}/${agg.total_qs} correct${agg.evaluated ? " (evaluated)" : " (pending, needs 5)"}`;
+    today.textContent = `Today: ${agg.attempt_count} attempts · ${agg.correct_qs}/${agg.total_qs} correct${agg.evaluated ? " (evaluated)" : " (scheduled 5 AM, needs 3)"}`;
     container.append(today);
   }
 
