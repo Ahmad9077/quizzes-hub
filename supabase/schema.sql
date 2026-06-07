@@ -24,6 +24,7 @@ create table if not exists public.quizzes (
 create table if not exists public.quiz_assignments (
   user_id uuid not null references public.profiles(id) on delete cascade,
   quiz_id text not null references public.quizzes(id) on delete cascade,
+  difficulty text not null default 'medium' check (difficulty in ('easy', 'medium', 'hard')),
   created_at timestamptz not null default now(),
   primary key (user_id, quiz_id)
 );
@@ -119,7 +120,9 @@ begin
 end;
 $$;
 
-create or replace function public.admin_set_assignments(target_user_id uuid, selected_quiz_ids text[])
+drop function if exists public.admin_set_assignments(uuid, text[]);
+
+create or replace function public.admin_set_assignments(target_user_id uuid, quiz_configs jsonb)
 returns void
 language plpgsql
 security definer
@@ -140,9 +143,11 @@ begin
 
   if exists (
     select 1
-    from unnest(coalesce(selected_quiz_ids, '{}'::text[])) as selected(quiz_id)
+    from jsonb_to_recordset(coalesce(quiz_configs, '[]'::jsonb)) as selected(quiz_id text, difficulty text)
     left join public.quizzes on quizzes.id = selected.quiz_id
-    where quizzes.id is null
+    where selected.quiz_id is null
+      or quizzes.id is null
+      or coalesce(selected.difficulty, 'medium') not in ('easy', 'medium', 'hard')
   ) then
     raise exception 'Unknown quiz assignment.';
   end if;
@@ -150,20 +155,31 @@ begin
   delete from public.quiz_assignments
   where user_id = target_user_id;
 
-  insert into public.quiz_assignments (user_id, quiz_id)
-  select target_user_id, selected.quiz_id
+  insert into public.quiz_assignments (user_id, quiz_id, difficulty)
+  select target_user_id, selected.quiz_id, selected.difficulty
   from (
-    select distinct quiz_id
-    from unnest(coalesce(selected_quiz_ids, '{}'::text[])) as selected(quiz_id)
+    select distinct on (quiz_id)
+      quiz_id,
+      coalesce(difficulty, 'medium') as difficulty
+    from jsonb_to_recordset(coalesce(quiz_configs, '[]'::jsonb)) as selected(quiz_id text, difficulty text)
     where quiz_id is not null
-  ) as selected;
+      and coalesce(difficulty, 'medium') in ('easy', 'medium', 'hard')
+    order by quiz_id
+  ) selected;
 end;
 $$;
 
 grant execute on function public.resolve_login(text) to anon, authenticated;
 grant execute on function public.is_admin() to authenticated;
 grant execute on function public.admin_delete_user(uuid) to authenticated;
-grant execute on function public.admin_set_assignments(uuid, text[]) to authenticated;
+grant execute on function public.admin_set_assignments(uuid, jsonb) to authenticated;
+
+alter table public.quiz_assignments
+add column if not exists difficulty text not null default 'medium';
+
+alter table public.quiz_assignments
+drop constraint if exists quiz_assignments_difficulty_check,
+add constraint quiz_assignments_difficulty_check check (difficulty in ('easy', 'medium', 'hard'));
 
 alter table public.quiz_progress
 drop constraint if exists quiz_progress_score_range,

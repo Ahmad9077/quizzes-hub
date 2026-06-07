@@ -35,7 +35,10 @@
         score: result.score,
         total: result.total,
         level: result.level || "Practice",
-        details: result.details || {}
+        details: {
+          difficulty: normalizeDifficulty(window.QuizzesHubLastQuizAccess?.difficulty),
+          ...(result.details || {})
+        }
       };
 
       const { error } = await client.from("quiz_progress").insert(payload);
@@ -51,5 +54,9 @@
       script.onerror = reject;
       document.head.append(script);
     });
+  }
+
+  function normalizeDifficulty(value) {
+    return ["easy", "medium", "hard"].includes(value) ? value : "medium";
   }
 })();

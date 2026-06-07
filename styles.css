@@ -328,6 +328,14 @@ code {
   line-height: 1.08;
 }
 
+.quiz-difficulty {
+  align-self: start;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
 .start-pill {
   display: inline-flex;
   align-items: center;
@@ -416,9 +424,25 @@ legend {
   padding: 10px 12px;
 }
 
+.checkbox-row span {
+  flex: 1;
+}
+
 .checkbox-row input {
   width: 18px;
   min-height: 18px;
+}
+
+.difficulty-select {
+  min-height: 36px;
+  border-radius: 12px;
+  padding: 0 28px 0 10px;
+  border: 1px solid rgba(22, 26, 50, 0.12);
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 800;
 }
 
 .user-row {
@@ -584,6 +608,10 @@ legend {
     max-width: none;
     margin: 0;
     font-size: 1.45rem;
+  }
+
+  .quiz-difficulty {
+    align-self: center;
   }
 
   .start-pill {

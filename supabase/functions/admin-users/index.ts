@@ -12,9 +12,11 @@ type AdminUsersBody = {
   displayName?: string;
   password?: string;
   role?: "user" | "admin";
-  quizIds?: string[];
+  quizConfigs?: Array<{ quizId?: string; quiz_id?: string; difficulty?: string }>;
   userId?: string;
 };
+
+const allowedDifficulties = new Set(["easy", "medium", "hard"]);
 
 Deno.serve(async (request) => {
   if (request.method === "OPTIONS") {
@@ -94,7 +96,14 @@ Deno.serve(async (request) => {
   const displayName = String(body.displayName || "").trim();
   const password = typeof body.password === "string" ? body.password : "";
   const role = body.role === "admin" ? "admin" : "user";
-  const quizIds = Array.isArray(body.quizIds) ? body.quizIds : [];
+  const quizConfigs = Array.isArray(body.quizConfigs)
+    ? body.quizConfigs.map((item) => ({
+        quiz_id: String(item.quizId || item.quiz_id || "").trim(),
+        difficulty: allowedDifficulties.has(String(item.difficulty || "medium"))
+          ? String(item.difficulty || "medium")
+          : "medium"
+      })).filter((item) => item.quiz_id)
+    : [];
 
   if (!/^[a-z0-9_]{3,32}$/.test(username)) {
     return json({ error: "Username must be 3-32 lowercase letters, numbers, or underscores." }, 400);
@@ -135,10 +144,14 @@ Deno.serve(async (request) => {
     return json({ error: profileInsertError.message }, 400);
   }
 
-  if (quizIds.length) {
+  if (quizConfigs.length) {
     const { error: assignmentError } = await adminClient
       .from("quiz_assignments")
-      .insert(quizIds.map((quizId) => ({ user_id: created.user.id, quiz_id: quizId })));
+      .insert(quizConfigs.map((item) => ({
+        user_id: created.user.id,
+        quiz_id: item.quiz_id,
+        difficulty: item.difficulty
+      })));
 
     if (assignmentError) {
       await adminClient.auth.admin.deleteUser(created.user.id);

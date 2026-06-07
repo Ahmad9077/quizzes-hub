@@ -46,7 +46,7 @@
 
       const { data, error } = await client
         .from("quiz_assignments")
-        .select("quiz_id")
+        .select("quiz_id, difficulty")
         .eq("user_id", session.user.id)
         .eq("quiz_id", quizId)
         .maybeSingle();
@@ -55,8 +55,14 @@
         return denyAccess("unauthorized");
       }
 
+      const access = {
+        ok: true,
+        quizId,
+        difficulty: normalizeDifficulty(data.difficulty)
+      };
+      window.QuizzesHubLastQuizAccess = access;
       document.documentElement.dataset.quizAccess = "granted";
-      return { ok: true, quizId };
+      return access;
     } catch (error) {
       console.error("Quizzes Hub access check failed.", error);
       return denyAccess("error");
@@ -88,5 +94,9 @@
     redirectUrl.searchParams.set("from", window.location.href);
     window.location.replace(redirectUrl.toString());
     return Promise.reject(new Error(`Quiz access denied: ${reason}`));
+  }
+
+  function normalizeDifficulty(value) {
+    return ["easy", "medium", "hard"].includes(value) ? value : "medium";
   }
 })();

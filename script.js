@@ -31,6 +31,12 @@ const quizCatalog = [
   }
 ];
 
+const difficultyOptions = [
+  { id: "easy", label: "Easy" },
+  { id: "medium", label: "Medium" },
+  { id: "hard", label: "Hard" }
+];
+
 const config = window.QUIZZES_HUB_CONFIG || {};
 const isConfigured = Boolean(
   config.supabaseUrl &&
@@ -156,13 +162,13 @@ async function renderDashboard() {
   document.querySelector("#logoutButton").addEventListener("click", logout);
 
   const assignments = await fetchAssignments(currentProfile.id);
-  renderAssignedQuizzes(assignments.map((item) => item.quiz_id));
+  renderAssignedQuizzes(assignments);
 }
 
 async function fetchAssignments(userId) {
   const { data, error } = await supabaseClient
     .from("quiz_assignments")
-    .select("quiz_id")
+    .select("quiz_id, difficulty")
     .eq("user_id", userId)
     .order("quiz_id");
 
@@ -173,9 +179,12 @@ async function fetchAssignments(userId) {
   return data || [];
 }
 
-function renderAssignedQuizzes(assignedIds) {
+function renderAssignedQuizzes(assignments) {
   const grid = document.querySelector("#assignedQuizGrid");
-  const allowed = quizCatalog.filter((quiz) => assignedIds.includes(quiz.id));
+  const assignmentMap = createAssignmentMap(assignments);
+  const allowed = quizCatalog
+    .filter((quiz) => assignmentMap.has(quiz.id))
+    .map((quiz) => ({ ...quiz, difficulty: assignmentMap.get(quiz.id) }));
 
   if (!allowed.length) {
     grid.replaceChildren(createEmptyState("No quizzes are assigned yet."));
@@ -192,6 +201,10 @@ function createQuizTile(quiz) {
   tile.setAttribute("aria-label", `Start ${quiz.title}`);
   tile.querySelector(".quiz-icon").textContent = quiz.icon;
   tile.querySelector(".quiz-name").textContent = quiz.title;
+  const difficulty = document.createElement("span");
+  difficulty.className = "quiz-difficulty";
+  difficulty.textContent = `${getDifficultyLabel(quiz.difficulty)} level`;
+  tile.querySelector(".quiz-name").after(difficulty);
   return tile;
 }
 
@@ -205,21 +218,33 @@ async function renderAdmin() {
   await renderAdminActivity();
 }
 
-function renderAssignmentCheckboxes(container, selectedIds) {
+function renderAssignmentCheckboxes(container, assignments) {
   const legend = container.querySelector("legend") || document.createElement("legend");
   legend.textContent = "Quiz access";
   container.replaceChildren(legend);
+  const assignmentMap = createAssignmentMap(assignments);
 
   quizCatalog.forEach((quiz) => {
     const label = document.createElement("label");
     label.className = "checkbox-row";
+    const selectedDifficulty = assignmentMap.get(quiz.id) || "medium";
     const input = document.createElement("input");
     input.type = "checkbox";
     input.value = quiz.id;
-    input.checked = selectedIds.includes(quiz.id);
+    input.checked = assignmentMap.has(quiz.id);
     const text = document.createElement("span");
     text.textContent = `${quiz.icon} ${quiz.title}`;
-    label.append(input, text);
+    const select = document.createElement("select");
+    select.className = "difficulty-select";
+    select.setAttribute("aria-label", `${quiz.title} difficulty`);
+    difficultyOptions.forEach((difficulty) => {
+      const option = document.createElement("option");
+      option.value = difficulty.id;
+      option.textContent = difficulty.label;
+      option.selected = difficulty.id === selectedDifficulty;
+      select.append(option);
+    });
+    label.append(input, text, select);
     container.append(label);
   });
 }
@@ -229,7 +254,7 @@ async function createUser(event) {
   const form = event.currentTarget;
   const message = document.querySelector("#createUserMessage");
   const formData = new FormData(form);
-  const quizIds = [...document.querySelectorAll("#newUserAssignments input:checked")].map((input) => input.value);
+  const quizConfigs = getAssignmentConfigs(document.querySelector("#newUserAssignments"));
 
   setMessage(message, "Creating user...");
 
@@ -246,7 +271,7 @@ async function createUser(event) {
         displayName: String(formData.get("displayName")).trim(),
         password: String(formData.get("password")),
         role: String(formData.get("role")),
-        quizIds
+        quizConfigs
       })
     });
 
@@ -281,7 +306,6 @@ async function renderAdminUsers() {
 
   for (const user of users) {
     const assignments = await fetchAssignments(user.id);
-    const selectedIds = assignments.map((item) => item.quiz_id);
     const row = document.createElement("article");
     row.className = "user-row";
 
@@ -322,7 +346,7 @@ async function renderAdminUsers() {
     content.append(name, meta, fieldset, passwordReset, actions, passwordMessage);
     row.append(content);
 
-    renderAssignmentCheckboxes(fieldset, selectedIds);
+    renderAssignmentCheckboxes(fieldset, assignments);
     saveButton.addEventListener("click", () => saveAssignments(user.id, fieldset, saveButton));
     passwordButton.addEventListener("click", () => updateUserPassword(user.id, passwordInput, passwordMessage));
     deleteButton.addEventListener("click", () => deleteUserAccount(user, passwordMessage));
@@ -338,14 +362,14 @@ function createEmptyState(message) {
 }
 
 async function saveAssignments(userId, fieldset, button) {
-  const selectedIds = [...fieldset.querySelectorAll("input:checked")].map((input) => input.value);
+  const quizConfigs = getAssignmentConfigs(fieldset);
   const originalText = button.textContent;
   button.disabled = true;
   button.textContent = "Saving...";
 
   const { error } = await supabaseClient.rpc("admin_set_assignments", {
     target_user_id: userId,
-    selected_quiz_ids: selectedIds
+    quiz_configs: quizConfigs
   });
 
   if (error) {
@@ -356,6 +380,34 @@ async function saveAssignments(userId, fieldset, button) {
   }
 
   await renderAdminUsers();
+}
+
+function getAssignmentConfigs(container) {
+  return [...container.querySelectorAll("input[type='checkbox']:checked")].map((input) => {
+    const row = input.closest(".checkbox-row");
+    return {
+      quiz_id: input.value,
+      difficulty: normalizeDifficulty(row?.querySelector("select")?.value)
+    };
+  });
+}
+
+function createAssignmentMap(assignments) {
+  return new Map((assignments || []).map((assignment) => {
+    if (typeof assignment === "string") {
+      return [assignment, "medium"];
+    }
+
+    return [assignment.quiz_id, normalizeDifficulty(assignment.difficulty)];
+  }));
+}
+
+function normalizeDifficulty(value) {
+  return difficultyOptions.some((difficulty) => difficulty.id === value) ? value : "medium";
+}
+
+function getDifficultyLabel(value) {
+  return difficultyOptions.find((difficulty) => difficulty.id === value)?.label || "Medium";
 }
 
 async function updateUserPassword(userId, input, message) {
