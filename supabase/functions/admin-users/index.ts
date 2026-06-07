@@ -73,10 +73,10 @@ Deno.serve(async (request) => {
       return json({ error: "User profile was not found." }, 404);
     }
 
-    const newPassword = String(body.password || "");
+    const newPassword = typeof body.password === "string" ? body.password : "";
 
-    if (newPassword.length < 8) {
-      return json({ error: "Password must be at least 8 characters." }, 400);
+    if (!newPassword) {
+      return json({ error: "Password is required." }, 400);
     }
 
     const { error: updateError } = await adminClient.auth.admin.updateUserById(targetUserId, {
@@ -92,7 +92,7 @@ Deno.serve(async (request) => {
 
   const username = String(body.username || "").trim().toLowerCase();
   const displayName = String(body.displayName || "").trim();
-  const password = String(body.password || "");
+  const password = typeof body.password === "string" ? body.password : "";
   const role = body.role === "admin" ? "admin" : "user";
   const quizIds = Array.isArray(body.quizIds) ? body.quizIds : [];
 
@@ -104,8 +104,8 @@ Deno.serve(async (request) => {
     return json({ error: "Display name is required." }, 400);
   }
 
-  if (password.length < 8) {
-    return json({ error: "Password must be at least 8 characters." }, 400);
+  if (!password) {
+    return json({ error: "Password is required." }, 400);
   }
 
   const loginEmail = `${username}@users.quizzeshub.local`;

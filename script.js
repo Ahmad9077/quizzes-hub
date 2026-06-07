@@ -298,9 +298,8 @@ async function renderAdminUsers() {
     passwordText.textContent = "New password";
     const passwordInput = document.createElement("input");
     passwordInput.type = "password";
-    passwordInput.minLength = 8;
     passwordInput.autocomplete = "new-password";
-    passwordInput.placeholder = "At least 8 characters";
+    passwordInput.placeholder = "New password";
     passwordReset.append(passwordText, passwordInput);
     const actions = document.createElement("div");
     actions.className = "assignment-actions";
@@ -363,8 +362,8 @@ async function updateUserPassword(userId, input, message) {
   const password = input.value;
   setMessage(message, "Changing password...");
 
-  if (password.length < 8) {
-    setMessage(message, "Password must be at least 8 characters.", true);
+  if (!password) {
+    setMessage(message, "Password is required.", true);
     return;
   }
 
