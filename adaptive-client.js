@@ -21,6 +21,7 @@
 
 (async () => {
   const fallbackPlan = { question_keys: [], attempts_today: 0 };
+  const DEFAULT_KEY_COUNT = 120;
   let _resolveReady;
   let _rejectReady;
   window.QuizzesHubAdaptiveReady = new Promise((resolve, reject) => {
@@ -44,6 +45,7 @@
 
   const client = window.QuizzesHubSupabaseClient;
   const quizId = access.quizId;
+  const recentStorageKey = `quizzes-hub:${quizId}:recent-question-keys:v1`;
 
   // Fetch selected question keys from Supabase. The current difficulty level
   // and weak topics stay server-side/admin-only.
@@ -51,14 +53,15 @@
   try {
     const { data: keyData, error: keyError } = await client.rpc("get_quiz_question_keys", {
       p_quiz_id: quizId,
-      p_count: 50
+      p_count: DEFAULT_KEY_COUNT
     });
     const { data: profileData } = await client.rpc("get_user_quiz_profile", {
       p_quiz_id: quizId
     });
     if (!keyError && keyData) {
+      const questionKeys = Array.isArray(keyData.question_keys) ? keyData.question_keys : [];
       plan = {
-        question_keys: Array.isArray(keyData.question_keys) ? keyData.question_keys : [],
+        question_keys: rotateRecentKeys(questionKeys),
         attempts_today: profileData?.attempts_today ?? 0
       };
     }
@@ -81,9 +84,9 @@
     // to random shuffle without revealing any level information.
     // ─────────────────────────────────────────────────────────
     selectQuestions(allQuestions, count = 10) {
-      const selectedKeys = Array.isArray(plan.question_keys) ? plan.question_keys : [];
+      const selectedKeys = rotateRecentKeys(Array.isArray(plan.question_keys) ? plan.question_keys : []);
       if (selectedKeys.length === 0) {
-        return shuffle(allQuestions).slice(0, count);
+        return avoidRecentQuestions(shuffle(allQuestions), count);
       }
 
       const byKey = new Map(allQuestions.map(q => [q.key, q]));
@@ -92,7 +95,7 @@
 
       const used = new Set(selected.map(q => q.key));
       const fill = shuffle(allQuestions.filter(q => !used.has(q.key)));
-      return [...selected, ...fill].slice(0, count);
+      return [...selected, ...avoidRecentQuestions(fill, count)].slice(0, count);
     },
 
     // ─────────────────────────────────────────────────────────
@@ -130,6 +133,9 @@
         });
 
         if (error) return { ok: false, reason: error.message };
+        rememberQuestionKeys(qResults.map(result => result.key).filter(Boolean));
+        plan = { ...plan, question_keys: rotateRecentKeys(plan.question_keys || []) };
+        window.QuizzesHubAdaptive.plan = plan;
 
         // Refresh non-sensitive attempt count.
         client.rpc("get_user_quiz_profile", { p_quiz_id: quizId })
@@ -154,5 +160,50 @@
       [a[i], a[j]] = [a[j], a[i]];
     }
     return a;
+  }
+
+  function rotateRecentKeys(keys) {
+    const recent = new Set(readRecentQuestionKeys());
+    const fresh = [];
+    const repeated = [];
+    keys.forEach(key => (recent.has(key) ? repeated : fresh).push(key));
+    return [...fresh, ...repeated];
+  }
+
+  function avoidRecentQuestions(questions, count) {
+    const recent = new Set(readRecentQuestionKeys());
+    const fresh = [];
+    const repeated = [];
+    questions.forEach(question => (recent.has(question.key) ? repeated : fresh).push(question));
+    return [...fresh, ...repeated].slice(0, count);
+  }
+
+  function readRecentQuestionKeys() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(recentStorageKey) || "[]");
+      return Array.isArray(parsed) ? parsed.filter(Boolean) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  function rememberQuestionKeys(keys) {
+    if (!Array.isArray(keys) || keys.length === 0) return;
+
+    try {
+      const uniqueKeys = [...new Set(keys.filter(Boolean))];
+      const current = readRecentQuestionKeys().filter(key => !uniqueKeys.includes(key));
+      const next = [...uniqueKeys, ...current].slice(0, getRecentLimit());
+      localStorage.setItem(recentStorageKey, JSON.stringify(next));
+    } catch {
+      // Storage can be unavailable; adaptive selection still works without it.
+    }
+  }
+
+  function getRecentLimit() {
+    const poolSize = Array.isArray(plan.question_keys) && plan.question_keys.length > 0
+      ? plan.question_keys.length
+      : DEFAULT_KEY_COUNT;
+    return Math.max(30, Math.floor(poolSize * 0.6));
   }
 })();
