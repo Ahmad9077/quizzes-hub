@@ -28,6 +28,13 @@ const quizCatalog = [
     icon: "📖",
     color: "#ffece6",
     url: "https://ahmad9077.github.io/little-words-picture-quiz/"
+  },
+  {
+    id: "english-word-choice",
+    title: "English Word Choice Quiz",
+    icon: "🔠",
+    color: "#e7f5ef",
+    url: "https://ahmad9077.github.io/english-word-choice-quiz/"
   }
 ];
 

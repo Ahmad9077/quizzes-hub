@@ -47,7 +47,8 @@ values
   ('world-flags', 'World Flags Quiz', 'https://ahmad9077.github.io/world-flags-quiz/', '🌍', '#e5f8ff', 10),
   ('country-map', 'Country Map Quiz', 'https://ahmad9077.github.io/country-map-quiz/', '🗺️', '#eafff9', 20),
   ('spelling', 'Spelling Quiz', 'https://ahmad9077.github.io/spelling-quiz/', '🔤', '#fff2bf', 30),
-  ('picture-reading', 'Picture Reading Quiz', 'https://ahmad9077.github.io/little-words-picture-quiz/', '📖', '#ffece6', 40)
+  ('picture-reading', 'Picture Reading Quiz', 'https://ahmad9077.github.io/little-words-picture-quiz/', '📖', '#ffece6', 40),
+  ('english-word-choice', 'English Word Choice Quiz', 'https://ahmad9077.github.io/english-word-choice-quiz/', '🔠', '#e7f5ef', 50)
 on conflict (id) do update set
   title = excluded.title,
   url = excluded.url,
