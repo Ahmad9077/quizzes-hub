@@ -472,30 +472,93 @@ async function renderAdminActivity() {
   const list = document.querySelector("#adminActivityList");
   list.replaceChildren(createEmptyState("Loading…"));
 
-  const { data: progress, error } = await supabaseClient
-    .from("quiz_progress")
-    .select("user_id, quiz_id, score, total, level, details, completed_at")
-    .order("completed_at", { ascending: false })
-    .limit(50);
+  const [profiles, quizzes, index] = await Promise.all([
+    fetchProfilesForActivity(),
+    fetchQuizzesForActivity(),
+    fetchActivityIndex()
+  ]);
 
-  if (error) {
+  if (!profiles.length) {
     list.replaceChildren(createEmptyState("Could not load activity."));
     return;
   }
 
-  if (!progress?.length) {
-    list.replaceChildren(createEmptyState("No activity yet."));
-    return;
-  }
-
-  const [profiles, quizzes] = await Promise.all([fetchProfilesForActivity(), fetchQuizzesForActivity()]);
-  const profileMap = new Map(profiles.map((profile) => [profile.id, profile]));
   const quizMap = new Map(quizzes.map((quiz) => [quiz.id, quiz]));
 
-  list.replaceChildren();
-  progress.forEach((item) => {
-    list.append(createActivityItem(item, profileMap.get(item.user_id), quizMap.get(item.quiz_id)));
+  const statsByUser = new Map();
+  index.forEach((row) => {
+    const stats = statsByUser.get(row.user_id) || { count: 0, last: row.completed_at };
+    stats.count += 1;
+    if (row.completed_at > stats.last) stats.last = row.completed_at;
+    statsByUser.set(row.user_id, stats);
   });
+
+  list.replaceChildren();
+  profiles.forEach((profile) => {
+    list.append(createUserActivityGroup(profile, statsByUser.get(profile.id), quizMap));
+  });
+}
+
+async function fetchActivityIndex() {
+  const { data, error } = await supabaseClient
+    .from("quiz_progress")
+    .select("user_id, completed_at")
+    .order("completed_at", { ascending: false })
+    .limit(1000);
+
+  return error ? [] : data || [];
+}
+
+function createUserActivityGroup(profile, stats, quizMap) {
+  const group = document.createElement("details");
+  group.className = "user-activity";
+
+  const summary = document.createElement("summary");
+  const name = document.createElement("strong");
+  name.textContent = profile.display_name;
+  const meta = document.createElement("span");
+  meta.className = "progress-meta";
+  meta.textContent = stats
+    ? `${stats.count} ${stats.count === 1 ? "attempt" : "attempts"} · last ${formatDateTime(stats.last)}`
+    : "No activity";
+  summary.append(name, meta);
+
+  const body = document.createElement("div");
+  body.className = "activity-list user-activity-items";
+  group.append(summary, body);
+
+  if (!stats) {
+    body.append(createEmptyState("No activity yet."));
+    return group;
+  }
+
+  // Activities load on first expand only
+  let loaded = false;
+  group.addEventListener("toggle", async () => {
+    if (!group.open || loaded) return;
+    loaded = true;
+    body.replaceChildren(createEmptyState("Loading…"));
+
+    const { data, error } = await supabaseClient
+      .from("quiz_progress")
+      .select("quiz_id, score, total, level, details, completed_at")
+      .eq("user_id", profile.id)
+      .order("completed_at", { ascending: false })
+      .limit(200);
+
+    if (error) {
+      loaded = false;
+      body.replaceChildren(createEmptyState("Could not load activity."));
+      return;
+    }
+
+    body.replaceChildren();
+    (data || []).forEach((item) => {
+      body.append(createActivityItem(item, quizMap.get(item.quiz_id)));
+    });
+  });
+
+  return group;
 }
 
 async function fetchProfilesForActivity() {
@@ -516,16 +579,16 @@ async function fetchQuizzesForActivity() {
   return error ? [] : data || [];
 }
 
-function createActivityItem(item, profile, quiz) {
+function createActivityItem(item, quiz) {
   const row = document.createElement("article");
   row.className = "activity-item";
 
   const header = document.createElement("div");
   const title = document.createElement("strong");
-  title.textContent = `${profile?.display_name || "Deleted user"} · ${quiz?.title || item.quiz_id}`;
+  title.textContent = quiz?.title || item.quiz_id;
   const meta = document.createElement("div");
   meta.className = "progress-meta";
-  meta.textContent = `${profile?.username ? `@${profile.username} · ` : ""}${item.level || "Practice"} · ${formatDateTime(item.completed_at)}`;
+  meta.textContent = `${item.level || "Practice"} · ${formatDateTime(item.completed_at)}`;
   header.append(title, meta);
 
   const score = document.createElement("div");
