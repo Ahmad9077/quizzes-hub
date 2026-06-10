@@ -58,6 +58,27 @@ const supabaseClient = isConfigured
 let currentSession = null;
 let currentProfile = null;
 
+// Dates are always shown as DD/MM/YYYY (en-GB), never US format.
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric"
+});
+const timeFormatter = new Intl.DateTimeFormat("en-GB", {
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false
+});
+
+function formatDate(value) {
+  return dateFormatter.format(new Date(value));
+}
+
+function formatDateTime(value) {
+  const date = new Date(value);
+  return `${dateFormatter.format(date)} ${timeFormatter.format(date)}`;
+}
+
 init();
 
 async function init() {
@@ -95,7 +116,7 @@ function renderLogin() {
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    setMessage(message, "Checking account...");
+    setMessage(message, "Signing in…");
 
     const formData = new FormData(form);
     const username = String(formData.get("username")).trim().toLowerCase();
@@ -109,7 +130,7 @@ function renderLogin() {
       const loginEmail = Array.isArray(loginData) ? loginData[0]?.login_email : loginData?.login_email;
 
       if (resolveError || !loginEmail) {
-        throw new Error("Username was not found.");
+        throw new Error("Username not found.");
       }
 
       const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -150,12 +171,7 @@ async function loadCurrentProfile() {
 
 async function renderDashboard() {
   renderTemplate("dashboardTemplate");
-  document.querySelector("#dashboardTitle").textContent = `Hi ${currentProfile.display_name}.`;
-  document.querySelector("#profileAvatar").textContent = currentProfile.avatar || "⭐";
-  document.querySelector("#profileName").textContent = currentProfile.display_name;
-  document.querySelector("#profileSummary").textContent = currentProfile.role === "admin"
-    ? "Admin account. You can manage quiz access and review progress."
-    : "These are the quizzes assigned to your account.";
+  document.querySelector("#dashboardTitle").textContent = `Hi, ${currentProfile.display_name}`;
 
   const adminButton = document.querySelector("#adminViewButton");
   adminButton.hidden = currentProfile.role !== "admin";
@@ -186,7 +202,7 @@ function renderAssignedQuizzes(assignments) {
   const allowed = quizCatalog.filter((quiz) => assignmentMap.has(quiz.id));
 
   if (!allowed.length) {
-    grid.replaceChildren(createEmptyState("No quizzes are assigned yet."));
+    grid.replaceChildren(createEmptyState("No quizzes assigned."));
     return;
   }
 
@@ -240,7 +256,7 @@ async function createUser(event) {
   const formData = new FormData(form);
   const quizConfigs = getAssignmentConfigs(document.querySelector("#newUserAssignments"));
 
-  setMessage(message, "Creating user...");
+  setMessage(message, "Creating…");
 
   try {
     const response = await fetch(`${config.supabaseUrl}/functions/v1/admin-users`, {
@@ -274,7 +290,7 @@ async function createUser(event) {
 
 async function renderAdminUsers() {
   const list = document.querySelector("#adminUsersList");
-  list.replaceChildren(createEmptyState("Loading users..."));
+  list.replaceChildren(createEmptyState("Loading…"));
 
   const { data: users, error } = await supabaseClient
     .from("profiles")
@@ -322,7 +338,7 @@ async function renderAdminUsers() {
     const deleteButton = document.createElement("button");
     deleteButton.className = "mini-action danger-action";
     deleteButton.type = "button";
-    deleteButton.textContent = "Delete account";
+    deleteButton.textContent = "Delete";
     deleteButton.hidden = user.id === currentProfile.id;
     const adaptiveButton = document.createElement("button");
     adaptiveButton.className = "mini-action";
@@ -359,7 +375,7 @@ async function saveAssignments(userId, fieldset, button) {
   const quizConfigs = getAssignmentConfigs(fieldset);
   const originalText = button.textContent;
   button.disabled = true;
-  button.textContent = "Saving...";
+  button.textContent = "Saving…";
 
   const { error } = await supabaseClient.rpc("admin_set_assignments", {
     target_user_id: userId,
@@ -397,7 +413,7 @@ function createAssignmentMap(assignments) {
 
 async function updateUserPassword(userId, input, message) {
   const password = input.value;
-  setMessage(message, "Changing password...");
+  setMessage(message, "Saving…");
 
   if (!password) {
     setMessage(message, "Password is required.", true);
@@ -434,7 +450,7 @@ async function deleteUserAccount(user, message) {
   const confirmed = window.confirm(`Delete ${user.display_name}'s account and all stored progress?`);
   if (!confirmed) return;
 
-  setMessage(message, "Deleting account...");
+  setMessage(message, "Deleting…");
 
   try {
     const { error } = await supabaseClient.rpc("admin_delete_user", {
@@ -454,7 +470,7 @@ async function deleteUserAccount(user, message) {
 
 async function renderAdminActivity() {
   const list = document.querySelector("#adminActivityList");
-  list.replaceChildren(createEmptyState("Loading activity..."));
+  list.replaceChildren(createEmptyState("Loading…"));
 
   const { data: progress, error } = await supabaseClient
     .from("quiz_progress")
@@ -468,7 +484,7 @@ async function renderAdminActivity() {
   }
 
   if (!progress?.length) {
-    list.replaceChildren(createEmptyState("No quiz activity yet."));
+    list.replaceChildren(createEmptyState("No activity yet."));
     return;
   }
 
@@ -509,18 +525,22 @@ function createActivityItem(item, profile, quiz) {
   title.textContent = `${profile?.display_name || "Deleted user"} · ${quiz?.title || item.quiz_id}`;
   const meta = document.createElement("div");
   meta.className = "progress-meta";
-  meta.textContent = `${profile?.username ? `@${profile.username} · ` : ""}${item.level || "Practice"} · ${new Date(item.completed_at).toLocaleString()}`;
+  meta.textContent = `${profile?.username ? `@${profile.username} · ` : ""}${item.level || "Practice"} · ${formatDateTime(item.completed_at)}`;
   header.append(title, meta);
 
   const score = document.createElement("div");
   score.className = "progress-score";
   score.textContent = `${item.score}/${item.total}`;
 
-  const summary = document.createElement("p");
-  summary.className = "activity-summary";
-  summary.textContent = summarizeProgressDetails(item.details);
+  row.append(header, score);
 
-  row.append(header, score, summary);
+  const summaryText = summarizeProgressDetails(item.details);
+  if (summaryText) {
+    const summary = document.createElement("p");
+    summary.className = "activity-summary";
+    summary.textContent = summaryText;
+    row.append(summary);
+  }
 
   if (item.details && Object.keys(item.details).length) {
     const details = document.createElement("details");
@@ -538,20 +558,20 @@ function createActivityItem(item, profile, quiz) {
 
 function summarizeProgressDetails(details) {
   if (!details || typeof details !== "object") {
-    return "No answer details recorded.";
+    return "";
   }
 
   if (Array.isArray(details.answers)) {
     const correct = details.answers.filter((answer) => answer.correct).length;
     const wrong = details.answers.length - correct;
-    return `${details.answers.length} answers tracked: ${correct} correct, ${wrong} wrong.`;
+    return `${correct} correct · ${wrong} wrong`;
   }
 
   if (Number.isFinite(details.wrongCount)) {
-    return `${details.wrongCount} wrong answers recorded.`;
+    return `${details.wrongCount} wrong`;
   }
 
-  return "Details recorded for review.";
+  return "";
 }
 
 async function logout() {
@@ -573,7 +593,7 @@ function createAdaptivePanel(userId, assignments) {
   panel.dataset.userId = userId;
 
   const heading = document.createElement("h4");
-  heading.textContent = "Adaptive level monitor";
+  heading.textContent = "Adaptive level";
   panel.append(heading);
 
   if (!assignments.length) {
@@ -613,7 +633,7 @@ async function loadAdaptiveAnalytics(userId, panel) {
 }
 
 async function renderAdaptiveTabContent(container, userId, quizId) {
-  container.replaceChildren(createEmptyState("Loading..."));
+  container.replaceChildren(createEmptyState("Loading…"));
 
   const { data, error } = await supabaseClient.rpc("admin_get_adaptive_analytics", {
     p_user_id: userId,
@@ -621,7 +641,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
   });
 
   if (error || !data) {
-    container.replaceChildren(createEmptyState("No adaptive data yet for this quiz."));
+    container.replaceChildren(createEmptyState("No data yet."));
     return;
   }
 
@@ -640,7 +660,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
     "Confidence",
     data.confidence != null ? `${Math.round(data.confidence * 100)}%` : "-"
   );
-  const sessions = createAdaptiveStat("Sessions evaluated", data.total_sessions ?? 0);
+  const sessions = createAdaptiveStat("Sessions", data.total_sessions ?? 0);
 
   stats.append(lvl, ema, conf, sessions);
   container.append(stats);
@@ -664,7 +684,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
     const agg = data.today_aggregate;
     const today = document.createElement("p");
     today.className = "progress-meta";
-    today.textContent = `Today: ${agg.attempt_count} attempts · ${agg.correct_qs}/${agg.total_qs} correct${agg.evaluated ? " (evaluated)" : " (scheduled 5 AM, needs 3)"}`;
+    today.textContent = `Today: ${agg.attempt_count} attempts · ${agg.correct_qs}/${agg.total_qs} correct${agg.evaluated ? " (evaluated)" : " (pending)"}`;
     container.append(today);
   }
 
@@ -672,7 +692,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
   const overrideSection = document.createElement("div");
   overrideSection.className = "adaptive-override";
   const overrideLabel = document.createElement("label");
-  overrideLabel.textContent = "Override level (1-100): ";
+  overrideLabel.textContent = "Override level ";
   const overrideInput = document.createElement("input");
   overrideInput.type = "number";
   overrideInput.min = 1;
@@ -686,7 +706,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
   const overrideBtn = document.createElement("button");
   overrideBtn.type = "button";
   overrideBtn.className = "mini-action";
-  overrideBtn.textContent = "Apply override";
+  overrideBtn.textContent = "Apply";
   const overrideMsg = document.createElement("span");
   overrideMsg.className = "form-message compact-message";
   overrideBtn.addEventListener("click", async () => {
@@ -696,7 +716,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
       return;
     }
     overrideBtn.disabled = true;
-    overrideMsg.textContent = "Saving...";
+    overrideMsg.textContent = "Saving…";
     const { error: overrideError } = await supabaseClient.rpc("admin_override_quiz_level", {
       p_user_id: userId,
       p_quiz_id: quizId,
@@ -732,7 +752,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
     const tbody = document.createElement("tbody");
     data.recent_adjustments.forEach(adj => {
       const tr = document.createElement("tr");
-      appendTableCell(tr, new Date(adj.date).toLocaleDateString());
+      appendTableCell(tr, formatDate(adj.date));
       appendTableCell(tr, adj.previous_level);
       appendTableCell(tr, adj.new_level);
       appendTableCell(tr, adj.trigger);
