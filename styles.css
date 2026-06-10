@@ -429,6 +429,52 @@ legend {
   align-items: start;
 }
 
+.user-activity {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.user-activity summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+  cursor: pointer;
+  list-style: none;
+  padding: 12px 16px;
+}
+
+.user-activity summary::-webkit-details-marker {
+  display: none;
+}
+
+.user-activity summary strong {
+  font-weight: 600;
+}
+
+.user-activity summary .progress-meta {
+  margin-left: auto;
+}
+
+.user-activity summary::after {
+  content: "›";
+  color: var(--muted);
+  transition: transform 140ms ease;
+}
+
+.user-activity[open] > summary {
+  border-bottom: 1px solid var(--line);
+}
+
+.user-activity[open] > summary::after {
+  transform: rotate(90deg);
+}
+
+.user-activity-items {
+  padding: 12px;
+}
+
 .activity-summary,
 .activity-details {
   grid-column: 1 / -1;
