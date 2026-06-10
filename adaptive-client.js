@@ -20,7 +20,11 @@
 // not in the public quiz JavaScript.
 
 (async () => {
-  const fallbackPlan = { question_keys: [], attempts_today: 0 };
+  // Live plan object: resolved via QuizzesHubAdaptiveReady and ALWAYS updated
+  // in place, so quiz apps that keep the resolved reference (instead of
+  // re-reading window.QuizzesHubAdaptive.plan) still see refreshed
+  // question_keys between rounds.
+  const plan = { question_keys: [], attempts_today: 0 };
   const DEFAULT_KEY_COUNT = 120;
   let _resolveReady;
   let _rejectReady;
@@ -49,7 +53,6 @@
 
   // Fetch selected question keys from Supabase. The current difficulty level
   // and weak topics stay server-side/admin-only.
-  let plan = null;
   try {
     const { data: keyData, error: keyError } = await client.rpc("get_quiz_question_keys", {
       p_quiz_id: quizId,
@@ -60,17 +63,13 @@
     });
     if (!keyError && keyData) {
       const questionKeys = Array.isArray(keyData.question_keys) ? keyData.question_keys : [];
-      plan = {
-        question_keys: rotateRecentKeys(questionKeys),
-        attempts_today: profileData?.attempts_today ?? 0
-      };
+      plan.question_keys = rotateRecentKeys(questionKeys);
+      plan.attempts_today = profileData?.attempts_today ?? 0;
     }
   } catch {
     // If the migration hasn't run yet, fall back gracefully to random selection.
   }
 
-  // Default profile when adaptive tables aren't ready yet
-  plan = plan ?? fallbackPlan;
   _resolveReady(plan);
 
   window.QuizzesHubAdaptive = {
@@ -134,15 +133,24 @@
 
         if (error) return { ok: false, reason: error.message };
         rememberQuestionKeys(qResults.map(result => result.key).filter(Boolean));
-        plan = { ...plan, question_keys: rotateRecentKeys(plan.question_keys || []) };
-        window.QuizzesHubAdaptive.plan = plan;
+        plan.question_keys = rotateRecentKeys(plan.question_keys || []);
+
+        // Re-fetch the plan: the server tracks per-question history, so the
+        // next round's selection rotates even across devices. The local
+        // rotation above stays as an immediate fallback if this fails.
+        client.rpc("get_quiz_question_keys", { p_quiz_id: quizId, p_count: DEFAULT_KEY_COUNT })
+          .then(({ data: freshKeys }) => {
+            if (freshKeys && Array.isArray(freshKeys.question_keys) && freshKeys.question_keys.length) {
+              plan.question_keys = rotateRecentKeys(freshKeys.question_keys);
+            }
+          })
+          .catch(() => {});
 
         // Refresh non-sensitive attempt count.
         client.rpc("get_user_quiz_profile", { p_quiz_id: quizId })
           .then(({ data: fresh }) => {
             if (fresh) {
-              plan = { ...plan, attempts_today: fresh.attempts_today ?? plan.attempts_today };
-              window.QuizzesHubAdaptive.plan = plan;
+              plan.attempts_today = fresh.attempts_today ?? plan.attempts_today;
             }
           });
 
