@@ -1,7 +1,8 @@
 # Adaptive Engine — How It Works
 
-Current behaviour as of migration `007_adaptive_engine_tuning.sql`. For
-question tagging conventions see `adaptive-question-tagging.md`.
+Current behaviour as of migrations `007_adaptive_engine_tuning.sql` and
+`008_fix_question_repetition.sql`. For question tagging conventions see
+`adaptive-question-tagging.md`.
 
 ## Data flow
 
@@ -61,22 +62,27 @@ and topics keep their status across days they were not played.
 
 ## Question selection (`get_quiz_question_keys`)
 
+Variety is a server-side guarantee: per-question history is derived from
+`quiz_progress` (cross-device, 60-day horizon) and **fresher material
+always ranks first**, so a question only repeats once everything fresher
+has been served — the full bank cycles before heavy repeats are possible.
+
 Ordering, best first:
 
-1. **Freshness** — keys answered in the user's last 3 recorded attempts
-   (tracked server-side via `quiz_progress`, so it works across devices)
-   sort behind everything else.
+1. **Freshness bucket** — never seen (or >60 days), then seen >7 days
+   ago, 2–7 days, 1–2 days, and finally seen today.
 2. **Difficulty window** — `[level − 15, level + 10]` (slightly easier
-   bias) outranks topic priority, so weak topics are practised at an
-   appropriate difficulty rather than at any difficulty.
+   bias). Within the window the order is **random on every call**;
+   outside it, nearest-to-window first. (Deterministic closest-to-level
+   ranking was the root cause of the repetition bug fixed in 008.)
 3. **Weak-topic interleave** — weak-topic questions appear at roughly
    30% of any prefix of the list instead of being front-loaded, so a
    round is never all remedial material.
-4. Closest-to-level first, randomised among ties.
 
-The client (`adaptive-client.js`) still keeps a per-device localStorage
-rotation as a secondary safeguard; the server-side recency handling above
-is the primary one.
+After every recorded attempt the client re-fetches the plan, so
+consecutive rounds in the same page session rotate too. The per-device
+localStorage rotation in `adaptive-client.js` remains only as a fallback
+when the re-fetch fails.
 
 ## Tuning constants (all in migration 007)
 
@@ -91,7 +97,8 @@ is the primary one.
 | Weak / strong topic thresholds | < 0.55 / ≥ 0.85 (min 4 samples) | `evaluate_adaptive_level` |
 | Selection window | level −15 … +10 | `get_quiz_question_keys` |
 | Weak-topic share per round | ~30% | `get_quiz_question_keys` |
-| Recency horizon | last 3 attempts | `get_quiz_question_keys` |
+| Freshness buckets | never / >7d / 2–7d / 1–2d / today | `get_quiz_question_keys` (008) |
+| History horizon | 60 days | `get_quiz_question_keys` (008) |
 
 ## Deliberately not implemented
 

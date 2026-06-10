@@ -137,6 +137,18 @@
         plan = { ...plan, question_keys: rotateRecentKeys(plan.question_keys || []) };
         window.QuizzesHubAdaptive.plan = plan;
 
+        // Re-fetch the plan: the server tracks per-question history, so the
+        // next round's selection rotates even across devices. The local
+        // rotation above stays as an immediate fallback if this fails.
+        client.rpc("get_quiz_question_keys", { p_quiz_id: quizId, p_count: DEFAULT_KEY_COUNT })
+          .then(({ data: freshKeys }) => {
+            if (freshKeys && Array.isArray(freshKeys.question_keys) && freshKeys.question_keys.length) {
+              plan = { ...plan, question_keys: rotateRecentKeys(freshKeys.question_keys) };
+              window.QuizzesHubAdaptive.plan = plan;
+            }
+          })
+          .catch(() => {});
+
         // Refresh non-sensitive attempt count.
         client.rpc("get_user_quiz_profile", { p_quiz_id: quizId })
           .then(({ data: fresh }) => {
