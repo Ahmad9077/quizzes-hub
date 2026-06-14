@@ -249,9 +249,7 @@ function renderChallengeMode(assignments) {
   const allowed = getAllowedQuizzes(assignments);
   const select = document.querySelector("#challengeQuizSelect");
   const createMessage = document.querySelector("#challengeCreateMessage");
-  const joinMessage = document.querySelector("#challengeJoinMessage");
   const createForm = document.querySelector("#createChallengeForm");
-  const joinForm = document.querySelector("#joinChallengeForm");
   const refreshButton = document.querySelector("#refreshChallengesButton");
 
   select.replaceChildren();
@@ -285,29 +283,6 @@ function renderChallengeMode(assignments) {
       await loadOpenChallenges();
     } catch (error) {
       setMessage(createMessage, error.message || "Could not create session.", true);
-    }
-  });
-
-  joinForm.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    setMessage(joinMessage, "Joining…");
-
-    const formData = new FormData(joinForm);
-    const inviteCode = String(formData.get("inviteCode") || "").trim().toUpperCase();
-
-    if (!inviteCode) {
-      setMessage(joinMessage, "Code is required.", true);
-      return;
-    }
-
-    try {
-      const state = await joinChallengeSession(null, inviteCode);
-      joinForm.reset();
-      setMessage(joinMessage, "Joined.");
-      setChallengeState(state);
-      await loadOpenChallenges();
-    } catch (error) {
-      setMessage(joinMessage, error.message || "Could not join session.", true);
     }
   });
 
@@ -348,7 +323,7 @@ function createOpenChallengeRow(session) {
   title.textContent = `${session.quiz_icon || "🎯"} ${session.quiz_title || session.quiz_id}`;
   const meta = document.createElement("div");
   meta.className = "progress-meta";
-  meta.textContent = `${session.host_display_name} · code ${session.invite_code}`;
+  meta.textContent = `${session.host_display_name} · open session`;
   content.append(title, meta);
 
   const button = document.createElement("button");
@@ -452,12 +427,11 @@ function renderChallengeState() {
   title.textContent = `${currentChallengeState.quiz?.icon || "🎯"} ${currentChallengeState.quiz?.title || currentChallengeState.quiz_id}`;
   const meta = document.createElement("p");
   meta.className = "progress-meta";
-  meta.textContent = `Code ${currentChallengeState.invite_code} · ${formatChallengeStatus(currentChallengeState.status)}`;
+  meta.textContent = formatChallengeStatus(currentChallengeState.status);
   titleWrap.append(title, meta);
 
   const actions = document.createElement("div");
   actions.className = "challenge-actions";
-  actions.append(createCopyCodeButton(currentChallengeState.invite_code));
 
   if (currentChallengeState.status === "waiting" && currentChallengeState.host_id === currentProfile.id) {
     const startButton = document.createElement("button");
@@ -518,7 +492,7 @@ function createWaitingPlayerCard() {
   name.textContent = "Waiting";
   const meta = document.createElement("span");
   meta.className = "progress-meta";
-  meta.textContent = "Share the code";
+  meta.textContent = "Open to assigned players";
   card.append(name, meta);
   return card;
 }
@@ -568,25 +542,6 @@ function buildChallengeQuizUrl(state) {
   const url = new URL(state.quiz?.url || quizCatalog.find((quiz) => quiz.id === state.quiz_id)?.url || window.location.href);
   url.searchParams.set("challenge_session", state.id);
   return url.toString();
-}
-
-function createCopyCodeButton(code) {
-  const button = document.createElement("button");
-  button.className = "mini-action";
-  button.type = "button";
-  button.textContent = "Copy code";
-  button.addEventListener("click", async () => {
-    try {
-      await navigator.clipboard.writeText(code);
-      button.textContent = "Copied";
-      window.setTimeout(() => {
-        button.textContent = "Copy code";
-      }, 1400);
-    } catch {
-      window.prompt("Challenge code", code);
-    }
-  });
-  return button;
 }
 
 async function startCurrentChallenge() {
