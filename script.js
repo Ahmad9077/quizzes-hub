@@ -524,12 +524,22 @@ function createChallengeStatusPanel(state) {
     const message = document.createElement("p");
     message.className = "challenge-turn-message";
     message.textContent = winner ? `${winner.display_name} wins` : "Challenge finished";
-    panel.append(message);
+    message.textContent = winner ? `🎉 ${winner.display_name} wins!` : "🎉 Challenge finished!";
+    panel.append(message, createChallengeScoreSummary(state));
     return panel;
   }
 
   panel.append(createEmptyState("Challenge ended."));
   return panel;
+}
+
+function createChallengeScoreSummary(state) {
+  const summary = document.createElement("div");
+  summary.className = "progress-meta";
+  summary.textContent = (state.players || [])
+    .map((player) => `${player.display_name}: ${player.wrong_count}/3 wrong`)
+    .join(" · ");
+  return summary;
 }
 
 function createChallengeLaunchLink(state) {
@@ -573,7 +583,11 @@ async function abandonCurrentChallenge() {
     return;
   }
 
-  setChallengeState(data);
+  if (data?.status === "abandoned") {
+    setChallengeState(null);
+  } else {
+    setChallengeState(data);
+  }
   await loadOpenChallenges();
 }
 
