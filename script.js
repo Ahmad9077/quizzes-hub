@@ -57,6 +57,9 @@ const supabaseClient = isConfigured
 
 let currentSession = null;
 let currentProfile = null;
+let currentChallengeState = null;
+let currentChallengeChannel = null;
+let dashboardAssignments = [];
 
 // Dates are always shown as DD/MM/YYYY (en-GB), never US format.
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -178,8 +181,10 @@ async function renderDashboard() {
   adminButton.addEventListener("click", renderAdmin);
   document.querySelector("#logoutButton").addEventListener("click", logout);
 
-  const assignments = await fetchAssignments(currentProfile.id);
-  renderAssignedQuizzes(assignments);
+  dashboardAssignments = await fetchAssignments(currentProfile.id);
+  setupDashboardTabs();
+  renderAssignedQuizzes(dashboardAssignments);
+  renderChallengeMode(dashboardAssignments);
 }
 
 async function fetchAssignments(userId) {
@@ -209,6 +214,27 @@ function renderAssignedQuizzes(assignments) {
   allowed.forEach((quiz) => grid.append(createQuizTile(quiz)));
 }
 
+function setupDashboardTabs() {
+  const quizzesButton = document.querySelector("#quizzesTabButton");
+  const challengeButton = document.querySelector("#challengeTabButton");
+  quizzesButton.addEventListener("click", () => activateDashboardTab("quizzes"));
+  challengeButton.addEventListener("click", () => activateDashboardTab("challenge"));
+}
+
+function activateDashboardTab(tabName) {
+  const isChallenge = tabName === "challenge";
+  document.querySelector("#quizzesPanel").hidden = isChallenge;
+  document.querySelector("#challengePanel").hidden = !isChallenge;
+  document.querySelector("#quizzesTabButton").classList.toggle("active-tab", !isChallenge);
+  document.querySelector("#challengeTabButton").classList.toggle("active-tab", isChallenge);
+  if (isChallenge) loadOpenChallenges();
+}
+
+function getAllowedQuizzes(assignments) {
+  const assignmentMap = createAssignmentMap(assignments);
+  return quizCatalog.filter((quiz) => assignmentMap.has(quiz.id));
+}
+
 function createQuizTile(quiz) {
   const tile = document.querySelector("#quizTileTemplate").content.firstElementChild.cloneNode(true);
   tile.href = quiz.url;
@@ -217,6 +243,388 @@ function createQuizTile(quiz) {
   tile.querySelector(".quiz-icon").textContent = quiz.icon;
   tile.querySelector(".quiz-name").textContent = quiz.title;
   return tile;
+}
+
+function renderChallengeMode(assignments) {
+  const allowed = getAllowedQuizzes(assignments);
+  const select = document.querySelector("#challengeQuizSelect");
+  const createMessage = document.querySelector("#challengeCreateMessage");
+  const joinMessage = document.querySelector("#challengeJoinMessage");
+  const createForm = document.querySelector("#createChallengeForm");
+  const joinForm = document.querySelector("#joinChallengeForm");
+  const refreshButton = document.querySelector("#refreshChallengesButton");
+
+  select.replaceChildren();
+
+  if (!allowed.length) {
+    select.disabled = true;
+    createForm.querySelector("button").disabled = true;
+    select.append(new Option("No quizzes assigned", ""));
+  } else {
+    allowed.forEach((quiz) => {
+      select.append(new Option(`${quiz.icon} ${quiz.title}`, quiz.id));
+    });
+  }
+
+  createForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    setMessage(createMessage, "Creating…");
+
+    const formData = new FormData(createForm);
+    const quizId = String(formData.get("quizId") || "");
+
+    try {
+      const { data, error } = await supabaseClient.rpc("create_challenge_session", {
+        p_quiz_id: quizId
+      });
+
+      if (error) throw error;
+
+      setMessage(createMessage, "Session ready.");
+      setChallengeState(data);
+      await loadOpenChallenges();
+    } catch (error) {
+      setMessage(createMessage, error.message || "Could not create session.", true);
+    }
+  });
+
+  joinForm.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    setMessage(joinMessage, "Joining…");
+
+    const formData = new FormData(joinForm);
+    const inviteCode = String(formData.get("inviteCode") || "").trim().toUpperCase();
+
+    if (!inviteCode) {
+      setMessage(joinMessage, "Code is required.", true);
+      return;
+    }
+
+    try {
+      const state = await joinChallengeSession(null, inviteCode);
+      joinForm.reset();
+      setMessage(joinMessage, "Joined.");
+      setChallengeState(state);
+      await loadOpenChallenges();
+    } catch (error) {
+      setMessage(joinMessage, error.message || "Could not join session.", true);
+    }
+  });
+
+  refreshButton.addEventListener("click", loadOpenChallenges);
+  renderChallengeState();
+  loadOpenChallenges();
+}
+
+async function loadOpenChallenges() {
+  const list = document.querySelector("#openChallengesList");
+  if (!list) return;
+
+  list.replaceChildren(createEmptyState("Loading…"));
+
+  await supabaseClient.rpc("purge_expired_challenges").catch(() => {});
+
+  const { data, error } = await supabaseClient.rpc("list_open_challenge_sessions");
+  if (error) {
+    list.replaceChildren(createEmptyState("Could not load sessions."));
+    return;
+  }
+
+  if (!data?.length) {
+    list.replaceChildren(createEmptyState("No open sessions."));
+    return;
+  }
+
+  list.replaceChildren();
+  data.forEach((session) => list.append(createOpenChallengeRow(session)));
+}
+
+function createOpenChallengeRow(session) {
+  const row = document.createElement("article");
+  row.className = "challenge-row";
+
+  const content = document.createElement("div");
+  const title = document.createElement("strong");
+  title.textContent = `${session.quiz_icon || "🎯"} ${session.quiz_title || session.quiz_id}`;
+  const meta = document.createElement("div");
+  meta.className = "progress-meta";
+  meta.textContent = `${session.host_display_name} · code ${session.invite_code}`;
+  content.append(title, meta);
+
+  const button = document.createElement("button");
+  button.className = "mini-action";
+  button.type = "button";
+  button.textContent = "Join";
+  button.addEventListener("click", async () => {
+    button.disabled = true;
+    button.textContent = "Joining…";
+    try {
+      const state = await joinChallengeSession(session.session_id, null);
+      setChallengeState(state);
+      await loadOpenChallenges();
+    } catch (error) {
+      window.alert(error.message || "Could not join session.");
+      button.disabled = false;
+      button.textContent = "Join";
+    }
+  });
+
+  row.append(content, button);
+  return row;
+}
+
+async function joinChallengeSession(sessionId, inviteCode) {
+  const { data, error } = await supabaseClient.rpc("join_challenge_session", {
+    p_session_id: sessionId,
+    p_invite_code: inviteCode
+  });
+
+  if (error) throw error;
+  return data;
+}
+
+function setChallengeState(state) {
+  currentChallengeState = state;
+  renderChallengeState();
+  subscribeToChallenge(state?.id);
+}
+
+async function refreshChallengeState() {
+  if (!currentChallengeState?.id) return;
+
+  const { data, error } = await supabaseClient.rpc("get_challenge_state", {
+    p_session_id: currentChallengeState.id
+  });
+
+  if (!error && data) {
+    currentChallengeState = data;
+    renderChallengeState();
+  }
+}
+
+function subscribeToChallenge(sessionId) {
+  if (currentChallengeChannel) {
+    supabaseClient.removeChannel(currentChallengeChannel);
+    currentChallengeChannel = null;
+  }
+
+  if (!sessionId) return;
+
+  currentChallengeChannel = supabaseClient
+    .channel(`challenge:${sessionId}`)
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "challenge_sessions", filter: `id=eq.${sessionId}` },
+      refreshChallengeState
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "challenge_players", filter: `session_id=eq.${sessionId}` },
+      refreshChallengeState
+    )
+    .on(
+      "postgres_changes",
+      { event: "*", schema: "public", table: "challenge_turns", filter: `session_id=eq.${sessionId}` },
+      refreshChallengeState
+    )
+    .subscribe();
+}
+
+function renderChallengeState() {
+  const card = document.querySelector("#activeChallengeCard");
+  const container = document.querySelector("#activeChallenge");
+  if (!card || !container) return;
+
+  if (!currentChallengeState) {
+    card.hidden = true;
+    container.replaceChildren();
+    return;
+  }
+
+  card.hidden = false;
+  container.replaceChildren();
+
+  const header = document.createElement("div");
+  header.className = "challenge-session-header";
+
+  const titleWrap = document.createElement("div");
+  const title = document.createElement("h3");
+  title.textContent = `${currentChallengeState.quiz?.icon || "🎯"} ${currentChallengeState.quiz?.title || currentChallengeState.quiz_id}`;
+  const meta = document.createElement("p");
+  meta.className = "progress-meta";
+  meta.textContent = `Code ${currentChallengeState.invite_code} · ${formatChallengeStatus(currentChallengeState.status)}`;
+  titleWrap.append(title, meta);
+
+  const actions = document.createElement("div");
+  actions.className = "challenge-actions";
+  actions.append(createCopyCodeButton(currentChallengeState.invite_code));
+
+  if (currentChallengeState.status === "waiting" && currentChallengeState.host_id === currentProfile.id) {
+    const startButton = document.createElement("button");
+    startButton.className = "primary-action";
+    startButton.type = "button";
+    startButton.textContent = "Start";
+    startButton.disabled = (currentChallengeState.players || []).length !== 2;
+    startButton.addEventListener("click", startCurrentChallenge);
+    actions.append(startButton);
+  }
+
+  if (["waiting", "active"].includes(currentChallengeState.status)) {
+    const cancelButton = document.createElement("button");
+    cancelButton.className = "mini-action";
+    cancelButton.type = "button";
+    cancelButton.textContent = "Leave";
+    cancelButton.addEventListener("click", abandonCurrentChallenge);
+    actions.append(cancelButton);
+  }
+
+  header.append(titleWrap, actions);
+  container.append(header);
+
+  const players = document.createElement("div");
+  players.className = "challenge-players";
+  (currentChallengeState.players || []).forEach((player) => {
+    players.append(createChallengePlayerCard(player));
+  });
+
+  if ((currentChallengeState.players || []).length < 2) {
+    players.append(createWaitingPlayerCard());
+  }
+
+  container.append(players);
+  container.append(createChallengeStatusPanel(currentChallengeState));
+}
+
+function createChallengePlayerCard(player) {
+  const card = document.createElement("article");
+  card.className = "challenge-player";
+  if (player.user_id === currentChallengeState.current_answering_user_id) {
+    card.classList.add("is-current-turn");
+  }
+
+  const name = document.createElement("strong");
+  name.textContent = `${player.avatar || "⭐"} ${player.display_name}`;
+  const meta = document.createElement("span");
+  meta.className = "progress-meta";
+  meta.textContent = `${player.is_host ? "Host" : "Player"} · ${player.wrong_count}/3 wrong`;
+  card.append(name, meta);
+  return card;
+}
+
+function createWaitingPlayerCard() {
+  const card = document.createElement("article");
+  card.className = "challenge-player is-empty";
+  const name = document.createElement("strong");
+  name.textContent = "Waiting";
+  const meta = document.createElement("span");
+  meta.className = "progress-meta";
+  meta.textContent = "Share the code";
+  card.append(name, meta);
+  return card;
+}
+
+function createChallengeStatusPanel(state) {
+  const panel = document.createElement("div");
+  panel.className = "challenge-status-panel";
+
+  if (state.status === "waiting") {
+    panel.append(createEmptyState("Waiting for another player."));
+    return panel;
+  }
+
+  if (state.status === "active") {
+    const currentPlayer = (state.players || []).find((player) => player.user_id === state.current_answering_user_id);
+    const message = document.createElement("p");
+    message.className = "challenge-turn-message";
+    message.textContent = state.current_answering_user_id === currentProfile.id
+      ? "Your turn"
+      : `${currentPlayer?.display_name || "Other player"}'s turn`;
+    panel.append(message, createChallengeLaunchLink(state));
+    return panel;
+  }
+
+  if (state.status === "finished") {
+    const winner = (state.players || []).find((player) => player.user_id === state.winner_id);
+    const message = document.createElement("p");
+    message.className = "challenge-turn-message";
+    message.textContent = winner ? `${winner.display_name} wins` : "Challenge finished";
+    panel.append(message);
+    return panel;
+  }
+
+  panel.append(createEmptyState("Challenge ended."));
+  return panel;
+}
+
+function createChallengeLaunchLink(state) {
+  const link = document.createElement("a");
+  link.className = "primary-action";
+  link.href = buildChallengeQuizUrl(state);
+  link.textContent = "Open quiz";
+  return link;
+}
+
+function buildChallengeQuizUrl(state) {
+  const url = new URL(state.quiz?.url || quizCatalog.find((quiz) => quiz.id === state.quiz_id)?.url || window.location.href);
+  url.searchParams.set("challenge_session", state.id);
+  return url.toString();
+}
+
+function createCopyCodeButton(code) {
+  const button = document.createElement("button");
+  button.className = "mini-action";
+  button.type = "button";
+  button.textContent = "Copy code";
+  button.addEventListener("click", async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      button.textContent = "Copied";
+      window.setTimeout(() => {
+        button.textContent = "Copy code";
+      }, 1400);
+    } catch {
+      window.prompt("Challenge code", code);
+    }
+  });
+  return button;
+}
+
+async function startCurrentChallenge() {
+  if (!currentChallengeState?.id) return;
+
+  const { data, error } = await supabaseClient.rpc("start_challenge_session", {
+    p_session_id: currentChallengeState.id
+  });
+
+  if (error) {
+    window.alert(error.message || "Could not start challenge.");
+    return;
+  }
+
+  setChallengeState(data);
+}
+
+async function abandonCurrentChallenge() {
+  if (!currentChallengeState?.id) return;
+
+  const { data, error } = await supabaseClient.rpc("abandon_challenge_session", {
+    p_session_id: currentChallengeState.id
+  });
+
+  if (error) {
+    window.alert(error.message || "Could not leave challenge.");
+    return;
+  }
+
+  setChallengeState(data);
+  await loadOpenChallenges();
+}
+
+function formatChallengeStatus(status) {
+  if (status === "waiting") return "Waiting";
+  if (status === "active") return "Live";
+  if (status === "finished") return "Finished";
+  return "Ended";
 }
 
 async function renderAdmin() {
@@ -638,6 +1046,12 @@ function summarizeProgressDetails(details) {
 }
 
 async function logout() {
+  if (currentChallengeChannel) {
+    supabaseClient.removeChannel(currentChallengeChannel);
+    currentChallengeChannel = null;
+  }
+  currentChallengeState = null;
+  dashboardAssignments = [];
   await supabaseClient.auth.signOut();
   currentSession = null;
   currentProfile = null;

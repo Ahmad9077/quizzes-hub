@@ -2,6 +2,11 @@
   const HUB_URL = "https://ahmad9077.github.io/quizzes-hub/";
   const currentScript = document.currentScript;
   const autoQuizId = currentScript?.dataset.quizId || window.QUIZZES_HUB_QUIZ_ID || "";
+  const challengeSessionId = new URLSearchParams(window.location.search).get("challenge_session") || "";
+
+  if (challengeSessionId) {
+    window.QUIZZES_HUB_CHALLENGE_SESSION_ID = challengeSessionId;
+  }
 
   window.QuizzesHubAccessGuard = {
     require: requireQuizAccess
