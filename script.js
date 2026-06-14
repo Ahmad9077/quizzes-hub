@@ -523,7 +523,6 @@ function createChallengeStatusPanel(state) {
     const winner = (state.players || []).find((player) => player.user_id === state.winner_id);
     const message = document.createElement("p");
     message.className = "challenge-turn-message";
-    message.textContent = winner ? `${winner.display_name} wins` : "Challenge finished";
     message.textContent = winner ? `🎉 ${winner.display_name} wins!` : "🎉 Challenge finished!";
     panel.append(message, createChallengeScoreSummary(state));
     return panel;
