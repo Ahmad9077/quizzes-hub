@@ -286,9 +286,11 @@ function renderChallengeMode(assignments) {
     }
   });
 
-  refreshButton.addEventListener("click", loadOpenChallenges);
+  refreshButton.addEventListener("click", () => {
+    void loadOpenChallenges();
+  });
   renderChallengeState();
-  loadOpenChallenges();
+  void loadOpenChallenges();
 }
 
 async function loadOpenChallenges() {
@@ -297,21 +299,21 @@ async function loadOpenChallenges() {
 
   list.replaceChildren(createEmptyState("Loading…"));
 
-  await supabaseClient.rpc("purge_expired_challenges").catch(() => {});
+  try {
+    const { data, error } = await supabaseClient.rpc("list_open_challenge_sessions");
+    if (error) throw error;
 
-  const { data, error } = await supabaseClient.rpc("list_open_challenge_sessions");
-  if (error) {
+    if (!data?.length) {
+      list.replaceChildren(createEmptyState("No open sessions."));
+      return;
+    }
+
+    list.replaceChildren();
+    data.forEach((session) => list.append(createOpenChallengeRow(session)));
+  } catch (error) {
+    console.error("Could not load challenge sessions.", error);
     list.replaceChildren(createEmptyState("Could not load sessions."));
-    return;
   }
-
-  if (!data?.length) {
-    list.replaceChildren(createEmptyState("No open sessions."));
-    return;
-  }
-
-  list.replaceChildren();
-  data.forEach((session) => list.append(createOpenChallengeRow(session)));
 }
 
 function createOpenChallengeRow(session) {
