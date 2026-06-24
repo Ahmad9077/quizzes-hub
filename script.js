@@ -35,6 +35,13 @@ const quizCatalog = [
     icon: "🔠",
     color: "#e7f5ef",
     url: "https://ahmad9077.github.io/english-word-choice-quiz/"
+  },
+  {
+    id: "border-detective",
+    title: "Border Detective",
+    icon: "🧩",
+    color: "#e0f2f1",
+    url: "https://ahmad9077.github.io/country-border-letter-quiz/"
   }
 ];
 
