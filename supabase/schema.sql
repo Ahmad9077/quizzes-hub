@@ -49,7 +49,7 @@ values
   ('spelling', 'Spelling Quiz', 'https://ahmad9077.github.io/spelling-quiz/', '🔤', '#fff2bf', 30),
   ('picture-reading', 'Picture Reading Quiz', 'https://ahmad9077.github.io/little-words-picture-quiz/', '📖', '#ffece6', 40),
   ('english-word-choice', 'English Word Choice Quiz', 'https://ahmad9077.github.io/english-word-choice-quiz/', '🔠', '#e7f5ef', 50),
-  ('border-detective', 'Border Detective', 'https://ahmad9077.github.io/country-border-letter-quiz/', '🧩', '#e0f2f1', 60)
+  ('border-detective', 'Border Detective', 'https://ahmad9077.github.io/country-border-letter-quiz/', '🧭', '#e8f2ff', 60)
 on conflict (id) do update set
   title = excluded.title,
   url = excluded.url,

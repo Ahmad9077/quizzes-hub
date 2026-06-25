@@ -5,42 +5,42 @@ const quizCatalog = [
     id: "world-flags",
     title: "World Flags Quiz",
     icon: "🌍",
-    color: "#e5f8ff",
+    color: "#dff5ff",
     url: "https://ahmad9077.github.io/world-flags-quiz/"
   },
   {
     id: "country-map",
     title: "Country Map Quiz",
     icon: "🗺️",
-    color: "#eafff9",
+    color: "#e0faee",
     url: "https://ahmad9077.github.io/country-map-quiz/"
   },
   {
     id: "spelling",
     title: "Spelling Quiz",
     icon: "🔤",
-    color: "#fff2bf",
+    color: "#fff0bf",
     url: "https://ahmad9077.github.io/spelling-quiz/"
   },
   {
     id: "picture-reading",
     title: "Picture Reading Quiz",
     icon: "📖",
-    color: "#ffece6",
+    color: "#ffe4da",
     url: "https://ahmad9077.github.io/little-words-picture-quiz/"
   },
   {
     id: "english-word-choice",
     title: "English Word Choice Quiz",
     icon: "🔠",
-    color: "#e7f5ef",
+    color: "#e8ebff",
     url: "https://ahmad9077.github.io/english-word-choice-quiz/"
   },
   {
     id: "border-detective",
     title: "Border Detective",
-    icon: "🧩",
-    color: "#e0f2f1",
+    icon: "🧭",
+    color: "#e8f2ff",
     url: "https://ahmad9077.github.io/country-border-letter-quiz/"
   }
 ];
