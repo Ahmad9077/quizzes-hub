@@ -5,10 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Private quiz dashboards.">
     <title>Quizzes Hub</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css?v=11">
+    <link rel="stylesheet" href="styles.css?v=15">
   </head>
   <body>
     <main id="app" class="app-shell" aria-live="polite">
@@ -32,22 +29,49 @@
 
     <template id="loginTemplate">
       <section class="auth-layout">
-        <form class="auth-card" id="loginForm">
-          <div>
-            <p class="brand">Quizzes Hub</p>
-            <h1>Sign in</h1>
+        <div class="auth-panel">
+          <div class="auth-copy">
+            <div>
+              <p class="brand">Quizzes Hub</p>
+              <h1>Play your next quiz.</h1>
+              <p class="hero-copy">One bright hub for each child, with quick access to their assigned quizzes.</p>
+            </div>
+            <div class="trivia-board" aria-hidden="true">
+              <span class="trivia-card card-main">
+                <b>World</b>
+                <i>Flags</i>
+              </span>
+              <span class="trivia-card card-dark">
+                <b>Map</b>
+                <i>Quiz</i>
+              </span>
+              <span class="trivia-card card-yellow">
+                <b>Words</b>
+                <i>Spell</i>
+              </span>
+              <span class="trivia-card card-light">
+                <b>Read</b>
+                <i>Picture</i>
+              </span>
+            </div>
           </div>
-          <label>
-            <span>Username</span>
-            <input name="username" autocomplete="username" required>
-          </label>
-          <label>
-            <span>Password</span>
-            <input name="password" type="password" autocomplete="current-password" required>
-          </label>
-          <button class="primary-action" type="submit">Sign in</button>
-          <p class="form-message" id="loginMessage"></p>
-        </form>
+          <form class="auth-card" id="loginForm">
+            <div class="form-heading">
+              <h2>Sign in</h2>
+              <p>Enter the username and password.</p>
+            </div>
+            <label>
+              <span>Username</span>
+              <input name="username" autocomplete="username" required>
+            </label>
+            <label>
+              <span>Password</span>
+              <input name="password" type="password" autocomplete="current-password" required>
+            </label>
+            <button class="primary-action" type="submit">Sign in</button>
+            <p class="form-message" id="loginMessage"></p>
+          </form>
+        </div>
       </section>
     </template>
 
@@ -61,15 +85,24 @@
           </div>
         </header>
 
-        <h1 id="dashboardTitle" class="page-title"></h1>
-
-        <nav class="dashboard-tabs" aria-label="Dashboard sections">
-          <button class="tab-action active-tab" id="quizzesTabButton" type="button">Quizzes</button>
-          <button class="tab-action" id="challengeTabButton" type="button">Challenge Mode</button>
-        </nav>
+        <section class="student-hero">
+          <div>
+            <p class="student-kicker">Student dashboard</p>
+            <h1 id="dashboardTitle" class="page-title"></h1>
+          </div>
+          <div class="profile-mark" aria-hidden="true">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+          <nav class="dashboard-tabs" aria-label="Dashboard sections">
+            <button class="tab-action active-tab" id="quizzesTabButton" type="button">Quizzes</button>
+            <button class="tab-action" id="challengeTabButton" type="button">Challenge</button>
+          </nav>
+        </section>
 
         <section id="quizzesPanel">
-          <h2 class="section-title">Your quizzes</h2>
+          <h2 class="section-title">Choose a quiz</h2>
           <div class="quiz-grid" id="assignedQuizGrid"></div>
         </section>
 
@@ -77,7 +110,7 @@
           <h2 class="section-title">Challenge Mode</h2>
           <div class="challenge-layout">
             <section class="challenge-card">
-              <h3>Start challenge</h3>
+              <h3>Start a challenge</h3>
               <form id="createChallengeForm" class="challenge-form">
                 <label>
                   <span>Quiz</span>
