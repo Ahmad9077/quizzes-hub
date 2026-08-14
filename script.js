@@ -42,6 +42,13 @@ const quizCatalog = [
     icon: "🧭",
     color: "#e8f2ff",
     url: "https://ahmad9077.github.io/country-border-letter-quiz/"
+  },
+  {
+    id: "arabic-phonics",
+    title: "صدى الحروف",
+    icon: "أ",
+    color: "#efe8ff",
+    url: "https://ahmad9077.github.io/arabic-phonics-quiz/"
   }
 ];
 
