@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow,noarchive">
+  <meta name="referrer" content="no-referrer">
+  <link rel="icon" href="data:,">
+  <meta name="theme-color" content="#173f3b">
+  <meta name="description" content="قصص الأنبياء: حكايات مصوّرة مع السرد وتفاعل بسيط.">
+  <title>قصص الأنبياء</title>
+  <link rel="preload" href="assets/fonts/noto-sans-arabic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/amiri.ttf" as="font" type="font/ttf" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body data-playing="false">
+  <svg class="icon-library" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="m9 5 11 7-11 7Z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 5v14M16 5v14" stroke-width="3.5"/></symbol>
+    <symbol id="i-left" viewBox="0 0 24 24"><path d="m14 5-7 7 7 7M7 12h14"/></symbol>
+    <symbol id="i-right" viewBox="0 0 24 24"><path d="m10 5 7 7-7 7M17 12H3"/></symbol>
+    <symbol id="i-replay" viewBox="0 0 24 24"><path d="M4 10a8 8 0 1 1 .8 7M4 4v6h6"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="m4 9 4 0 5-4v14l-5-4H4ZM17 8a6 6 0 0 1 0 8M20 5a10 10 0 0 1 0 14"/></symbol>
+    <symbol id="i-muted" viewBox="0 0 24 24"><path d="m4 9 4 0 5-4v14l-5-4H4ZM17 9l5 6M22 9l-5 6"/></symbol>
+    <symbol id="i-book" viewBox="0 0 24 24"><path d="M12 6C9 3 4 4 2 5v14c3-1 7-1 10 1 3-2 7-2 10-1V5c-2-1-7-2-10 1Zm0 0v14"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12 5 5L20 7"/></symbol>
+  </defs></svg>
+
+  <main id="app">
+    <section class="cover" id="cover" aria-labelledby="cover-title">
+      <img class="cover-art" id="cover-art" alt="" fetchpriority="high" hidden>
+      <div class="cover-shade"></div>
+      <div class="cover-top"><a class="hub-link" data-hub-link href="https://ahmad9077.github.io/quizzes-hub/prophets-stories.html"><svg class="icon"><use href="#i-right"/></svg><span>قصص الأنبياء</span></a><button class="reference-button cover-reference" type="button" data-open-references><svg class="icon"><use href="#i-book"/></svg><span>المراجع</span></button></div>
+      <div class="cover-copy">
+        <p class="eyebrow">قصة مصوّرة تفاعلية</p>
+        <h1 id="cover-title"><span>قصص الأنبياء</span></h1>
+        <p class="cover-question" id="cover-question"></p>
+        <button class="start-button" id="start" type="button" disabled><span id="start-label">تُجهَّز القصة…</span><svg class="icon"><use href="#i-left"/></svg></button>
+        <p class="cover-caption" id="cover-caption"></p>
+        <p class="load-message" id="load-message" role="status"></p>
+      </div>
+      <span class="cover-edge" aria-hidden="true"></span>
+    </section>
+
+    <section class="reader" id="reader" aria-label="مشاهد القصة" hidden>
+      <header class="reader-header"><a class="story-brand" data-hub-link href="https://ahmad9077.github.io/quizzes-hub/prophets-stories.html" aria-label="العودة إلى قصص الأنبياء"><span class="story-wordmark" id="story-wordmark">قصص الأنبياء</span><span class="hub-return">قصص الأنبياء</span></a><div class="scene-count" dir="ltr" aria-live="polite"><bdi id="scene-number" dir="ltr">1</bdi><span class="count-divider">/</span><bdi id="scene-total" dir="ltr">1</bdi></div><button class="reference-button" type="button" data-open-references><svg class="icon"><use href="#i-book"/></svg><span>المراجع</span></button></header>
+      <div class="story-progress" role="progressbar" aria-label="تقدم القصة" aria-valuemin="0" aria-valuemax="1" aria-valuenow="1"><span id="story-progress-fill"></span></div>
+      <div class="scene-layout">
+        <div class="scene-stage" id="scene-stage">
+          <div class="art-backdrop" id="art-backdrop"></div>
+          <div class="art-frame" id="art-frame"><img id="scene-art" class="scene-art" alt="" decoding="async"></div>
+          <img class="foreground-foliage" src="assets/art/foliage.png" alt="" aria-hidden="true">
+          <div class="stage-vignette"></div>
+          <div class="stage-caption"><span id="stage-label"></span><span class="art-disclaimer">رسم توضيحي</span></div>
+          <div class="art-error" id="art-error" hidden>تعذّر تحميل الرسم. يمكنك متابعة النص أو إعادة تحميل الصفحة.</div>
+        </div>
+        <div class="reading-page" id="reading-page">
+          <div class="page-content">
+            <div class="chapter-heading"><span class="chapter-mark" aria-hidden="true"></span><p id="source-label"></p><span id="paragraph-indicator" class="paragraph-indicator" aria-label="الفقرة الحالية"><bdi dir="ltr">1</bdi> من <bdi dir="ltr">2</bdi></span></div>
+            <h2 id="scene-title" tabindex="-1"></h2>
+            <div class="narrative" id="narrative"></div>
+            <p class="audio-notice" id="audio-notice" role="status" hidden></p>
+            <div class="interaction" id="interaction"></div>
+            <div class="closing" id="closing" hidden><p class="eyebrow">ختام القصة</p><h3 id="closing-title">حكايةٌ بقيت في الذاكرة</h3><p id="closing-summary"></p><button class="primary-button" id="restart" type="button"><svg class="icon"><use href="#i-replay"/></svg><span>أعد القصة</span></button></div>
+          </div>
+          <footer class="story-controls" aria-label="أدوات القصة">
+            <div class="audio-progress" aria-hidden="true"><span id="audio-progress-fill"></span></div>
+            <div class="control-row">
+              <button id="previous" class="nav-button previous-button" type="button" aria-label="الفقرة السابقة"><svg class="icon"><use href="#i-right"/></svg><span>السابق</span></button>
+              <div class="audio-buttons"><button id="replay" class="icon-button" type="button" aria-label="أعد الفقرة" title="أعد الفقرة"><svg class="icon"><use href="#i-replay"/></svg></button><button id="play-pause" class="play-button" type="button" aria-label="إيقاف مؤقت"><svg class="icon"><use id="play-icon" href="#i-pause"/></svg></button><button id="mute" class="icon-button" type="button" aria-label="كتم الصوت" aria-pressed="false" title="كتم الصوت"><svg class="icon"><use id="mute-icon" href="#i-volume"/></svg></button></div>
+              <button id="next" class="nav-button next-button" type="button" aria-label="المشهد التالي"><span id="next-label">التالي</span><svg class="icon"><use href="#i-left"/></svg></button>
+            </div>
+            <p id="playback-state" class="playback-state">يمكنك الاستماع أو قراءة القصة</p>
+          </footer>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="references-dialog" class="references-dialog" aria-labelledby="references-title"><div class="references-header"><h2 id="references-title">المراجع والنص القرآني</h2><button id="close-references" class="icon-button" type="button" aria-label="إغلاق المراجع"><svg class="icon"><use href="#i-close"/></svg></button></div><div id="references-body" class="references-body"><p>تُحمَّل المراجع…</p></div></dialog>
+  <audio id="narration" preload="auto" playsinline></audio>
+  <noscript><div class="noscript">تحتاج القصة التفاعلية إلى تفعيل جافاسكربت في المتصفح. <a href="https://ahmad9077.github.io/quizzes-hub/prophets-stories.html">العودة إلى قصص الأنبياء</a>.</div></noscript>
+</body>
+</html>
