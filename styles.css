@@ -576,6 +576,18 @@ code {
   line-height: 1.16;
 }
 
+.stories-tile {
+  --tile-color: #d4b37d;
+}
+
+.stories-thumbnail {
+  object-fit: cover;
+}
+
+.stories-tile .quiz-name {
+  line-height: 1.5;
+}
+
 .start-pill {
   grid-column: 2;
   justify-self: start;

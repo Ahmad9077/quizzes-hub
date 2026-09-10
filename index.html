@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Private quiz dashboards.">
     <title>Quizzes Hub</title>
-    <link rel="stylesheet" href="styles.css?v=15">
+    <link rel="stylesheet" href="styles.css?v=16">
   </head>
   <body>
     <main id="app" class="app-shell" aria-live="polite">
@@ -81,7 +81,6 @@
         <header class="topbar">
           <p class="brand">Quizzes Hub</p>
           <div class="topbar-actions">
-            <a class="ghost-action" href="prophets-stories.html">قصص الأنبياء</a>
             <button class="ghost-action" id="adminViewButton" type="button" hidden>Admin</button>
             <button class="ghost-action" id="logoutButton" type="button">Sign out</button>
           </div>
@@ -104,7 +103,7 @@
         </section>
 
         <section id="quizzesPanel">
-          <h2 class="section-title">Choose a quiz</h2>
+          <h2 class="section-title">Choose a quiz or story</h2>
           <div class="quiz-grid" id="assignedQuizGrid"></div>
         </section>
 
@@ -144,6 +143,14 @@
         <span class="quiz-icon" aria-hidden="true"></span>
         <span class="quiz-name"></span>
         <span class="start-pill">Start</span>
+      </a>
+    </template>
+
+    <template id="storiesTileTemplate">
+      <a class="quiz-tile stories-tile" href="prophets-stories.html" lang="ar" dir="rtl" aria-label="قصص الأنبياء — افتح القصص الأربع">
+        <img class="quiz-icon stories-thumbnail" src="story-thumbnails/valley.webp" width="62" height="62" alt="">
+        <span class="quiz-name">قصص الأنبياء</span>
+        <span class="start-pill">افتح القصص · 4</span>
       </a>
     </template>
 
@@ -203,6 +210,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js?v=4"></script>
-    <script src="script.js?v=23"></script>
+    <script src="script.js?v=24"></script>
   </body>
 </html>

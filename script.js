@@ -220,12 +220,12 @@ function renderAssignedQuizzes(assignments) {
   const assignmentMap = createAssignmentMap(assignments);
   const allowed = quizCatalog.filter((quiz) => assignmentMap.has(quiz.id));
 
-  if (!allowed.length) {
-    grid.replaceChildren(createEmptyState("No quizzes assigned."));
-    return;
-  }
+  const storiesTile = document.querySelector("#storiesTileTemplate").content.firstElementChild.cloneNode(true);
+  const tiles = allowed.length
+    ? allowed.map(createQuizTile)
+    : [createEmptyState("No quizzes assigned.")];
 
-  allowed.forEach((quiz) => grid.append(createQuizTile(quiz)));
+  grid.replaceChildren(...tiles, storiesTile);
 }
 
 function setupDashboardTabs() {
