@@ -52,6 +52,13 @@ const quizCatalog = [
   }
 ];
 
+const storyCollection = {
+  id: "prophets-stories",
+  title: "قصص الأنبياء",
+  icon: "📚"
+};
+const assignmentCatalog = [...quizCatalog, storyCollection];
+
 const config = window.QUIZZES_HUB_CONFIG || {};
 const isConfigured = Boolean(
   config.supabaseUrl &&
@@ -220,12 +227,12 @@ function renderAssignedQuizzes(assignments) {
   const assignmentMap = createAssignmentMap(assignments);
   const allowed = quizCatalog.filter((quiz) => assignmentMap.has(quiz.id));
 
-  const storiesTile = document.querySelector("#storiesTileTemplate").content.firstElementChild.cloneNode(true);
-  const tiles = allowed.length
-    ? allowed.map(createQuizTile)
-    : [createEmptyState("No quizzes assigned.")];
+  const tiles = allowed.map(createQuizTile);
+  if (assignmentMap.has(storyCollection.id)) {
+    tiles.push(document.querySelector("#storiesTileTemplate").content.firstElementChild.cloneNode(true));
+  }
 
-  grid.replaceChildren(...tiles, storiesTile);
+  grid.replaceChildren(...(tiles.length ? tiles : [createEmptyState("No quizzes or stories enabled yet.")]));
 }
 
 function setupDashboardTabs() {
@@ -623,11 +630,11 @@ async function renderAdmin() {
 
 function renderAssignmentCheckboxes(container, assignments) {
   const legend = container.querySelector("legend") || document.createElement("legend");
-  legend.textContent = "Quiz access";
+  legend.textContent = "Quiz & story access";
   container.replaceChildren(legend);
   const assignmentMap = createAssignmentMap(assignments);
 
-  quizCatalog.forEach((quiz) => {
+  assignmentCatalog.forEach((quiz) => {
     const label = document.createElement("label");
     label.className = "checkbox-row";
     const input = document.createElement("input");
@@ -1048,6 +1055,7 @@ async function logout() {
 // ─────────────────────────────────────────────────────────────────
 
 function createAdaptivePanel(userId, assignments) {
+  const gradedAssignments = assignments.filter((assignment) => quizCatalog.some((quiz) => quiz.id === assignment.quiz_id));
   const panel = document.createElement("div");
   panel.className = "adaptive-panel";
   panel.hidden = true;
@@ -1057,7 +1065,7 @@ function createAdaptivePanel(userId, assignments) {
   heading.textContent = "Adaptive level";
   panel.append(heading);
 
-  if (!assignments.length) {
+  if (!gradedAssignments.length) {
     panel.append(createEmptyState("No quizzes assigned."));
     return panel;
   }
@@ -1068,7 +1076,7 @@ function createAdaptivePanel(userId, assignments) {
   const content = document.createElement("div");
   content.className = "adaptive-tab-content";
 
-  assignments.forEach((a, i) => {
+  gradedAssignments.forEach((a, i) => {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "mini-action" + (i === 0 ? " active-tab" : "");
