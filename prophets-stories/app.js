@@ -2,7 +2,7 @@ const $ = (id) => document.getElementById(id);
 const audio = $('narration');
 const displayNumber = (n) => String(n);
 const englishDigits = (text) => String(text).replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)));
-const allowedStories = new Set(['sulayman', 'nuh', 'musa', 'yunus']);
+const allowedStories = new Set(['sulayman', 'nuh', 'musa', 'yunus', 'ibrahim', 'ismail', 'yaqub', 'yusuf', 'ayyub', 'dawud', 'zakariya', 'isa', 'hud', 'salih', 'shuayb']);
 const requestedStory = new URLSearchParams(location.search).get('story');
 const storySlug = allowedStories.has(requestedStory) ? requestedStory : 'sulayman';
 const dataDirectory = `data/${storySlug}/`;
@@ -211,7 +211,8 @@ function renderScene(index, { play = state.wantsAudio, focus = false, paragraph 
   $('audio-notice').hidden = true;
   $('art-error').hidden = true;
   $('scene-title').textContent = scene.title;
-  $('source-label').textContent = englishDigits(scene.source?.startsWith('سورة') ? scene.source : `سورة ${scene.source || ''}`);
+  const sourceLabel = scene.source || '';
+  $('source-label').textContent = englishDigits(/^(سورة|صحيح|سنن|مسند)/.test(sourceLabel) ? sourceLabel : `سورة ${sourceLabel}`);
   $('scene-number').textContent = displayNumber(index + 1);
   $('scene-total').textContent = displayNumber(state.story.scenes.length);
   $('stage-label').textContent = scene.title;

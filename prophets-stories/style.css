@@ -64,7 +64,7 @@
   .reader[data-mode="interaction"] .page-content{padding-top:34px}
 }
 
-/* Story identity and numerals stay consistent across the four stories. */
+/* Story identity and numerals stay consistent across the collection. */
 .scene-count{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
 .scene-count bdi,.paragraph-indicator bdi,.order-number{direction:ltr;unicode-bidi:isolate;font-variant-numeric:tabular-nums}
 .hub-link{display:inline-flex;align-items:center;gap:8px;min-height:44px;color:inherit;text-decoration:none;font-size:12px}
@@ -75,3 +75,15 @@
 .cover-question{white-space:pre-line}
 @media(max-width:389px){.story-brand .story-wordmark{font-size:22px}.hub-return{font-size:8px}}
 @media(min-width:700px){.story-brand .story-wordmark{font-size:27px}.hub-return{font-size:9px}}
+
+/* Keep every counted object in Yusuf's dream visible at every aspect ratio.
+   A plain night background avoids duplicating the lights in a blurred backdrop. */
+.scene-stage[data-image="yusuf-stars"],body[data-story="yusuf"] .cover{background:#0b284a}
+.scene-stage[data-image="yusuf-stars"] .scene-art,
+body[data-story="yusuf"] .cover-art{object-fit:contain;transform:none;animation:none}
+.scene-stage[data-image="yusuf-stars"] .art-backdrop{display:none}
+body[data-story="yusuf"] .cover-art{object-position:center 15%}
+/* The camel is the focal point near the right edge of these two paintings. */
+.scene-stage[data-image="salih-valley"] .scene-art,
+.scene-stage[data-image="salih-sign"] .scene-art,
+body[data-story="salih"] .cover-art{object-position:right center;transform:none;animation:none}
