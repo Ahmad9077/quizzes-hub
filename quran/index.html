@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow"><meta name="description" content="اختر السورة، واستمع وتعلّم آيةً آية.">
+<title>القرآن الكريم</title><link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="style.css?v=1">
+<script defer src="../config.js?v=4"></script>
+<script defer src="../access-guard.js" data-quiz-id="quran-al-balad"></script>
+<script defer src="app.js?v=1"></script>
+</head>
+<body data-screen="home">
+<a class="skip" href="#main">انتقل إلى المحتوى</a>
+<header class="site-header"><a class="wordmark" href="#" id="homeLink">القرآن الكريم</a><a id="backHome" class="surahs-link" href="#" aria-label="العودة إلى السور" title="السور" hidden><svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.6"/><rect x="14" y="3" width="7" height="7" rx="1.6"/><rect x="3" y="14" width="7" height="7" rx="1.6"/><rect x="14" y="14" width="7" height="7" rx="1.6"/></svg></a><a id="backHub" class="text-link" href="../">الهَب</a></header>
+<main id="main" aria-busy="true">
+<section id="home" class="home-screen" aria-labelledby="homeTitle">
+<div class="home-intro"><h1 id="homeTitle">اختر السورة</h1></div>
+<div id="surahList" class="surah-list" aria-label="السور المتاحة"></div>
+<p id="loading" class="loading" role="status">جارٍ تحميل السورة…</p>
+</section>
+<section id="reader" hidden aria-labelledby="chapterTitle">
+<div class="reader-heading"><h1 id="chapterTitle">سورة البلد</h1><div class="mode-switch" role="group" aria-label="طريقة القراءة"><button id="learnMode" aria-pressed="true">أتعلم</button><button id="testMode" aria-pressed="false">أختبر نفسي</button></div></div>
+<div class="reader-layout">
+<aside class="chapter-nav"><p class="section-label">آيات السورة</p><nav id="verseList" aria-label="اختيار آية"></nav></aside>
+<div class="reading-column">
+<div class="verse-meta"><span id="verseCounter"></span><label class="mobile-picker">الآية <select id="versePicker" aria-label="اختر الآية"></select></label></div>
+<article id="verseStage" class="verse-stage" aria-label="الآية الحالية"><p id="basmala" class="basmala" hidden></p><div id="verseLine" class="quran-text"><span id="verseText"></span>&nbsp;<span id="verseMarker" class="verse-marker" role="img"></span></div><div id="recall" class="recall" hidden><h2>جرّب قراءتها.</h2><button id="reveal" class="reveal-button">أظهر الآية</button></div><div class="verse-bottom"><button id="hideAgain" class="text-button" hidden>إخفاء الآية</button></div></article>
+<div class="verse-navigation"><button id="previous"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14m-6-6 6 6-6 6"/></svg><span>الآية السابقة</span></button><button id="next"><span>الآية التالية</span><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5m6-6-6 6 6 6"/></svg></button></div>
+<div class="audio-panel"><p class="reciter">مشاري راشد العفاسي</p><div class="audio-actions"><button id="listen" class="primary listen-button" aria-pressed="false"><span id="listenLabel">استمع للآية</span></button><button id="listenUntil" class="cumulative-button">من البداية إلى هذه الآية</button></div><p id="playStatus" class="play-status" role="status"></p></div>
+</div></div>
+</section>
+<p id="message" class="message" role="alert"></p>
+</main>
+<footer><span>التلاوة: العفاسي · النص: <a href="https://tanzil.net" target="_blank" rel="noreferrer">تنزيل</a></span><a href="privacy.html">المصادر والخصوصية</a></footer>
+</body></html>

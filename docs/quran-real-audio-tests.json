@@ -1,0 +1,20 @@
+[
+  {
+    "engine": "WebKit",
+    "singleVersePlayedOnce": [
+      "090013.mp3"
+    ],
+    "cumulativeUntil3": [
+      "001001.mp3",
+      "090001.mp3",
+      "090002.mp3",
+      "090003.mp3"
+    ],
+    "textStayedHidden": true,
+    "maxConcurrentPlayback": 1,
+    "homeStopsAudio": true,
+    "audioFailureKeepsReading": true,
+    "realMediaPlayback": true,
+    "physicalDevice": false
+  }
+]

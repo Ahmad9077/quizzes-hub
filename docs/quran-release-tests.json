@@ -1,0 +1,87 @@
+[
+  {
+    "name": "iphone-small",
+    "all20Verses": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "iphone",
+    "all20Verses": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "ipad",
+    "all20Verses": true,
+    "noHorizontalOverflow": true,
+    "noScroll": false,
+    "bookmarkRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "desktop",
+    "all20Verses": true,
+    "noHorizontalOverflow": true,
+    "noScroll": false,
+    "bookmarkRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "perAccountIsolation": true,
+    "expiredMetadataRefreshedFromRealProvider": true,
+    "refreshed": {
+      "ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "retrieved": "2026-09-15T12:37:35.814Z"
+    },
+    "wrongMetadataRejected": true
+  },
+  {
+    "name": "signed-out",
+    "redirect": "signin"
+  },
+  {
+    "name": "unassigned",
+    "redirect": "unauthorized"
+  },
+  {
+    "hubCatalog": {
+      "links": [
+        "prophets-stories.html",
+        "quran/"
+      ],
+      "graded": 0,
+      "count": 1,
+      "unassignedCount": 0
+    }
+  }
+]

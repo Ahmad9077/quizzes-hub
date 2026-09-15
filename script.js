@@ -57,7 +57,8 @@ const storyCollection = {
   title: "قصص الأنبياء",
   icon: "📚"
 };
-const assignmentCatalog = [...quizCatalog, storyCollection];
+const quranCollection = { id: "quran-al-balad", title: "القرآن الكريم", icon: "ق" };
+const assignmentCatalog = [...quizCatalog, storyCollection, quranCollection];
 
 const config = window.QUIZZES_HUB_CONFIG || {};
 const isConfigured = Boolean(
@@ -232,7 +233,11 @@ function renderAssignedQuizzes(assignments) {
     tiles.push(document.querySelector("#storiesTileTemplate").content.firstElementChild.cloneNode(true));
   }
 
-  grid.replaceChildren(...(tiles.length ? tiles : [createEmptyState("No quizzes or stories enabled yet.")]));
+  if (assignmentMap.has(quranCollection.id)) {
+    tiles.push(document.querySelector("#quranTileTemplate").content.firstElementChild.cloneNode(true));
+  }
+
+  grid.replaceChildren(...(tiles.length ? tiles : [createEmptyState("No activities enabled yet.")]));
 }
 
 function setupDashboardTabs() {
@@ -630,7 +635,7 @@ async function renderAdmin() {
 
 function renderAssignmentCheckboxes(container, assignments) {
   const legend = container.querySelector("legend") || document.createElement("legend");
-  legend.textContent = "Quiz & story access";
+  legend.textContent = "Activity access";
   container.replaceChildren(legend);
   const assignmentMap = createAssignmentMap(assignments);
 

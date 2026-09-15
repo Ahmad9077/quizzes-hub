@@ -1579,3 +1579,7 @@ select:focus {
     gap: 10px;
   }
 }
+
+.quran-tile { --tile-color: #dce9dd; }
+.quran-tile .quiz-name { line-height: 1.5; }
+.quran-tile .quran-thumbnail { color: #285342; padding: 4px; }

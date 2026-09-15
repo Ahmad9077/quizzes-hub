@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="description" content="Private quiz dashboards.">
     <title>Quizzes Hub</title>
-    <link rel="stylesheet" href="styles.css?v=16">
+    <link rel="stylesheet" href="styles.css?v=17">
   </head>
   <body>
     <main id="app" class="app-shell" aria-live="polite">
@@ -145,6 +145,14 @@
       </a>
     </template>
 
+    <template id="quranTileTemplate">
+      <a class="quiz-tile quran-tile" href="quran/" lang="ar" dir="rtl" aria-label="القرآن الكريم — سورة البلد">
+        <svg class="quiz-icon quran-thumbnail" viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M32 17c-7-5-16-6-25-3v35c9-3 18-2 25 3 7-5 16-6 25-3V14c-9-3-18-2-25 3Zm0 0v35"/><path d="M15 24c4-1 7 0 10 2m-10 7c4-1 7 0 10 2m14-9c3-2 6-3 10-2m-10 11c3-2 6-3 10-2"/></svg>
+        <span class="quiz-name">القرآن الكريم</span>
+        <span class="start-pill">سورة البلد</span>
+      </a>
+    </template>
+
     <template id="storiesTileTemplate">
       <a class="quiz-tile stories-tile" href="prophets-stories.html" lang="ar" dir="rtl" aria-label="قصص الأنبياء — افتح القصص الخمس عشرة">
         <img class="quiz-icon stories-thumbnail" src="story-thumbnails/valley.webp" width="62" height="62" alt="">
@@ -209,6 +217,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js?v=4"></script>
-    <script src="script.js?v=25"></script>
+    <script src="script.js?v=26"></script>
   </body>
 </html>

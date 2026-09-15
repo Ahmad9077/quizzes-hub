@@ -1,0 +1,90 @@
+{
+  "reader": "مشاري راشد العفاسي",
+  "readerId": 7,
+  "provider": "Quran Foundation",
+  "retrieved": "2026-09-14T13:45:13.731964+00:00",
+  "expires": "2026-09-21T13:45:13.732272+00:00",
+  "verses": [
+    {
+      "id": 1,
+      "url": "https://verses.quran.com/Alafasy/mp3/090001.mp3"
+    },
+    {
+      "id": 2,
+      "url": "https://verses.quran.com/Alafasy/mp3/090002.mp3"
+    },
+    {
+      "id": 3,
+      "url": "https://verses.quran.com/Alafasy/mp3/090003.mp3"
+    },
+    {
+      "id": 4,
+      "url": "https://verses.quran.com/Alafasy/mp3/090004.mp3"
+    },
+    {
+      "id": 5,
+      "url": "https://verses.quran.com/Alafasy/mp3/090005.mp3"
+    },
+    {
+      "id": 6,
+      "url": "https://verses.quran.com/Alafasy/mp3/090006.mp3"
+    },
+    {
+      "id": 7,
+      "url": "https://verses.quran.com/Alafasy/mp3/090007.mp3"
+    },
+    {
+      "id": 8,
+      "url": "https://verses.quran.com/Alafasy/mp3/090008.mp3"
+    },
+    {
+      "id": 9,
+      "url": "https://verses.quran.com/Alafasy/mp3/090009.mp3"
+    },
+    {
+      "id": 10,
+      "url": "https://verses.quran.com/Alafasy/mp3/090010.mp3"
+    },
+    {
+      "id": 11,
+      "url": "https://verses.quran.com/Alafasy/mp3/090011.mp3"
+    },
+    {
+      "id": 12,
+      "url": "https://verses.quran.com/Alafasy/mp3/090012.mp3"
+    },
+    {
+      "id": 13,
+      "url": "https://verses.quran.com/Alafasy/mp3/090013.mp3"
+    },
+    {
+      "id": 14,
+      "url": "https://verses.quran.com/Alafasy/mp3/090014.mp3"
+    },
+    {
+      "id": 15,
+      "url": "https://verses.quran.com/Alafasy/mp3/090015.mp3"
+    },
+    {
+      "id": 16,
+      "url": "https://verses.quran.com/Alafasy/mp3/090016.mp3"
+    },
+    {
+      "id": 17,
+      "url": "https://verses.quran.com/Alafasy/mp3/090017.mp3"
+    },
+    {
+      "id": 18,
+      "url": "https://verses.quran.com/Alafasy/mp3/090018.mp3"
+    },
+    {
+      "id": 19,
+      "url": "https://verses.quran.com/Alafasy/mp3/090019.mp3"
+    },
+    {
+      "id": 20,
+      "url": "https://verses.quran.com/Alafasy/mp3/090020.mp3"
+    }
+  ],
+  "basmala": "https://verses.quran.com/Alafasy/mp3/001001.mp3"
+}
