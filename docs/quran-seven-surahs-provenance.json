@@ -1,0 +1,74 @@
+{
+  "retrieved": "2026-09-22T06:54:23.872671+00:00",
+  "textSource": "https://tanzil.net/pub/download/index.php?quranType=uthmani&outType=txt-2&agree=true",
+  "source_sha256": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
+  "version": "1.1",
+  "reciter": {
+    "id": 7,
+    "reciter_name": "Mishari Rashid al-`Afasy",
+    "style": null,
+    "translated_name": {
+      "name": "Mishari Rashid al-`Afasy",
+      "language_name": "english"
+    }
+  },
+  "termsChecked": "2026-09-22",
+  "chapters": [
+    {
+      "chapter": 90,
+      "name": "البلد",
+      "verseCount": 20,
+      "text_sha256": "9167383e6553334fabc36deae3aba7cb25013f76d17204c0f603ffd98a4f3022",
+      "audioEndpoint": "https://api.quran.com/api/v4/recitations/7/by_chapter/90?per_page=50",
+      "audioFilesVerified": 20
+    },
+    {
+      "chapter": 89,
+      "name": "الفجر",
+      "verseCount": 30,
+      "text_sha256": "9ff40661378ee170856dce00aba4f9f26c98982182f415d4fb52d9d238a4e2df",
+      "audioEndpoint": "https://api.quran.com/api/v4/recitations/7/by_chapter/89?per_page=50",
+      "audioFilesVerified": 30
+    },
+    {
+      "chapter": 88,
+      "name": "الغاشية",
+      "verseCount": 26,
+      "text_sha256": "3337a3f31933d2ff0dd1140d9c6c196efeb8981605dbe1da9b0ff4265aeda169",
+      "audioEndpoint": "https://api.quran.com/api/v4/recitations/7/by_chapter/88?per_page=50",
+      "audioFilesVerified": 26
+    },
+    {
+      "chapter": 87,
+      "name": "الأعلى",
+      "verseCount": 19,
+      "text_sha256": "91da34e5c249dca7f9883480b8e0b078b75975f7ca58865b8f83a28891d39ea4",
+      "audioEndpoint": "https://api.quran.com/api/v4/recitations/7/by_chapter/87?per_page=50",
+      "audioFilesVerified": 19
+    },
+    {
+      "chapter": 86,
+      "name": "الطارق",
+      "verseCount": 17,
+      "text_sha256": "aed3bb48bdc43432bada78499f042d02af42452515be1bdfaa9c0fb0ab64cf5b",
+      "audioEndpoint": "https://api.quran.com/api/v4/recitations/7/by_chapter/86?per_page=50",
+      "audioFilesVerified": 17
+    },
+    {
+      "chapter": 85,
+      "name": "البروج",
+      "verseCount": 22,
+      "text_sha256": "f87191d112d5f0469e3fe8f960571e614c1ee731dd1b3782370a0b1847561f42",
+      "audioEndpoint": "https://api.quran.com/api/v4/recitations/7/by_chapter/85?per_page=50",
+      "audioFilesVerified": 22
+    },
+    {
+      "chapter": 84,
+      "name": "الانشقاق",
+      "verseCount": 25,
+      "text_sha256": "2f4bc65ac760d48d51514729882bffbb1853fc7f6c4208fc853c7ea541e70691",
+      "audioEndpoint": "https://api.quran.com/api/v4/recitations/7/by_chapter/84?per_page=50",
+      "audioFilesVerified": 25
+    }
+  ]
+}

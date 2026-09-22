@@ -17,9 +17,9 @@ button:focus-visible,a:focus-visible,select:focus-visible{outline:3px solid #82a
 .wordmark{font-size:25px;font-weight:700;text-decoration:none}
 main{padding-top:34px;min-height:calc(100dvh - 180px)}h1,h2,p{margin:0}h1{font-size:38px;line-height:1.6;font-weight:600}h2{font-size:28px;line-height:1.8;font-weight:500}
 .eyebrow,.section-label{font-size:14px;color:var(--muted);font-weight:500}
-.home-screen{width:min(650px,100%);margin:clamp(22px,8vh,90px) auto 0}
+.home-screen{width:min(850px,100%);margin:clamp(16px,5vh,48px) auto 0}
 .home-intro h1{font-size:46px;margin:8px 0}.home-intro>p:last-child{color:var(--muted);font-size:20px}
-.surah-list{display:grid;gap:16px;margin-top:36px}
+.surah-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:24px}
 .surah-card{display:flex;align-items:center;justify-content:space-between;gap:20px;text-decoration:none;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:16px 26px;min-height:88px;transition:background .18s,border-color .18s}
 .surah-card:hover{background:var(--mint);border-color:#b6cabc}.surah-name{font-size:29px;font-weight:500}.surah-count{font-size:18px;color:var(--muted);white-space:nowrap}
 .loading{color:var(--muted);margin-top:20px;font-size:16px}
@@ -53,8 +53,8 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:20px;ma
 @media(max-width:720px){
  .site-header,main,footer{width:calc(100% - 28px)}.site-header{padding-block:2px;gap:12px;min-height:48px}.wordmark{font-size:23px;white-space:nowrap}.text-link{font-size:17px;min-height:44px}
  main{padding-top:12px;min-height:0}h1{font-size:32px}h2{font-size:26px}
- .home-screen{margin:32px auto 0}.home-intro h1{font-size:38px;margin:6px 0}.home-intro>p:last-child{font-size:19px}.home-intro .eyebrow{display:none}
- .surah-list{margin-top:26px}.surah-card{padding:12px 22px;min-height:80px}.surah-name{font-size:27px}.surah-count{font-size:17px}
+ .home-screen{margin:10px auto 0}.home-intro h1{font-size:38px;margin:6px 0}.home-intro>p:last-child{font-size:19px}.home-intro .eyebrow{display:none}
+ .surah-list{margin-top:14px;gap:10px}.surah-card{flex-direction:column;align-items:flex-start;justify-content:center;gap:0;padding:7px 14px;min-height:70px}.surah-name{font-size:23px;line-height:1.6}.surah-count{font-size:15px;line-height:1.5}
  .reader-heading{gap:12px;margin-bottom:8px;min-height:46px}.reader-heading h1{font-size:32px;margin:0;line-height:1.4}
  .mode-switch{padding:3px;gap:2px;border-radius:11px;margin:0}.mode-switch button{min-width:0;min-height:44px;padding:4px 12px;font-size:16px;border-radius:8px}
  .reader-layout{display:block}.chapter-nav{display:none}.reading-column{min-height:0}.verse-meta{padding:0 2px 4px;min-height:42px;font-size:14px;gap:8px}

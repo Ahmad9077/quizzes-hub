@@ -1,1 +1,44 @@
-[{"id":90,"name":"البلد","text":"data/90.json","audio":"data/audio.json"}]
+[
+  {
+    "id": 90,
+    "name": "البلد",
+    "text": "data/90.json",
+    "audio": "data/audio.json"
+  },
+  {
+    "id": 89,
+    "name": "الفجر",
+    "text": "data/89.json",
+    "audio": "data/audio-89.json"
+  },
+  {
+    "id": 88,
+    "name": "الغاشية",
+    "text": "data/88.json",
+    "audio": "data/audio-88.json"
+  },
+  {
+    "id": 87,
+    "name": "الأعلى",
+    "text": "data/87.json",
+    "audio": "data/audio-87.json"
+  },
+  {
+    "id": 86,
+    "name": "الطارق",
+    "text": "data/86.json",
+    "audio": "data/audio-86.json"
+  },
+  {
+    "id": 85,
+    "name": "البروج",
+    "text": "data/85.json",
+    "audio": "data/audio-85.json"
+  },
+  {
+    "id": 84,
+    "name": "الانشقاق",
+    "text": "data/84.json",
+    "audio": "data/audio-84.json"
+  }
+]

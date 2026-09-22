@@ -1,0 +1,646 @@
+{
+  "files": [
+    {
+      "file": "001001.mp3",
+      "status": 200
+    },
+    {
+      "file": "084001.mp3",
+      "status": 200
+    },
+    {
+      "file": "084002.mp3",
+      "status": 200
+    },
+    {
+      "file": "084003.mp3",
+      "status": 200
+    },
+    {
+      "file": "084004.mp3",
+      "status": 200
+    },
+    {
+      "file": "084005.mp3",
+      "status": 200
+    },
+    {
+      "file": "084006.mp3",
+      "status": 200
+    },
+    {
+      "file": "084007.mp3",
+      "status": 200
+    },
+    {
+      "file": "084008.mp3",
+      "status": 200
+    },
+    {
+      "file": "084009.mp3",
+      "status": 200
+    },
+    {
+      "file": "084010.mp3",
+      "status": 200
+    },
+    {
+      "file": "084011.mp3",
+      "status": 200
+    },
+    {
+      "file": "084012.mp3",
+      "status": 200
+    },
+    {
+      "file": "084013.mp3",
+      "status": 200
+    },
+    {
+      "file": "084014.mp3",
+      "status": 200
+    },
+    {
+      "file": "084015.mp3",
+      "status": 200
+    },
+    {
+      "file": "084016.mp3",
+      "status": 200
+    },
+    {
+      "file": "084017.mp3",
+      "status": 200
+    },
+    {
+      "file": "084018.mp3",
+      "status": 200
+    },
+    {
+      "file": "084019.mp3",
+      "status": 200
+    },
+    {
+      "file": "084020.mp3",
+      "status": 200
+    },
+    {
+      "file": "084021.mp3",
+      "status": 200
+    },
+    {
+      "file": "084022.mp3",
+      "status": 200
+    },
+    {
+      "file": "084023.mp3",
+      "status": 200
+    },
+    {
+      "file": "084024.mp3",
+      "status": 200
+    },
+    {
+      "file": "084025.mp3",
+      "status": 200
+    },
+    {
+      "file": "085001.mp3",
+      "status": 200
+    },
+    {
+      "file": "085002.mp3",
+      "status": 200
+    },
+    {
+      "file": "085003.mp3",
+      "status": 200
+    },
+    {
+      "file": "085004.mp3",
+      "status": 200
+    },
+    {
+      "file": "085005.mp3",
+      "status": 200
+    },
+    {
+      "file": "085006.mp3",
+      "status": 200
+    },
+    {
+      "file": "085007.mp3",
+      "status": 200
+    },
+    {
+      "file": "085008.mp3",
+      "status": 200
+    },
+    {
+      "file": "085009.mp3",
+      "status": 200
+    },
+    {
+      "file": "085010.mp3",
+      "status": 200
+    },
+    {
+      "file": "085011.mp3",
+      "status": 200
+    },
+    {
+      "file": "085012.mp3",
+      "status": 200
+    },
+    {
+      "file": "085013.mp3",
+      "status": 200
+    },
+    {
+      "file": "085014.mp3",
+      "status": 200
+    },
+    {
+      "file": "085015.mp3",
+      "status": 200
+    },
+    {
+      "file": "085016.mp3",
+      "status": 200
+    },
+    {
+      "file": "085017.mp3",
+      "status": 200
+    },
+    {
+      "file": "085018.mp3",
+      "status": 200
+    },
+    {
+      "file": "085019.mp3",
+      "status": 200
+    },
+    {
+      "file": "085020.mp3",
+      "status": 200
+    },
+    {
+      "file": "085021.mp3",
+      "status": 200
+    },
+    {
+      "file": "085022.mp3",
+      "status": 200
+    },
+    {
+      "file": "086001.mp3",
+      "status": 200
+    },
+    {
+      "file": "086002.mp3",
+      "status": 200
+    },
+    {
+      "file": "086003.mp3",
+      "status": 200
+    },
+    {
+      "file": "086004.mp3",
+      "status": 200
+    },
+    {
+      "file": "086005.mp3",
+      "status": 200
+    },
+    {
+      "file": "086006.mp3",
+      "status": 200
+    },
+    {
+      "file": "086007.mp3",
+      "status": 200
+    },
+    {
+      "file": "086008.mp3",
+      "status": 200
+    },
+    {
+      "file": "086009.mp3",
+      "status": 200
+    },
+    {
+      "file": "086010.mp3",
+      "status": 200
+    },
+    {
+      "file": "086011.mp3",
+      "status": 200
+    },
+    {
+      "file": "086012.mp3",
+      "status": 200
+    },
+    {
+      "file": "086013.mp3",
+      "status": 200
+    },
+    {
+      "file": "086014.mp3",
+      "status": 200
+    },
+    {
+      "file": "086015.mp3",
+      "status": 200
+    },
+    {
+      "file": "086016.mp3",
+      "status": 200
+    },
+    {
+      "file": "086017.mp3",
+      "status": 200
+    },
+    {
+      "file": "087001.mp3",
+      "status": 200
+    },
+    {
+      "file": "087002.mp3",
+      "status": 200
+    },
+    {
+      "file": "087003.mp3",
+      "status": 200
+    },
+    {
+      "file": "087004.mp3",
+      "status": 200
+    },
+    {
+      "file": "087005.mp3",
+      "status": 200
+    },
+    {
+      "file": "087006.mp3",
+      "status": 200
+    },
+    {
+      "file": "087007.mp3",
+      "status": 200
+    },
+    {
+      "file": "087008.mp3",
+      "status": 200
+    },
+    {
+      "file": "087009.mp3",
+      "status": 200
+    },
+    {
+      "file": "087010.mp3",
+      "status": 200
+    },
+    {
+      "file": "087011.mp3",
+      "status": 200
+    },
+    {
+      "file": "087012.mp3",
+      "status": 200
+    },
+    {
+      "file": "087013.mp3",
+      "status": 200
+    },
+    {
+      "file": "087014.mp3",
+      "status": 200
+    },
+    {
+      "file": "087015.mp3",
+      "status": 200
+    },
+    {
+      "file": "087016.mp3",
+      "status": 200
+    },
+    {
+      "file": "087017.mp3",
+      "status": 200
+    },
+    {
+      "file": "087018.mp3",
+      "status": 200
+    },
+    {
+      "file": "087019.mp3",
+      "status": 200
+    },
+    {
+      "file": "088001.mp3",
+      "status": 200
+    },
+    {
+      "file": "088002.mp3",
+      "status": 200
+    },
+    {
+      "file": "088003.mp3",
+      "status": 200
+    },
+    {
+      "file": "088004.mp3",
+      "status": 200
+    },
+    {
+      "file": "088005.mp3",
+      "status": 200
+    },
+    {
+      "file": "088006.mp3",
+      "status": 200
+    },
+    {
+      "file": "088007.mp3",
+      "status": 200
+    },
+    {
+      "file": "088008.mp3",
+      "status": 200
+    },
+    {
+      "file": "088009.mp3",
+      "status": 200
+    },
+    {
+      "file": "088010.mp3",
+      "status": 200
+    },
+    {
+      "file": "088011.mp3",
+      "status": 200
+    },
+    {
+      "file": "088012.mp3",
+      "status": 200
+    },
+    {
+      "file": "088013.mp3",
+      "status": 200
+    },
+    {
+      "file": "088014.mp3",
+      "status": 200
+    },
+    {
+      "file": "088015.mp3",
+      "status": 200
+    },
+    {
+      "file": "088016.mp3",
+      "status": 200
+    },
+    {
+      "file": "088017.mp3",
+      "status": 200
+    },
+    {
+      "file": "088018.mp3",
+      "status": 200
+    },
+    {
+      "file": "088019.mp3",
+      "status": 200
+    },
+    {
+      "file": "088020.mp3",
+      "status": 200
+    },
+    {
+      "file": "088021.mp3",
+      "status": 200
+    },
+    {
+      "file": "088022.mp3",
+      "status": 200
+    },
+    {
+      "file": "088023.mp3",
+      "status": 200
+    },
+    {
+      "file": "088024.mp3",
+      "status": 200
+    },
+    {
+      "file": "088025.mp3",
+      "status": 200
+    },
+    {
+      "file": "088026.mp3",
+      "status": 200
+    },
+    {
+      "file": "089001.mp3",
+      "status": 200
+    },
+    {
+      "file": "089002.mp3",
+      "status": 200
+    },
+    {
+      "file": "089003.mp3",
+      "status": 200
+    },
+    {
+      "file": "089004.mp3",
+      "status": 200
+    },
+    {
+      "file": "089005.mp3",
+      "status": 200
+    },
+    {
+      "file": "089006.mp3",
+      "status": 200
+    },
+    {
+      "file": "089007.mp3",
+      "status": 200
+    },
+    {
+      "file": "089008.mp3",
+      "status": 200
+    },
+    {
+      "file": "089009.mp3",
+      "status": 200
+    },
+    {
+      "file": "089010.mp3",
+      "status": 200
+    },
+    {
+      "file": "089011.mp3",
+      "status": 200
+    },
+    {
+      "file": "089012.mp3",
+      "status": 200
+    },
+    {
+      "file": "089013.mp3",
+      "status": 200
+    },
+    {
+      "file": "089014.mp3",
+      "status": 200
+    },
+    {
+      "file": "089015.mp3",
+      "status": 200
+    },
+    {
+      "file": "089016.mp3",
+      "status": 200
+    },
+    {
+      "file": "089017.mp3",
+      "status": 200
+    },
+    {
+      "file": "089018.mp3",
+      "status": 200
+    },
+    {
+      "file": "089019.mp3",
+      "status": 200
+    },
+    {
+      "file": "089020.mp3",
+      "status": 200
+    },
+    {
+      "file": "089021.mp3",
+      "status": 200
+    },
+    {
+      "file": "089022.mp3",
+      "status": 200
+    },
+    {
+      "file": "089023.mp3",
+      "status": 200
+    },
+    {
+      "file": "089024.mp3",
+      "status": 200
+    },
+    {
+      "file": "089025.mp3",
+      "status": 200
+    },
+    {
+      "file": "089026.mp3",
+      "status": 200
+    },
+    {
+      "file": "089027.mp3",
+      "status": 200
+    },
+    {
+      "file": "089028.mp3",
+      "status": 200
+    },
+    {
+      "file": "089029.mp3",
+      "status": 200
+    },
+    {
+      "file": "089030.mp3",
+      "status": 200
+    },
+    {
+      "file": "090001.mp3",
+      "status": 200
+    },
+    {
+      "file": "090002.mp3",
+      "status": 200
+    },
+    {
+      "file": "090003.mp3",
+      "status": 200
+    },
+    {
+      "file": "090004.mp3",
+      "status": 200
+    },
+    {
+      "file": "090005.mp3",
+      "status": 200
+    },
+    {
+      "file": "090006.mp3",
+      "status": 200
+    },
+    {
+      "file": "090007.mp3",
+      "status": 200
+    },
+    {
+      "file": "090008.mp3",
+      "status": 200
+    },
+    {
+      "file": "090009.mp3",
+      "status": 200
+    },
+    {
+      "file": "090010.mp3",
+      "status": 200
+    },
+    {
+      "file": "090011.mp3",
+      "status": 200
+    },
+    {
+      "file": "090012.mp3",
+      "status": 200
+    },
+    {
+      "file": "090013.mp3",
+      "status": 200
+    },
+    {
+      "file": "090014.mp3",
+      "status": 200
+    },
+    {
+      "file": "090015.mp3",
+      "status": 200
+    },
+    {
+      "file": "090016.mp3",
+      "status": 200
+    },
+    {
+      "file": "090017.mp3",
+      "status": 200
+    },
+    {
+      "file": "090018.mp3",
+      "status": 200
+    },
+    {
+      "file": "090019.mp3",
+      "status": 200
+    },
+    {
+      "file": "090020.mp3",
+      "status": 200
+    }
+  ],
+  "count": 160,
+  "method": "HEAD requests to original provider; actual playback tested separately"
+}

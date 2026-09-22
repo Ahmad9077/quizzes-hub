@@ -1,0 +1,106 @@
+[
+  {
+    "name": "small-phone",
+    "surahs": 7,
+    "versesChecked": 159,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "iphone-small",
+    "surahs": 7,
+    "versesChecked": 159,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "iphone",
+    "surahs": 7,
+    "versesChecked": 159,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "ipad",
+    "surahs": 7,
+    "versesChecked": 159,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": false,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "desktop",
+    "surahs": 7,
+    "versesChecked": 159,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": false,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "perAccountIsolation": true,
+    "expiredMetadataRefreshedFromRealProvider": true,
+    "refreshed": {
+      "ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "retrieved": "2026-09-22T06:59:25.594Z"
+    },
+    "wrongMetadataRejected": true
+  },
+  {
+    "name": "signed-out",
+    "redirect": "signin"
+  },
+  {
+    "name": "unassigned",
+    "redirect": "unauthorized"
+  },
+  {
+    "hubCatalog": {
+      "links": [
+        "prophets-stories.html",
+        "quran/"
+      ],
+      "graded": 0,
+      "count": 1,
+      "unassignedCount": 0
+    }
+  }
+]

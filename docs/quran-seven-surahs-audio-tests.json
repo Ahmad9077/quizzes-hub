@@ -1,0 +1,52 @@
+[
+  {
+    "chapter": 90,
+    "singleVersePlayedOnce": "090001.mp3",
+    "realMediaPlayback": true
+  },
+  {
+    "chapter": 89,
+    "singleVersePlayedOnce": "089001.mp3",
+    "realMediaPlayback": true
+  },
+  {
+    "chapter": 88,
+    "singleVersePlayedOnce": "088001.mp3",
+    "realMediaPlayback": true
+  },
+  {
+    "chapter": 87,
+    "singleVersePlayedOnce": "087001.mp3",
+    "realMediaPlayback": true
+  },
+  {
+    "chapter": 86,
+    "singleVersePlayedOnce": "086001.mp3",
+    "realMediaPlayback": true
+  },
+  {
+    "chapter": 85,
+    "singleVersePlayedOnce": "085001.mp3",
+    "realMediaPlayback": true
+  },
+  {
+    "chapter": 84,
+    "singleVersePlayedOnce": "084001.mp3",
+    "realMediaPlayback": true
+  },
+  {
+    "engine": "WebKit",
+    "cumulativeUntil3": [
+      "001001.mp3",
+      "085001.mp3",
+      "085002.mp3",
+      "085003.mp3"
+    ],
+    "textStayedHidden": true,
+    "maxConcurrentPlayback": 1,
+    "switchingSurahsStopsAudio": true,
+    "stopButtonStopsAudio": true,
+    "audioFailureKeepsReading": true,
+    "physicalDevice": false
+  }
+]

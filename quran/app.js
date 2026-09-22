@@ -188,11 +188,9 @@ async function boot() {
     accessGranted = true;
     document.getElementById('main').setAttribute('aria-busy', 'false');
     const entries = await readJSON('data/surahs.json');
-    await Promise.all(entries.map(async entry => {
-      const data = await readJSON(entry.text);
-      catalog.set(entry.id, {...entry, chapter:data});
-    }));
-    for (const entry of catalog.values()) {
+    const loadedEntries = await Promise.all(entries.map(async entry => ({...entry, chapter:await readJSON(entry.text)})));
+    for (const entry of loadedEntries) {
+      catalog.set(entry.id, entry);
       const link = document.createElement('a'); link.className = 'surah-card'; link.href = '#surah-' + entry.id;
       const title = document.createElement('span'); title.className = 'surah-name'; title.textContent = 'سورة ' + entry.chapter.name;
       const count = document.createElement('span'); count.className = 'surah-count'; count.textContent = number(entry.chapter.verses.length) + ' آية';
