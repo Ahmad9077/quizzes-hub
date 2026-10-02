@@ -4,7 +4,7 @@ const fs=require('node:fs'), assert=require('node:assert/strict');
 const base=process.env.QURAN_TEST_BASE || 'http://127.0.0.1:8871';
 const entries=JSON.parse(fs.readFileSync('quran/data/surahs.json'));
 const chapters=entries.map(entry=>JSON.parse(fs.readFileSync('quran/'+entry.text)));
-const expectedIds=[90,89,88,87,86,85,84];
+const expectedIds=[1,90,89,88,87,86,85,84];
 assert.deepEqual(entries.map(e=>e.id),expectedIds);
 const out=[];
 async function fixture(page, user='test-a', assigned=true) {
@@ -20,7 +20,7 @@ async function fixture(page, user='test-a', assigned=true) {
 (async()=>{
  for(const [name,type,w,h] of [['small-phone',webkit,320,568],['iphone-small',webkit,375,548],['iphone',webkit,390,664],['ipad',webkit,820,1180],['desktop',chromium,1440,1000]]) {
   const browser=await type.launch(), context=await browser.newContext({viewport:{width:w,height:h},isMobile:w<721,hasTouch:w<1000}), page=await context.newPage(),errors=[];
-  await fixture(page);page.on('pageerror',e=>errors.push(e.message));
+  await fixture(page);await page.route('https://api.quran.com/**',r=>r.abort());page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'/quran/');await page.locator('.surah-card').first().waitFor();await page.evaluate(()=>document.fonts.ready);
   assert.equal(await page.locator('#backHub').getAttribute('href'),'../');
   assert.deepEqual(await page.locator('.surah-card').evaluateAll(cards=>cards.map(c=>c.getAttribute('href'))),expectedIds.map(id=>'#surah-'+id));
@@ -29,7 +29,7 @@ async function fixture(page, user='test-a', assigned=true) {
    assert(box.scrollWidth<=box.width, name+' '+label+' horizontal '+JSON.stringify(box));if(w<721)assert(box.scrollHeight<=box.height+1,name+' '+label+' scroll '+JSON.stringify(box));
   }
   await fit('home');
-  await page.screenshot({path:'/tmp/quran-seven-'+name+'-home.png',fullPage:true});
+  await page.screenshot({path:'/tmp/quran-eight-'+name+'-home.png',fullPage:true});
   let checked=0;
   for(const surah of chapters) {
    await page.locator('.surah-card[href="#surah-'+surah.chapter+'"]').click();await page.locator('#reader').waitFor({state:'visible'});
@@ -38,6 +38,7 @@ async function fixture(page, user='test-a', assigned=true) {
    for(const verse of surah.verses) {
     await page.evaluate(id=>selectVerse(id),verse.id);await page.waitForTimeout(35);
     assert.equal(await page.locator('#verseText').textContent(),verse.text);
+    assert.equal(await page.locator('#basmala').isVisible(),verse.id===1&&!surah.basmalaIsVerse);
     assert.equal(await page.locator('#verseMarker').getAttribute('aria-label'),'الآية '+new Intl.NumberFormat('ar-KW').format(verse.id));
     await fit(surah.chapter+':'+verse.id);
     const bounds=await page.evaluate(()=>{const e=document.getElementById('verseLine'),s=document.getElementById('verseStage'),r=document.createRange();r.selectNodeContents(e);const t=r.getBoundingClientRect(),c=s.getBoundingClientRect();return {top:t.top,bottom:t.bottom,left:t.left,right:t.right,cardTop:c.top,cardBottom:c.bottom,cardLeft:c.left,cardRight:c.right};});
@@ -54,7 +55,7 @@ async function fixture(page, user='test-a', assigned=true) {
   const saved=await page.evaluate(()=>Object.keys(localStorage).sort());assert.deepEqual(saved,expectedIds.map(id=>'quizzes-hub:quran:test-a:verse:'+id).sort());
   await page.locator('.surah-card[href="#surah-90"]').click();await page.waitForFunction(()=>chapter.chapter===90&&currentScreen==='reader');assert.equal(await page.locator('#versePicker').inputValue(),'20');assert(await page.locator('#verseText').isHidden());
   await page.locator('#learnMode').click();await page.evaluate(()=>selectVerse(17));await page.waitForTimeout(50);
-  await page.screenshot({path:'/tmp/quran-seven-'+name+'-reader.png',fullPage:true});
+  await page.screenshot({path:'/tmp/quran-eight-'+name+'-reader.png',fullPage:true});
   await page.evaluate(()=>fixtureAuthChange('SIGNED_OUT',null));await page.waitForURL(base+'/');
   assert.deepEqual(errors,[]);
   out.push({name,surahs:chapters.length,versesChecked:checked,noClippedText:true,noHorizontalOverflow:true,noScroll:w<721,bookmarkPerSurahRestored:true,signoutLeavesApp:true,physicalDevice:false});await browser.close();console.log(name+' passed '+checked+' verses');
@@ -76,5 +77,5 @@ async function fixture(page, user='test-a', assigned=true) {
  await hub.goto(base+'/');await hub.locator('#loginForm').waitFor();
  const tiles=await hub.evaluate(()=>{renderTemplate('dashboardTemplate');renderAssignedQuizzes([{quiz_id:'prophets-stories'},{quiz_id:'quran-al-balad'}]);const links=[...document.querySelectorAll('#assignedQuizGrid a')].map(x=>x.getAttribute('href'));const graded=getAllowedQuizzes([{quiz_id:'quran-al-balad'}]).length;const field=document.createElement('fieldset');renderAssignmentCheckboxes(field,[]);const count=field.querySelectorAll('input[value="quran-al-balad"]').length;renderAssignedQuizzes([{quiz_id:'prophets-stories'}]);return {links,graded,count,unassignedCount:document.querySelectorAll('.quran-tile').length}});
  assert.deepEqual(tiles,{links:['prophets-stories.html','quran/'],graded:0,count:1,unassignedCount:0});out.push({hubCatalog:tiles});
- await b.close();fs.writeFileSync('docs/quran-seven-surahs-tests.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out,null,2));
+ await b.close();fs.writeFileSync('docs/quran-eight-surahs-tests.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out,null,2));
 })().catch(e=>{console.error(e);process.exit(1)});

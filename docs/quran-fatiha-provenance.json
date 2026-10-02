@@ -1,0 +1,15 @@
+{
+  "retrieved": "2026-10-02T04:46:48.160417+00:00",
+  "version": "1.1",
+  "textSource": "https://tanzil.net/pub/download/index.php?quranType=uthmani&outType=txt-2&agree=true",
+  "source_sha256": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
+  "chapter_sha256": "c36bc4b4a2dc62e25ba478053cb3de4bf19f65cda82120f236e222b99857ce2b",
+  "verseCount": 7,
+  "basmalaIsVerse": true,
+  "audioEndpoint": "https://api.quran.com/api/v4/recitations/7/by_chapter/1?per_page=50",
+  "readerId": 7,
+  "audioFilesVerified": 7,
+  "termsChecked": "2026-10-02",
+  "termsLastUpdated": "2026-09-26",
+  "delivery": "Original provider streams; no MP3s hosted in this repository"
+}

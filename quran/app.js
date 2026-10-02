@@ -45,7 +45,7 @@ function draw() {
   $('verseMarker').hidden = hidden;
   $('recall').hidden = !hidden;
   $('basmala').textContent = chapter.basmala;
-  $('basmala').hidden = visibleVerse !== 1 || hidden;
+  $('basmala').hidden = visibleVerse !== 1 || hidden || chapter.basmalaIsVerse === true;
   $('hideAgain').hidden = mode !== 'test' || !revealed;
   $('verseCounter').textContent = 'الآية ' + number(visibleVerse) + ' من ' + number(chapter.verses.length);
   $('versePicker').value = selected;
@@ -136,7 +136,7 @@ async function listen(cumulative = false) {
     audioData = await loadAudio(entry);
     if (token !== generation) return;
     entry.audioData = audioData;
-    if (cumulative) {
+    if (cumulative && !entry.chapter.basmalaIsVerse) {
       status('أستمع للبسملة');
       await playFile(audioData.basmala, token);
     }
@@ -187,7 +187,7 @@ async function boot() {
     });
     accessGranted = true;
     document.getElementById('main').setAttribute('aria-busy', 'false');
-    const entries = await readJSON('data/surahs.json');
+    const entries = await readJSON('data/surahs.json?v=3');
     const loadedEntries = await Promise.all(entries.map(async entry => ({...entry, chapter:await readJSON(entry.text)})));
     for (const entry of loadedEntries) {
       catalog.set(entry.id, entry);

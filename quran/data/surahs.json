@@ -1,5 +1,11 @@
 [
   {
+    "id": 1,
+    "name": "الفاتحة",
+    "text": "data/1.json",
+    "audio": "data/audio-1.json"
+  },
+  {
     "id": 90,
     "name": "البلد",
     "text": "data/90.json",

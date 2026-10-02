@@ -1,0 +1,21 @@
+{
+  "engine": "WebKit",
+  "physicalDevice": false,
+  "realChildAccount": false,
+  "realMediaPlayback": true,
+  "basmalaNumberedVerse1": true,
+  "noDuplicateBasmala": true,
+  "fullFatihaPlayback": [
+    "001001.mp3",
+    "001002.mp3",
+    "001003.mp3",
+    "001004.mp3",
+    "001005.mp3",
+    "001006.mp3",
+    "001007.mp3"
+  ],
+  "textStayedHidden": true,
+  "maxConcurrentPlayback": 1,
+  "otherSurahIntroBasmalaPreserved": true,
+  "audioFailureKeepsReading": true
+}
