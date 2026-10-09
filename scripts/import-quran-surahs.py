@@ -5,7 +5,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE_URL = 'https://tanzil.net/pub/download/index.php?quranType=uthmani&outType=txt-2&agree=true'
-CHAPTERS = [(1, 'الفاتحة', 7), (90, 'البلد', 20), (89, 'الفجر', 30), (88, 'الغاشية', 26), (87, 'الأعلى', 19), (86, 'الطارق', 17), (85, 'البروج', 22), (84, 'الانشقاق', 25)]
+CHAPTERS = [(1, 'الفاتحة', 7), (114, 'الناس', 6), (90, 'البلد', 20), (89, 'الفجر', 30), (88, 'الغاشية', 26), (87, 'الأعلى', 19), (86, 'الطارق', 17), (85, 'البروج', 22), (84, 'الانشقاق', 25)]
 
 def download(url):
     return subprocess.check_output(['curl', '-fLsS', '--max-time', '40', '-A', 'Mozilla/5.0', url])
@@ -75,6 +75,6 @@ def main():
     for path, data in pending: save(path, data)
     save('quran/data/surahs.json', catalog)
     (ROOT / 'docs/quran-current-source.txt').write_text('\n'.join(source_records) + '\n' + notice)
-    save('docs/quran-current-provenance.json', {'retrieved': now.isoformat(), 'textSource': SOURCE_URL, 'source_sha256': hashlib.sha256(raw).hexdigest(), 'version': '1.1', 'reciter': reciter, 'termsChecked': '2026-10-02', 'chapters': evidence})
+    save('docs/quran-current-provenance.json', {'retrieved': now.isoformat(), 'textSource': SOURCE_URL, 'source_sha256': hashlib.sha256(raw).hexdigest(), 'version': '1.1', 'reciter': reciter, 'termsChecked': '2026-10-09', 'chapters': evidence})
 
 if __name__ == '__main__': main()

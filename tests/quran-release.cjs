@@ -4,7 +4,7 @@ const fs=require('node:fs'), assert=require('node:assert/strict');
 const base=process.env.QURAN_TEST_BASE || 'http://127.0.0.1:8871';
 const entries=JSON.parse(fs.readFileSync('quran/data/surahs.json'));
 const chapters=entries.map(entry=>JSON.parse(fs.readFileSync('quran/'+entry.text)));
-const expectedIds=[1,90,89,88,87,86,85,84];
+const expectedIds=[1,114,90,89,88,87,86,85,84];
 assert.deepEqual(entries.map(e=>e.id),expectedIds);
 const out=[];
 async function fixture(page, user='test-a', assigned=true) {
@@ -12,16 +12,17 @@ async function fixture(page, user='test-a', assigned=true) {
   window.fixtureAuthChange=null;
   window.supabase={createClient:()=>({
    auth:{getSession:async()=>({data:{session:user?{user:{id:user}}:null}}),onAuthStateChange:cb=>{window.fixtureAuthChange=cb;return {data:{subscription:{unsubscribe(){}}}}}},
-   from:table=>({select(){return this},eq(){return this},maybeSingle:async()=>({data:assigned?{quiz_id:'quran-al-balad',difficulty:'medium'}:null})})
+   from:table=>({select(){return this},eq(key,value){if(key==='quiz_id')this.quizId=value;return this},async maybeSingle(){return {data:assigned&&(!Array.isArray(assigned)||assigned.includes(this.quizId))?{quiz_id:this.quizId,difficulty:'medium'}:null}}})
   })};
  },{user,assigned});
  await page.route('https://ahmad9077.github.io/quizzes-hub/**', r=>r.fulfill({contentType:'text/plain',body:'Hub redirect fixture'}));
 }
 (async()=>{
- for(const [name,type,w,h] of [['small-phone',webkit,320,568],['iphone-small',webkit,375,548],['iphone',webkit,390,664],['ipad',webkit,820,1180],['desktop',chromium,1440,1000]]) {
+ for(const group of ['hamoud','deema']) for(const [viewportName,type,w,h] of [['small-phone',webkit,320,568],['iphone-small',webkit,375,548],['iphone',webkit,390,664],['ipad',webkit,820,1180],['desktop',chromium,1440,1000]]) {
+  const name=group+'-'+viewportName, expectedIds=group==='hamoud'?[90,89,88,87,86,85,84]:[1,114], chapters=entries.filter(e=>expectedIds.includes(e.id)).map(e=>JSON.parse(fs.readFileSync('quran/'+e.text)));
   const browser=await type.launch(), context=await browser.newContext({viewport:{width:w,height:h},isMobile:w<721,hasTouch:w<1000}), page=await context.newPage(),errors=[];
-  await fixture(page);await page.route('https://api.quran.com/**',r=>r.abort());page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(base+'/quran/');await page.locator('.surah-card').first().waitFor();await page.evaluate(()=>document.fonts.ready);
+  await fixture(page,'test-a',[group==='hamoud'?'quran-al-balad':'quran-deema']);await page.route('https://api.quran.com/**',r=>r.abort());page.on('pageerror',e=>errors.push(e.message));
+  await page.goto(base+'/quran/?group='+group);await page.locator('.surah-card').first().waitFor();await page.evaluate(()=>document.fonts.ready);
   assert.equal(await page.locator('#backHub').getAttribute('href'),'../');
   assert.deepEqual(await page.locator('.surah-card').evaluateAll(cards=>cards.map(c=>c.getAttribute('href'))),expectedIds.map(id=>'#surah-'+id));
   async function fit(label) {
@@ -53,9 +54,7 @@ async function fixture(page, user='test-a', assigned=true) {
    await page.locator('#backHome').click();await page.locator('#home').waitFor({state:'visible'});
   }
   const saved=await page.evaluate(()=>Object.keys(localStorage).sort());assert.deepEqual(saved,expectedIds.map(id=>'quizzes-hub:quran:test-a:verse:'+id).sort());
-  await page.locator('.surah-card[href="#surah-90"]').click();await page.waitForFunction(()=>chapter.chapter===90&&currentScreen==='reader');assert.equal(await page.locator('#versePicker').inputValue(),'20');assert(await page.locator('#verseText').isHidden());
-  await page.locator('#learnMode').click();await page.evaluate(()=>selectVerse(17));await page.waitForTimeout(50);
-  await page.screenshot({path:'/tmp/quran-eight-'+name+'-reader.png',fullPage:true});
+  await page.goto(base+'/quran/?group='+group+'#surah-'+(group==='hamoud'?1:90));await page.locator('#home').waitFor({state:'visible'});assert(await page.locator('#reader').isHidden());
   await page.evaluate(()=>fixtureAuthChange('SIGNED_OUT',null));await page.waitForURL(base+'/');
   assert.deepEqual(errors,[]);
   out.push({name,surahs:chapters.length,versesChecked:checked,noClippedText:true,noHorizontalOverflow:true,noScroll:w<721,bookmarkPerSurahRestored:true,signoutLeavesApp:true,physicalDevice:false});await browser.close();console.log(name+' passed '+checked+' verses');
@@ -72,10 +71,13 @@ async function fixture(page, user='test-a', assigned=true) {
  for(const [name,user,assigned,reason] of [['signed-out',null,true,'signin'],['unassigned','test-a',false,'unauthorized']]) {
   const page=await b.newPage();await fixture(page,user,assigned);await page.goto(base+'/quran/');await page.waitForURL('https://ahmad9077.github.io/quizzes-hub/**');assert.equal(new URL(page.url()).searchParams.get('access'),reason);out.push({name,redirect:reason});await page.close();
  }
+ for(const [group,assigned] of [['hamoud',['quran-deema']],['deema',['quran-al-balad']]]) {
+  const page=await b.newPage();await fixture(page,'test-a',assigned);await page.goto(base+'/quran/?group='+group);await page.waitForURL('https://ahmad9077.github.io/quizzes-hub/**');assert.equal(new URL(page.url()).searchParams.get('access'),'unauthorized');out.push({group,wrongGroupDenied:true});await page.close();
+ }
  // Exercise the actual Hub tile/assignment renderers with isolated DOM fixtures.
  const hub=await b.newPage();await hub.route('https://cdn.jsdelivr.net/**',r=>r.fulfill({contentType:'application/javascript',body:'window.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session:null}})}})};'}));
  await hub.goto(base+'/');await hub.locator('#loginForm').waitFor();
- const tiles=await hub.evaluate(()=>{renderTemplate('dashboardTemplate');renderAssignedQuizzes([{quiz_id:'prophets-stories'},{quiz_id:'quran-al-balad'}]);const links=[...document.querySelectorAll('#assignedQuizGrid a')].map(x=>x.getAttribute('href'));const graded=getAllowedQuizzes([{quiz_id:'quran-al-balad'}]).length;const field=document.createElement('fieldset');renderAssignmentCheckboxes(field,[]);const count=field.querySelectorAll('input[value="quran-al-balad"]').length;renderAssignedQuizzes([{quiz_id:'prophets-stories'}]);return {links,graded,count,unassignedCount:document.querySelectorAll('.quran-tile').length}});
- assert.deepEqual(tiles,{links:['prophets-stories.html','quran/'],graded:0,count:1,unassignedCount:0});out.push({hubCatalog:tiles});
- await b.close();fs.writeFileSync('docs/quran-eight-surahs-tests.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out,null,2));
+ const tiles=await hub.evaluate(()=>{renderTemplate('dashboardTemplate');renderAssignedQuizzes([{quiz_id:'prophets-stories'},{quiz_id:'quran-al-balad'},{quiz_id:'quran-deema'}]);const links=[...document.querySelectorAll('#assignedQuizGrid a')].map(x=>x.getAttribute('href'));const graded=getAllowedQuizzes([{quiz_id:'quran-al-balad'}]).length;const field=document.createElement('fieldset');renderAssignmentCheckboxes(field,[]);const count=field.querySelectorAll('input[value="quran-al-balad"],input[value="quran-deema"]').length;renderAssignedQuizzes([{quiz_id:'prophets-stories'}]);return {links,graded,count,unassignedCount:document.querySelectorAll('.quran-tile').length}});
+ assert.deepEqual(tiles,{links:['prophets-stories.html','quran/?group=hamoud','quran/?group=deema'],graded:0,count:2,unassignedCount:0});out.push({hubCatalog:tiles});
+ await b.close();fs.writeFileSync('docs/quran-groups-tests.json',JSON.stringify(out,null,2));console.log(JSON.stringify(out,null,2));
 })().catch(e=>{console.error(e);process.exit(1)});

@@ -1,0 +1,19 @@
+{
+  "retrieved": "2026-10-09T20:20:47.291153+00:00",
+  "textSource": "https://tanzil.net/pub/download/index.php?quranType=uthmani&outType=txt-2&agree=true",
+  "source_sha256": "bf4f57b968d03f4131c070b1e285da9be0e0a108a21c910e872801ca273312c8",
+  "version": "1.1",
+  "reciter": {
+    "id": 7,
+    "reciter_name": "Mishari Rashid al-`Afasy",
+    "style": null,
+    "translated_name": {
+      "name": "Mishari Rashid al-`Afasy",
+      "language_name": "english"
+    }
+  },
+  "audioEndpoint": "https://api.quran.com/api/v4/recitations/7/by_chapter/114?per_page=50",
+  "audioFilesVerified": 6,
+  "termsChecked": "2026-10-09",
+  "recordings": "Streamed directly from original provider; no MP3 redistribution."
+}

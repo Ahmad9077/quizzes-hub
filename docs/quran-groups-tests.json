@@ -1,0 +1,170 @@
+[
+  {
+    "name": "hamoud-small-phone",
+    "surahs": 7,
+    "versesChecked": 159,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "hamoud-iphone-small",
+    "surahs": 7,
+    "versesChecked": 159,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "hamoud-iphone",
+    "surahs": 7,
+    "versesChecked": 159,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "hamoud-ipad",
+    "surahs": 7,
+    "versesChecked": 159,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": false,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "hamoud-desktop",
+    "surahs": 7,
+    "versesChecked": 159,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": false,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "deema-small-phone",
+    "surahs": 2,
+    "versesChecked": 13,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "deema-iphone-small",
+    "surahs": 2,
+    "versesChecked": 13,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "deema-iphone",
+    "surahs": 2,
+    "versesChecked": 13,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": true,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "deema-ipad",
+    "surahs": 2,
+    "versesChecked": 13,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": false,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "name": "deema-desktop",
+    "surahs": 2,
+    "versesChecked": 13,
+    "noClippedText": true,
+    "noHorizontalOverflow": true,
+    "noScroll": false,
+    "bookmarkPerSurahRestored": true,
+    "signoutLeavesApp": true,
+    "physicalDevice": false
+  },
+  {
+    "perAccountIsolation": true,
+    "expiredMetadataRefreshedFromRealProvider": true,
+    "refreshed": {
+      "ids": [
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20
+      ],
+      "retrieved": "2026-10-09T20:22:24.949Z"
+    },
+    "wrongMetadataRejected": true
+  },
+  {
+    "name": "signed-out",
+    "redirect": "signin"
+  },
+  {
+    "name": "unassigned",
+    "redirect": "unauthorized"
+  },
+  {
+    "group": "hamoud",
+    "wrongGroupDenied": true
+  },
+  {
+    "group": "deema",
+    "wrongGroupDenied": true
+  },
+  {
+    "hubCatalog": {
+      "links": [
+        "prophets-stories.html",
+        "quran/?group=hamoud",
+        "quran/?group=deema"
+      ],
+      "graded": 0,
+      "count": 2,
+      "unassignedCount": 0
+    }
+  }
+]

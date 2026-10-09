@@ -6,7 +6,7 @@ const entries=JSON.parse(fs.readFileSync('quran/data/surahs.json'));
 (async()=>{
  const browser=await webkit.launch(),page=await browser.newPage({viewport:{width:390,height:664}}),results=[];
  await page.addInitScript(()=>{
-  window.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session:{user:{id:'audio-fixture'}}}}),onAuthStateChange(){}},from:()=>({select(){return this},eq(){return this},maybeSingle:async()=>({data:{quiz_id:'quran-al-balad'}})})})};
+  window.supabase={createClient:()=>({auth:{getSession:async()=>({data:{session:{user:{id:'audio-fixture'}}}}),onAuthStateChange(){}},from:()=>({select(){return this},eq(k,v){if(k==='quiz_id')this.id=v;return this},async maybeSingle(){return {data:{quiz_id:this.id}}}})})};
   window.proof={played:[],ended:[],active:0,max:0,hidden:[]};
   const play=HTMLMediaElement.prototype.play;
   HTMLMediaElement.prototype.play=function(){
@@ -18,7 +18,7 @@ const entries=JSON.parse(fs.readFileSync('quran/data/surahs.json'));
  });
  await page.goto(base+'/quran/');await page.locator('.surah-card').first().waitFor();
  for(const entry of entries){
-  await page.locator('.surah-card[href="#surah-'+entry.id+'"]').click();await page.locator('#reader').waitFor({state:'visible'});
+  await page.goto(base+'/quran/?group='+([1,114].includes(entry.id)?'deema':'hamoud')+'#surah-'+entry.id);await page.locator('#reader').waitFor({state:'visible'});
   await page.evaluate(()=>{selectVerse(1);proof.played=[];proof.ended=[]});
   await page.locator('#listen').click();await page.waitForFunction(()=>proof.ended.length===1&&!playing,{},{timeout:30000});
   const played=await page.evaluate(()=>structuredClone(proof));const expected=String(entry.id).padStart(3,'0')+'001.mp3';
@@ -40,5 +40,5 @@ const entries=JSON.parse(fs.readFileSync('quran/data/surahs.json'));
  await page.route('**/data/audio-84.json',r=>r.abort());await page.evaluate(()=>{delete catalog.get(84).audioData;audioData=null});await page.locator('#listen').click();
  await page.waitForFunction(()=>!playing&&document.getElementById('message').textContent.length>0);assert(await page.locator('#verseText').isVisible());
  results.push({engine:'WebKit',cumulativeUntil3:cumulative.ended,textStayedHidden:true,maxConcurrentPlayback:cumulative.max,switchingSurahsStopsAudio:true,stopButtonStopsAudio:true,audioFailureKeepsReading:true,physicalDevice:false});
- await browser.close();fs.writeFileSync('docs/quran-seven-surahs-audio-tests.json',JSON.stringify(results,null,2));console.log('All real-media checks passed.');
+ await browser.close();fs.writeFileSync('docs/quran-all-surahs-audio-tests.json',JSON.stringify(results,null,2));console.log('All real-media checks passed.');
 })().catch(e=>{console.error(e);process.exit(1)});

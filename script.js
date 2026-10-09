@@ -57,8 +57,11 @@ const storyCollection = {
   title: "قصص الأنبياء",
   icon: "📚"
 };
-const quranCollection = { id: "quran-al-balad", title: "القرآن الكريم", icon: "ق" };
-const assignmentCatalog = [...quizCatalog, storyCollection, quranCollection];
+const quranCollections = [
+  { id: "quran-al-balad", title: "القرآن الكريم - حمود", icon: "ق", group: "hamoud", countLabel: "٧ سور" },
+  { id: "quran-deema", title: "القرآن الكريم - ديما", icon: "ق", group: "deema", countLabel: "سورتان" }
+];
+const assignmentCatalog = [...quizCatalog, storyCollection, ...quranCollections];
 
 const config = window.QUIZZES_HUB_CONFIG || {};
 const isConfigured = Boolean(
@@ -233,8 +236,14 @@ function renderAssignedQuizzes(assignments) {
     tiles.push(document.querySelector("#storiesTileTemplate").content.firstElementChild.cloneNode(true));
   }
 
-  if (assignmentMap.has(quranCollection.id)) {
-    tiles.push(document.querySelector("#quranTileTemplate").content.firstElementChild.cloneNode(true));
+  for (const collection of quranCollections) {
+    if (!assignmentMap.has(collection.id)) continue;
+    const tile = document.querySelector("#quranTileTemplate").content.firstElementChild.cloneNode(true);
+    tile.href = "quran/?group=" + collection.group;
+    tile.setAttribute("aria-label", collection.title + " — اختر السورة");
+    tile.querySelector(".quiz-name").textContent = collection.title;
+    tile.querySelector(".start-pill").textContent = "اختر السورة · " + collection.countLabel;
+    tiles.push(tile);
   }
 
   grid.replaceChildren(...(tiles.length ? tiles : [createEmptyState("No activities enabled yet.")]));

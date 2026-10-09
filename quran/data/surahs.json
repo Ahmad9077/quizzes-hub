@@ -6,6 +6,12 @@
     "audio": "data/audio-1.json"
   },
   {
+    "id": 114,
+    "name": "الناس",
+    "text": "data/114.json",
+    "audio": "data/audio-114.json"
+  },
+  {
     "id": 90,
     "name": "البلد",
     "text": "data/90.json",

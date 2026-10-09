@@ -1,0 +1,22 @@
+{
+  "isolatedDOMFixtures": true,
+  "productionDataWritten": false,
+  "names": [
+    "ق القرآن الكريم - حمود",
+    "ق القرآن الكريم - ديما"
+  ],
+  "before": [
+    {
+      "quiz_id": "quran-al-balad",
+      "difficulty": "medium"
+    }
+  ],
+  "after": [
+    {
+      "quiz_id": "quran-deema",
+      "difficulty": "medium"
+    }
+  ],
+  "newUserDefaults": [],
+  "privacyReturnKeepsGroup": true
+}
