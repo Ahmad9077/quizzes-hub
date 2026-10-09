@@ -1,6 +1,6 @@
 # Quran groups release checkpoint — 2026-10-09
 
-Status: implemented and locally verified; NOT published. No live SQL or assignment writes performed.
+Status: migration 014 applied and independently verified on 2026-10-10. Frontend release is ready for publication; see deployment evidence for final live status. No assignment writes performed.
 Worktree: quran-hub-release. Branch: release/quran-groups.
 Production base: a3935aa5a10db4955d7d7d49ac352f1469bfbcc1.
 
@@ -9,7 +9,7 @@ Requested catalog:
 - quran-deema → القرآن الكريم - ديما → quran/?group=deema → 1,114.
 Keep existing assignments. Do not assign either activity automatically.
 
-Blocker: Supabase dashboard session expired; GitHub OAuth sign-in also needs user login. No authenticated Supabase CLI or DB URL is available. Browser Chrome profile Your Chrome has a Quran groups tab awaiting sign-in; Mac native UI is locked, but the browser extension works. No credentials were read, entered, or changed.
+Resolved on 2026-10-10 after user sign-in. Historical blocker: Supabase dashboard session expired; GitHub OAuth sign-in also needs user login. No authenticated Supabase CLI or DB URL is available. Browser Chrome profile Your Chrome has a Quran groups tab awaiting sign-in; Mac native UI is locked, but the browser extension works. No credentials were read, entered, or changed.
 
 After the user completes sign-in:
 1. Open project eqzhjjpazzsovabsqemc SQL editor, a fresh blank query.
@@ -28,3 +28,6 @@ Verification complete:
 These use isolated account fixtures; no physical iPhone or child testing claimed.
 
 No local server or automatic continuation is required. To resume local testing: python3 -m http.server 8871 --bind 127.0.0.1, then run test with PLAYWRIGHT_MODULE=/Users/macserver/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright.
+
+## Database verification — 2026-10-10
+Migration 014 returned Success. Separate committed-state query showed both exact group titles and URLs. Before/after counts unchanged: profiles 9, assignments 46, progress 228, Hamoud assignments 2, Deema assignments 0. No authentication, RLS, profile, progress or assignment changes.
