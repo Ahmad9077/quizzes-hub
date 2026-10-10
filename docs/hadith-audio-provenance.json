@@ -1,0 +1,15 @@
+{
+  "model": "eleven_v4",
+  "voice": "Hamid - Friendly, Natural and Positive",
+  "voiceId": "A9ATTqUUQ6GHu0coCz8t",
+  "text": "مَنْ قَالَ: رَضِيتُ بِاللَّهِ رَبًّا، وَبِالْإِسْلَامِ دِينًا، وَبِمُحَمَّدٍ صَلَّى اللَّهُ عَلَيْهِ وَسَلَّمَ نَبِيًّا، وَجَبَتْ لَهُ الْجَنَّةُ.",
+  "secondsToGenerate": 5.92,
+  "bytes": 171407,
+  "sha256": "7ce7fcb92002056c78a213d4fd323399c6c6d13e588ccd5593ba8fad86599a96",
+  "reportedCharacterCost": "9",
+  "synthetic": true,
+  "attempts": 1,
+  "sourceUrl": "https://ablibrary.net/book_content/b/18945/145",
+  "durationSeconds": 10.64,
+  "humanPronunciationApproval": false
+}

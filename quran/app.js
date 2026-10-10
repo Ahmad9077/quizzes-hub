@@ -171,7 +171,7 @@ function route() {
   if (!accessGranted) return;
   const match = location.hash.match(/^#surah-(\d+)$/);
   if (match && catalog.has(Number(match[1]))) { openChapter(Number(match[1])); return; }
-  stopAudio(); showScreen('home'); document.title = 'القرآن الكريم - ' + window.QuranGroup.title;
+  stopAudio(); showScreen('home'); document.title = window.QuranGroup.hadith ? 'القرآن والأحاديث - ديما' : 'القرآن الكريم - حمود';
 }
 async function boot() {
   try {
@@ -191,6 +191,7 @@ async function boot() {
     const group = window.QuranGroup;
     if (access.quizId !== group.quizId) throw Error('تعذر التحقق من صلاحية المجموعة.');
     $('homeTitle').textContent = group.title;
+    if (group.hadith) { $('hadithSection').hidden = false; $('homeLink').textContent = 'القرآن والأحاديث'; }
     $('privacyLink').href = 'privacy.html?group=' + (group.quizId === 'quran-deema' ? 'deema' : 'hamoud');
     const entries = group.surahs.map(id => manifest.find(entry => entry.id === id));
     if (entries.some(entry => !entry)) throw Error('تعذر تحميل سور المجموعة.');

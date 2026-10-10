@@ -91,3 +91,6 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:20px;ma
 
 /* Content becomes available after the existing Hub access check. */
 #main[aria-busy="true"] #surahList{display:none}
+
+.hadith-section{margin-top:26px}.hadith-section h2{font-size:25px;margin-bottom:10px}.hadith-card{max-width:none}
+@media(max-width:720px){.hadith-section{margin-top:22px}.hadith-section h2{font-size:25px;margin-bottom:8px}}

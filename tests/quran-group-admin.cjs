@@ -15,7 +15,7 @@ const assert=require('node:assert/strict'),fs=require('node:fs');
   renderAssignmentCheckboxes(field,[]);const newUserDefaults=getAssignmentConfigs(field);
   return {names,before,after,newUserDefaults};
  });
- assert.deepEqual(proof.names,['ق القرآن الكريم - حمود','ق القرآن الكريم - ديما']);
+ assert.deepEqual(proof.names,['ق القرآن الكريم - حمود','ق القرآن والأحاديث - ديما']);
  assert.deepEqual(proof.before,[{quiz_id:'quran-al-balad',difficulty:'medium'}]);
  assert.deepEqual(proof.after,[{quiz_id:'quran-deema',difficulty:'medium'}]);assert.deepEqual(proof.newUserDefaults,[]);
  await page.goto('http://127.0.0.1:8871/quran/privacy.html?group=deema');

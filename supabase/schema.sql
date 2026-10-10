@@ -53,7 +53,7 @@ values
   ('arabic-phonics', 'صدى الحروف', 'https://ahmad9077.github.io/arabic-phonics-quiz/', 'أ', '#efe8ff', 70),
   ('prophets-stories', 'قصص الأنبياء', 'https://ahmad9077.github.io/quizzes-hub/prophets-stories.html', '📚', '#d4b37d', 80),
   ('quran-al-balad', 'القرآن الكريم - حمود', 'https://ahmad9077.github.io/quizzes-hub/quran/?group=hamoud', 'ق', '#dce9dd', 90),
-  ('quran-deema', 'القرآن الكريم - ديما', 'https://ahmad9077.github.io/quizzes-hub/quran/?group=deema', 'ق', '#dce9dd', 100)
+  ('quran-deema', 'القرآن والأحاديث - ديما', 'https://ahmad9077.github.io/quizzes-hub/quran/?group=deema', 'ق', '#dce9dd', 100)
 on conflict (id) do update set
   title = excluded.title,
   url = excluded.url,

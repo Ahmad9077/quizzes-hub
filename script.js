@@ -59,7 +59,7 @@ const storyCollection = {
 };
 const quranCollections = [
   { id: "quran-al-balad", title: "القرآن الكريم - حمود", icon: "ق", group: "hamoud", countLabel: "٧ سور" },
-  { id: "quran-deema", title: "القرآن الكريم - ديما", icon: "ق", group: "deema", countLabel: "سورتان" }
+  { id: "quran-deema", title: "القرآن والأحاديث - ديما", icon: "ق", group: "deema", countLabel: "سورتان وحديث" }
 ];
 const assignmentCatalog = [...quizCatalog, storyCollection, ...quranCollections];
 
@@ -240,9 +240,9 @@ function renderAssignedQuizzes(assignments) {
     if (!assignmentMap.has(collection.id)) continue;
     const tile = document.querySelector("#quranTileTemplate").content.firstElementChild.cloneNode(true);
     tile.href = "quran/?group=" + collection.group;
-    tile.setAttribute("aria-label", collection.title + " — اختر السورة");
+    tile.setAttribute("aria-label", collection.title);
     tile.querySelector(".quiz-name").textContent = collection.title;
-    tile.querySelector(".start-pill").textContent = "اختر السورة · " + collection.countLabel;
+    tile.querySelector(".start-pill").textContent = (collection.group === "deema" ? "افتح المجموعة · " : "اختر السورة · ") + collection.countLabel;
     tiles.push(tile);
   }
 

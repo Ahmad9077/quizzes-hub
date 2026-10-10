@@ -22,9 +22,9 @@ async function fixture(page, user='test-a', assigned=true) {
   const name=group+'-'+viewportName, expectedIds=group==='hamoud'?[90,89,88,87,86,85,84]:[1,114], chapters=entries.filter(e=>expectedIds.includes(e.id)).map(e=>JSON.parse(fs.readFileSync('quran/'+e.text)));
   const browser=await type.launch(), context=await browser.newContext({viewport:{width:w,height:h},isMobile:w<721,hasTouch:w<1000}), page=await context.newPage(),errors=[];
   await fixture(page,'test-a',[group==='hamoud'?'quran-al-balad':'quran-deema']);await page.route('https://api.quran.com/**',r=>r.abort());page.on('pageerror',e=>errors.push(e.message));
-  await page.goto(base+'/quran/?group='+group);await page.locator('.surah-card').first().waitFor();await page.evaluate(()=>document.fonts.ready);
+  await page.goto(base+'/quran/?group='+group);await page.locator('#surahList .surah-card').first().waitFor();await page.evaluate(()=>document.fonts.ready);
   assert.equal(await page.locator('#backHub').getAttribute('href'),'../');
-  assert.deepEqual(await page.locator('.surah-card').evaluateAll(cards=>cards.map(c=>c.getAttribute('href'))),expectedIds.map(id=>'#surah-'+id));
+  assert.deepEqual(await page.locator('#surahList .surah-card').evaluateAll(cards=>cards.map(c=>c.getAttribute('href'))),expectedIds.map(id=>'#surah-'+id));
   async function fit(label) {
    const box=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,height:innerHeight,scrollHeight:document.documentElement.scrollHeight}));
    assert(box.scrollWidth<=box.width, name+' '+label+' horizontal '+JSON.stringify(box));if(w<721)assert(box.scrollHeight<=box.height+1,name+' '+label+' scroll '+JSON.stringify(box));
@@ -33,7 +33,7 @@ async function fixture(page, user='test-a', assigned=true) {
   await page.screenshot({path:'/tmp/quran-eight-'+name+'-home.png',fullPage:true});
   let checked=0;
   for(const surah of chapters) {
-   await page.locator('.surah-card[href="#surah-'+surah.chapter+'"]').click();await page.locator('#reader').waitFor({state:'visible'});
+   await page.locator('#surahList .surah-card[href="#surah-'+surah.chapter+'"]').click();await page.locator('#reader').waitFor({state:'visible'});
    assert.equal(await page.locator('#chapterTitle').textContent(),'سورة '+surah.name);
    assert(await page.locator('#previous').isDisabled());
    for(const verse of surah.verses) {

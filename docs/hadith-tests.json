@@ -1,0 +1,42 @@
+[
+  {
+    "name": "small",
+    "noClippedText": true,
+    "noHorizontalScroll": true,
+    "noVerticalScroll": true
+  },
+  {
+    "name": "iphone-small",
+    "noClippedText": true,
+    "noHorizontalScroll": true,
+    "noVerticalScroll": true
+  },
+  {
+    "name": "iphone",
+    "noClippedText": true,
+    "noHorizontalScroll": true,
+    "noVerticalScroll": true
+  },
+  {
+    "name": "ipad",
+    "noClippedText": true,
+    "noHorizontalScroll": true,
+    "noVerticalScroll": false
+  },
+  {
+    "name": "desktop",
+    "noClippedText": true,
+    "noHorizontalScroll": true,
+    "noVerticalScroll": false
+  },
+  {
+    "realV4MediaPlayback": true,
+    "hiddenTextStayedHidden": true,
+    "stopWorks": true,
+    "failureKeepsReading": true,
+    "signoutRedirects": true
+  },
+  {
+    "hamoudCannotEnterHadith": true
+  }
+]
