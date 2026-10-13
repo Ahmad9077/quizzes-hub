@@ -49,6 +49,13 @@ const quizCatalog = [
     icon: "أ",
     color: "#efe8ff",
     url: "https://ahmad9077.github.io/arabic-phonics-quiz/"
+  },
+  {
+    id: "science-grade1",
+    title: "علوم",
+    icon: "🔬",
+    color: "#e3f6dc",
+    url: "https://ahmad9077.github.io/science-grade1-quiz/"
   }
 ];
 
