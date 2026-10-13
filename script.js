@@ -583,6 +583,17 @@ function createChallengeScoreSummary(state) {
   return summary;
 }
 
+// The Hub is also served at haya-nt3lm.com (see cloudflare/). Quiz addresses stored in the
+// database use the GitHub address; keep them on whichever address the Hub is open on, so the
+// quiz shares this page's sign-in.
+function localizeHubUrl(value) {
+  const github = "https://ahmad9077.github.io";
+  if (window.location.origin === github) return value;
+  return String(value)
+    .replace(`${github}/quizzes-hub/`, `${window.location.origin}/`)
+    .replace(`${github}/`, `${window.location.origin}/`);
+}
+
 function createChallengeLaunchLink(state) {
   const link = document.createElement("a");
   link.className = "primary-action";
@@ -592,7 +603,7 @@ function createChallengeLaunchLink(state) {
 }
 
 function buildChallengeQuizUrl(state) {
-  const url = new URL(state.quiz?.url || quizCatalog.find((quiz) => quiz.id === state.quiz_id)?.url || window.location.href);
+  const url = new URL(localizeHubUrl(state.quiz?.url || quizCatalog.find((quiz) => quiz.id === state.quiz_id)?.url || window.location.href));
   url.searchParams.set("challenge_session", state.id);
   return url.toString();
 }

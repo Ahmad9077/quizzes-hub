@@ -1,7 +1,9 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
+// The Hub runs at its GitHub address and at haya-nt3lm.com (same files, see cloudflare/).
+const allowedOrigins = new Set(["https://ahmad9077.github.io", "https://haya-nt3lm.com"]);
+
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "https://ahmad9077.github.io",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS"
 };
@@ -18,7 +20,7 @@ type AdminUsersBody = {
 
 const allowedDifficulties = new Set(["easy", "medium", "hard"]);
 
-Deno.serve(async (request) => {
+async function handle(request: Request): Promise<Response> {
   if (request.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
   }
@@ -160,7 +162,16 @@ Deno.serve(async (request) => {
   }
 
   return json({ id: created.user.id, username, displayName, role });
-});
+}
+
+Deno.serve(async (request) => withCors(request, await handle(request)));
+
+function withCors(request: Request, response: Response) {
+  const origin = request.headers.get("Origin") ?? "";
+  response.headers.set("Access-Control-Allow-Origin", allowedOrigins.has(origin) ? origin : "https://ahmad9077.github.io");
+  response.headers.set("Vary", "Origin");
+  return response;
+}
 
 function json(payload: unknown, status = 200) {
   return new Response(JSON.stringify(payload), {

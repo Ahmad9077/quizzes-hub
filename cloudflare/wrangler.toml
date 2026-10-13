@@ -1,0 +1,11 @@
+# Serves the Quizzes Hub and its quiz sites at haya-nt3lm.com (see haya-nt3lm-worker.js).
+# Deploy from this folder: npx wrangler deploy
+name = "haya-nt3lm-hub"
+main = "haya-nt3lm-worker.js"
+compatibility_date = "2026-10-01"
+account_id = "cb8327c64dd8aba791c042b403b7e766"
+workers_dev = false
+routes = [
+  { pattern = "haya-nt3lm.com", custom_domain = true },
+  { pattern = "www.haya-nt3lm.com", custom_domain = true },
+]
