@@ -33,7 +33,8 @@ export function localize(text, self) {
 export default {
   async fetch(request) {
     const url = new URL(request.url)
-    if (url.hostname !== HOST) {
+    // Always the secure address: passwords are typed here, and the admin tools only accept https.
+    if (url.protocol !== 'https:' || url.hostname !== HOST) {
       return Response.redirect(`https://${HOST}${url.pathname}${url.search}`, 301)
     }
     if (request.method !== 'GET' && request.method !== 'HEAD') {

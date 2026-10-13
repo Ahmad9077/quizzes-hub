@@ -105,7 +105,7 @@ const errorTranslations = [
   [/password is required/i, "كلمة المرور مطلوبة."],
   [/admin access required/i, "هذا الإجراء يحتاج صلاحية مدير."],
   [/not signed in|not authenticated|jwt/i, "انتهت الجلسة، سجل الدخول من جديد."],
-  [/failed to fetch|network/i, "تعذر الاتصال، تأكد من الإنترنت وحاول مرة ثانية."]
+  [/failed to fetch|load failed|network/i, "تعذر الاتصال، تأكد من الإنترنت وحاول مرة ثانية."]
 ];
 
 function arabicError(error, fallback) {
@@ -762,7 +762,7 @@ async function createUser(event) {
     setMessage(message, "تم إنشاء المستخدم.");
     await renderAdminUsers();
   } catch (error) {
-    setMessage(message, error.message, true);
+    setMessage(message, arabicError(error, error.message), true);
   }
 }
 
@@ -920,7 +920,7 @@ async function updateUserPassword(userId, input, message) {
     input.value = "";
     setMessage(message, "تم تغيير كلمة المرور.");
   } catch (error) {
-    setMessage(message, error.message || "تعذر تغيير كلمة المرور.", true);
+    setMessage(message, arabicError(error, error.message || "تعذر تغيير كلمة المرور."), true);
   }
 }
 
