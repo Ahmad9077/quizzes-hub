@@ -1,16 +1,19 @@
 <!doctype html>
-<html lang="en">
+<html lang="ar" dir="rtl">
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Private quiz dashboards.">
-    <title>Quizzes Hub</title>
-    <link rel="stylesheet" href="styles.css?v=17">
+    <meta name="description" content="هيا نتعلم: صفحة خاصة لكل طفل فيها اختباراته وقصصه.">
+    <title>هيا نتعلم</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400..900&display=swap">
+    <link rel="stylesheet" href="styles.css?v=18">
   </head>
   <body>
     <main id="app" class="app-shell" aria-live="polite">
       <section class="loading-screen">
-        <p>Loading…</p>
+        <p>جاري التحميل…</p>
       </section>
     </main>
 
@@ -18,11 +21,11 @@
       <section class="auth-layout">
         <article class="auth-card setup-card">
           <div>
-            <p class="brand">Quizzes Hub</p>
-            <h1>Setup required</h1>
+            <p class="brand">هيا نتعلم</p>
+            <h1>الإعداد مطلوب</h1>
           </div>
-          <p>Add the Supabase URL and anon key in <code>config.js</code>, then run the SQL and Edge Function in the <code>supabase</code> folder.</p>
-          <a class="primary-action" href="README.md">Setup notes</a>
+          <p>أضف رابط Supabase والمفتاح العام في <code>config.js</code>، ثم شغّل ملفات SQL ووظيفة Edge الموجودة في مجلد <code>supabase</code>.</p>
+          <a class="primary-action" href="README.md">ملاحظات الإعداد</a>
         </article>
       </section>
     </template>
@@ -32,43 +35,43 @@
         <div class="auth-panel">
           <div class="auth-copy">
             <div>
-              <p class="brand">Quizzes Hub</p>
-              <h1>Play your next quiz.</h1>
-              <p class="hero-copy">One bright hub for each child, with quick access to their assigned quizzes.</p>
+              <p class="brand">هيا نتعلم</p>
+              <h1>هيا نلعب ونتعلم!</h1>
+              <p class="hero-copy">صفحة مرحة لكل طفل، توصله بسرعة لاختباراته وقصصه.</p>
             </div>
             <div class="trivia-board" aria-hidden="true">
               <span class="trivia-card card-main">
-                <b>World</b>
-                <i>Flags</i>
+                <b>أعلام</b>
+                <i>الدول</i>
               </span>
               <span class="trivia-card card-dark">
-                <b>Map</b>
-                <i>Quiz</i>
+                <b>خرائط</b>
+                <i>العالم</i>
               </span>
               <span class="trivia-card card-yellow">
-                <b>Words</b>
-                <i>Spell</i>
+                <b>كلمات</b>
+                <i>تهجئة</i>
               </span>
               <span class="trivia-card card-light">
-                <b>Read</b>
-                <i>Picture</i>
+                <b>علوم</b>
+                <i>الصف الأول</i>
               </span>
             </div>
           </div>
           <form class="auth-card" id="loginForm">
             <div class="form-heading">
-              <h2>Sign in</h2>
-              <p>Enter the username and password.</p>
+              <h2>تسجيل الدخول</h2>
+              <p>اكتب اسم المستخدم وكلمة المرور.</p>
             </div>
             <label>
-              <span>Username</span>
+              <span>اسم المستخدم</span>
               <input name="username" autocomplete="username" required>
             </label>
             <label>
-              <span>Password</span>
+              <span>كلمة المرور</span>
               <input name="password" type="password" autocomplete="current-password" required>
             </label>
-            <button class="primary-action" type="submit">Sign in</button>
+            <button class="primary-action" type="submit">دخول</button>
             <p class="form-message" id="loginMessage"></p>
           </form>
         </div>
@@ -78,16 +81,16 @@
     <template id="dashboardTemplate">
       <section class="dashboard">
         <header class="topbar">
-          <p class="brand">Quizzes Hub</p>
+          <p class="brand">هيا نتعلم</p>
           <div class="topbar-actions">
-            <button class="ghost-action" id="adminViewButton" type="button" hidden>Admin</button>
-            <button class="ghost-action" id="logoutButton" type="button">Sign out</button>
+            <button class="ghost-action" id="adminViewButton" type="button" hidden>الإدارة</button>
+            <button class="ghost-action" id="logoutButton" type="button">تسجيل الخروج</button>
           </div>
         </header>
 
         <section class="student-hero">
           <div>
-            <p class="student-kicker">Student dashboard</p>
+            <p class="student-kicker">صفحتي</p>
             <h1 id="dashboardTitle" class="page-title"></h1>
           </div>
           <div class="profile-mark" aria-hidden="true">
@@ -95,28 +98,28 @@
             <span></span>
             <span></span>
           </div>
-          <nav class="dashboard-tabs" aria-label="Dashboard sections">
-            <button class="tab-action active-tab" id="quizzesTabButton" type="button">Quizzes</button>
-            <button class="tab-action" id="challengeTabButton" type="button">Challenge</button>
+          <nav class="dashboard-tabs" aria-label="أقسام الصفحة">
+            <button class="tab-action active-tab" id="quizzesTabButton" type="button">الأنشطة</button>
+            <button class="tab-action" id="challengeTabButton" type="button">التحدي</button>
           </nav>
         </section>
 
         <section id="quizzesPanel">
-          <h2 class="section-title">Choose a quiz or story</h2>
+          <h2 class="section-title">اختر اختبارا أو قصة</h2>
           <div class="quiz-grid" id="assignedQuizGrid"></div>
         </section>
 
         <section id="challengePanel" hidden>
-          <h2 class="section-title">Challenge Mode</h2>
+          <h2 class="section-title">وضع التحدي</h2>
           <div class="challenge-layout">
             <section class="challenge-card">
-              <h3>Start a challenge</h3>
+              <h3>ابدأ تحديا</h3>
               <form id="createChallengeForm" class="challenge-form">
                 <label>
-                  <span>Quiz</span>
+                  <span>الاختبار</span>
                   <select id="challengeQuizSelect" name="quizId" required></select>
                 </label>
-                <button class="primary-action" type="submit">Create session</button>
+                <button class="primary-action" type="submit">أنشئ جلسة</button>
               </form>
               <p class="form-message" id="challengeCreateMessage"></p>
             </section>
@@ -128,8 +131,8 @@
 
           <section class="challenge-card">
             <div class="section-heading-row">
-              <h3>Open sessions</h3>
-              <button class="mini-action" id="refreshChallengesButton" type="button">Refresh</button>
+              <h3>الجلسات المفتوحة</h3>
+              <button class="mini-action" id="refreshChallengesButton" type="button">تحديث</button>
             </div>
             <div class="challenge-list" id="openChallengesList"></div>
           </section>
@@ -141,7 +144,7 @@
       <a class="quiz-tile">
         <span class="quiz-icon" aria-hidden="true"></span>
         <span class="quiz-name"></span>
-        <span class="start-pill">Start</span>
+        <span class="start-pill">ابدأ</span>
       </a>
     </template>
 
@@ -164,52 +167,52 @@
     <template id="adminTemplate">
       <section class="dashboard admin-dashboard">
         <header class="topbar">
-          <p class="brand">Quizzes Hub</p>
+          <p class="brand">هيا نتعلم</p>
           <div class="topbar-actions">
-            <button class="ghost-action" id="backToDashboardButton" type="button">Dashboard</button>
-            <button class="ghost-action" id="adminLogoutButton" type="button">Sign out</button>
+            <button class="ghost-action" id="backToDashboardButton" type="button">صفحتي</button>
+            <button class="ghost-action" id="adminLogoutButton" type="button">تسجيل الخروج</button>
           </div>
         </header>
 
-        <h1 class="page-title">Admin</h1>
+        <h1 class="page-title">الإدارة</h1>
 
         <section class="admin-grid">
           <form class="admin-card" id="createUserForm">
-            <h2>New user</h2>
+            <h2>مستخدم جديد</h2>
             <label>
-              <span>Username</span>
+              <span>اسم المستخدم</span>
               <input name="username" required>
             </label>
             <label>
-              <span>Display name</span>
+              <span>الاسم الظاهر</span>
               <input name="displayName" required>
             </label>
             <label>
-              <span>Password</span>
+              <span>كلمة المرور</span>
               <input name="password" type="password" required>
             </label>
             <label>
-              <span>Role</span>
+              <span>الصلاحية</span>
               <select name="role">
-                <option value="user">User</option>
-                <option value="admin">Admin</option>
+                <option value="user">طفل</option>
+                <option value="admin">مدير</option>
               </select>
             </label>
             <fieldset id="newUserAssignments">
-              <legend>Quiz access</legend>
+              <legend>الأنشطة المتاحة</legend>
             </fieldset>
-            <button class="primary-action" type="submit">Create user</button>
+            <button class="primary-action" type="submit">إنشاء المستخدم</button>
             <p class="form-message" id="createUserMessage"></p>
           </form>
 
           <section class="admin-card users-card">
-            <h2>Users</h2>
+            <h2>المستخدمون</h2>
             <div id="adminUsersList" class="admin-users-list"></div>
           </section>
         </section>
 
         <section class="admin-card activity-card">
-          <h2>Activity</h2>
+          <h2>النشاط</h2>
           <div id="adminActivityList" class="activity-list"></div>
         </section>
       </section>
@@ -217,6 +220,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js?v=4"></script>
-    <script src="script.js?v=30"></script>
+    <script src="script.js?v=31"></script>
   </body>
 </html>

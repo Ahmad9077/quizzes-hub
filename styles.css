@@ -46,8 +46,8 @@ body {
     linear-gradient(180deg, #fff7f4 0, #fff7f4 320px, var(--bg) 321px),
     var(--bg);
   color: var(--ink);
-  font-family: "Avenir Next", Avenir, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  line-height: 1.5;
+  font-family: "Cairo", "Geeza Pro", "Avenir Next", Avenir, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.6;
 }
 
 a {
@@ -100,7 +100,7 @@ select:disabled {
   display: inline-block;
   width: 10px;
   height: 10px;
-  margin-right: 8px;
+  margin-inline-end: 8px;
   border-radius: 50%;
   background: var(--accent);
   content: "";
@@ -861,12 +861,12 @@ legend {
 }
 
 .user-activity summary .progress-meta {
-  margin-left: auto;
+  margin-inline-start: auto;
 }
 
 .user-activity summary::after {
   color: var(--muted);
-  content: ">";
+  content: "<";
   transition: transform 140ms ease;
 }
 
@@ -876,7 +876,7 @@ legend {
 }
 
 .user-activity[open] > summary::after {
-  transform: rotate(90deg);
+  transform: rotate(-90deg);
 }
 
 .user-activity-items {
@@ -984,7 +984,7 @@ legend {
 
 .adaptive-history-table th,
 .adaptive-history-table td {
-  text-align: left;
+  text-align: start;
   border-bottom: 1px solid var(--line);
   padding: 6px 8px;
 }
@@ -1170,7 +1170,7 @@ legend {
   }
 
   .user-activity summary .progress-meta {
-    margin-left: 0;
+    margin-inline-start: 0;
   }
 }
 
@@ -1583,3 +1583,61 @@ select:focus {
 .quran-tile { --tile-color: #dce9dd; }
 .quran-tile .quiz-name { line-height: 1.5; }
 .quran-tile .quran-thumbnail { color: #285342; padding: 4px; }
+
+/* ── Arabic, right-to-left ─────────────────────────────── */
+/* Arabic letters need taller lines than the original English display type. */
+h1,
+.page-title {
+  line-height: 1.25;
+}
+
+.auth-copy h1 {
+  max-width: 7.5em;
+  letter-spacing: 0;
+  line-height: 1.2;
+}
+
+/* Three brand dots sit before the name and never overlap it. */
+.brand::before {
+  margin-inline-end: 44px;
+  box-shadow: -16px 0 0 var(--accent), -32px 0 0 var(--navy);
+}
+
+/* Mirror the decorations so they frame the page from the reading side. */
+.auth-copy::before {
+  right: auto;
+  left: -70px;
+}
+
+.auth-copy::after {
+  left: auto;
+  right: 34px;
+}
+
+.student-hero::before {
+  right: auto;
+  left: 170px;
+}
+
+@media (max-width: 760px) {
+  .student-hero::before {
+    right: auto;
+    left: -84px;
+  }
+}
+
+/* Usernames and passwords are typed in Latin letters. */
+input[name="username"],
+input[type="password"] {
+  direction: ltr;
+  text-align: right;
+}
+
+.auth-copy h1 {
+  font-size: clamp(2.8rem, 5.4vw, 5.2rem);
+}
+
+/* The admin title sits on the light page, not on the dark student card. */
+.admin-dashboard > .page-title {
+  color: var(--ink);
+}

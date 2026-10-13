@@ -3,42 +3,42 @@ const app = document.querySelector("#app");
 const quizCatalog = [
   {
     id: "world-flags",
-    title: "World Flags Quiz",
+    title: "أعلام الدول",
     icon: "🌍",
     color: "#dff5ff",
     url: "https://ahmad9077.github.io/world-flags-quiz/"
   },
   {
     id: "country-map",
-    title: "Country Map Quiz",
+    title: "خريطة الدول",
     icon: "🗺️",
     color: "#e0faee",
     url: "https://ahmad9077.github.io/country-map-quiz/"
   },
   {
     id: "spelling",
-    title: "Spelling Quiz",
+    title: "تهجئة الكلمات",
     icon: "🔤",
     color: "#fff0bf",
     url: "https://ahmad9077.github.io/spelling-quiz/"
   },
   {
     id: "picture-reading",
-    title: "Picture Reading Quiz",
+    title: "اقرأ الصورة",
     icon: "📖",
     color: "#ffe4da",
     url: "https://ahmad9077.github.io/little-words-picture-quiz/"
   },
   {
     id: "english-word-choice",
-    title: "English Word Choice Quiz",
+    title: "اختر الكلمة الإنجليزية",
     icon: "🔠",
     color: "#e8ebff",
     url: "https://ahmad9077.github.io/english-word-choice-quiz/"
   },
   {
     id: "border-detective",
-    title: "Border Detective",
+    title: "محقق الحدود",
     icon: "🧭",
     color: "#e8f2ff",
     url: "https://ahmad9077.github.io/country-border-letter-quiz/"
@@ -69,6 +69,53 @@ const quranCollections = [
   { id: "quran-deema", title: "القرآن والأحاديث - ديما", icon: "ق", group: "deema", countLabel: "سورتان وحديث" }
 ];
 const assignmentCatalog = [...quizCatalog, storyCollection, ...quranCollections];
+
+// The interface is Arabic. Titles stored in the database are older English names, so screens
+// show the catalog title when the activity is known.
+function activityTitle(id, fallback) {
+  return assignmentCatalog.find((item) => item.id === id)?.title || fallback || id;
+}
+
+// Arabic counted nouns: 1, 2, 3–10 and 11+ take different forms.
+function countLabel(count, one, two, few, many) {
+  if (count === 1) return one;
+  if (count === 2) return two;
+  if (count >= 3 && count <= 10) return `${count} ${few}`;
+  return `${count} ${many}`;
+}
+
+const levelLabels = { adaptive: "تكيفي", Practice: "تدريب", practice: "تدريب" };
+const topicLabels = {
+  science_grade1: "علوم",
+  topic_plants: "النبات",
+  topic_movement: "الحركة",
+  topic_covering: "الغطاء",
+  topic_food: "الغذاء",
+  topic_breathing: "التنفس",
+  topic_reproduction: "التكاثر"
+};
+
+// Messages that come back from Supabase and the admin-users function are in English.
+const errorTranslations = [
+  [/invalid login credentials/i, "اسم المستخدم أو كلمة المرور غير صحيحة."],
+  [/already been registered|already exists|duplicate key/i, "اسم المستخدم مستخدم من قبل."],
+  [/password should be at least (\d+)/i, (match) => `كلمة المرور لازم تكون ${match[1]} أحرف على الأقل.`],
+  [/username must be 3-32/i, "اسم المستخدم من 3 إلى 32 حرفا إنجليزيا صغيرا أو رقما أو _ فقط."],
+  [/display name is required/i, "الاسم الظاهر مطلوب."],
+  [/password is required/i, "كلمة المرور مطلوبة."],
+  [/admin access required/i, "هذا الإجراء يحتاج صلاحية مدير."],
+  [/not signed in|not authenticated|jwt/i, "انتهت الجلسة، سجل الدخول من جديد."],
+  [/failed to fetch|network/i, "تعذر الاتصال، تأكد من الإنترنت وحاول مرة ثانية."]
+];
+
+function arabicError(error, fallback) {
+  const message = String(error?.message || error || "");
+  for (const [pattern, text] of errorTranslations) {
+    const match = message.match(pattern);
+    if (match) return typeof text === "function" ? text(match) : text;
+  }
+  return fallback;
+}
 
 const config = window.QUIZZES_HUB_CONFIG || {};
 const isConfigured = Boolean(
@@ -151,7 +198,7 @@ function renderLogin() {
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    setMessage(message, "Signing in…");
+    setMessage(message, "جاري تسجيل الدخول…");
 
     const formData = new FormData(form);
     const username = String(formData.get("username")).trim().toLowerCase();
@@ -165,7 +212,7 @@ function renderLogin() {
       const loginEmail = Array.isArray(loginData) ? loginData[0]?.login_email : loginData?.login_email;
 
       if (resolveError || !loginEmail) {
-        throw new Error("Username not found.");
+        throw new Error("اسم المستخدم غير موجود.");
       }
 
       const { data, error } = await supabaseClient.auth.signInWithPassword({
@@ -181,7 +228,7 @@ function renderLogin() {
       await loadCurrentProfile();
       await renderDashboard();
     } catch (error) {
-      setMessage(message, error.message || "Could not sign in.", true);
+      setMessage(message, error.message === "اسم المستخدم غير موجود." ? error.message : arabicError(error, "تعذر تسجيل الدخول."), true);
     }
   });
 }
@@ -206,7 +253,7 @@ async function loadCurrentProfile() {
 
 async function renderDashboard() {
   renderTemplate("dashboardTemplate");
-  document.querySelector("#dashboardTitle").textContent = `Hi, ${currentProfile.display_name}`;
+  document.querySelector("#dashboardTitle").textContent = `مرحبا، ${currentProfile.display_name}`;
 
   const adminButton = document.querySelector("#adminViewButton");
   adminButton.hidden = currentProfile.role !== "admin";
@@ -253,7 +300,7 @@ function renderAssignedQuizzes(assignments) {
     tiles.push(tile);
   }
 
-  grid.replaceChildren(...(tiles.length ? tiles : [createEmptyState("No activities enabled yet.")]));
+  grid.replaceChildren(...(tiles.length ? tiles : [createEmptyState("لا توجد أنشطة مفعلة بعد.")]));
 }
 
 function setupDashboardTabs() {
@@ -281,7 +328,7 @@ function createQuizTile(quiz) {
   const tile = document.querySelector("#quizTileTemplate").content.firstElementChild.cloneNode(true);
   tile.href = quiz.url;
   tile.style.setProperty("--tile-color", quiz.color);
-  tile.setAttribute("aria-label", `Start ${quiz.title}`);
+  tile.setAttribute("aria-label", `ابدأ ${quiz.title}`);
   tile.querySelector(".quiz-icon").textContent = quiz.icon;
   tile.querySelector(".quiz-name").textContent = quiz.title;
   return tile;
@@ -299,7 +346,7 @@ function renderChallengeMode(assignments) {
   if (!allowed.length) {
     select.disabled = true;
     createForm.querySelector("button").disabled = true;
-    select.append(new Option("No quizzes assigned", ""));
+    select.append(new Option("لا توجد اختبارات مسندة", ""));
   } else {
     allowed.forEach((quiz) => {
       select.append(new Option(`${quiz.icon} ${quiz.title}`, quiz.id));
@@ -308,7 +355,7 @@ function renderChallengeMode(assignments) {
 
   createForm.addEventListener("submit", async (event) => {
     event.preventDefault();
-    setMessage(createMessage, "Creating…");
+    setMessage(createMessage, "جاري الإنشاء…");
 
     const formData = new FormData(createForm);
     const quizId = String(formData.get("quizId") || "");
@@ -320,11 +367,11 @@ function renderChallengeMode(assignments) {
 
       if (error) throw error;
 
-      setMessage(createMessage, "Session ready.");
+      setMessage(createMessage, "الجلسة جاهزة.");
       setChallengeState(data);
       await loadOpenChallenges();
     } catch (error) {
-      setMessage(createMessage, error.message || "Could not create session.", true);
+      setMessage(createMessage, arabicError(error, "تعذر إنشاء الجلسة."), true);
     }
   });
 
@@ -339,14 +386,14 @@ async function loadOpenChallenges() {
   const list = document.querySelector("#openChallengesList");
   if (!list) return;
 
-  list.replaceChildren(createEmptyState("Loading…"));
+  list.replaceChildren(createEmptyState("جاري التحميل…"));
 
   try {
     const { data, error } = await supabaseClient.rpc("list_open_challenge_sessions");
     if (error) throw error;
 
     if (!data?.length) {
-      list.replaceChildren(createEmptyState("No open sessions."));
+      list.replaceChildren(createEmptyState("لا توجد جلسات مفتوحة."));
       return;
     }
 
@@ -354,7 +401,7 @@ async function loadOpenChallenges() {
     data.forEach((session) => list.append(createOpenChallengeRow(session)));
   } catch (error) {
     console.error("Could not load challenge sessions.", error);
-    list.replaceChildren(createEmptyState("Could not load sessions."));
+    list.replaceChildren(createEmptyState("تعذر تحميل الجلسات."));
   }
 }
 
@@ -364,27 +411,27 @@ function createOpenChallengeRow(session) {
 
   const content = document.createElement("div");
   const title = document.createElement("strong");
-  title.textContent = `${session.quiz_icon || "🎯"} ${session.quiz_title || session.quiz_id}`;
+  title.textContent = `${session.quiz_icon || "🎯"} ${activityTitle(session.quiz_id, session.quiz_title)}`;
   const meta = document.createElement("div");
   meta.className = "progress-meta";
-  meta.textContent = `${session.host_display_name} · open session`;
+  meta.textContent = `${session.host_display_name} · جلسة مفتوحة`;
   content.append(title, meta);
 
   const button = document.createElement("button");
   button.className = "mini-action";
   button.type = "button";
-  button.textContent = "Join";
+  button.textContent = "انضمام";
   button.addEventListener("click", async () => {
     button.disabled = true;
-    button.textContent = "Joining…";
+    button.textContent = "جاري الانضمام…";
     try {
       const state = await joinChallengeSession(session.session_id, null);
       setChallengeState(state);
       await loadOpenChallenges();
     } catch (error) {
-      window.alert(error.message || "Could not join session.");
+      window.alert(arabicError(error, "تعذر الانضمام إلى الجلسة."));
       button.disabled = false;
-      button.textContent = "Join";
+      button.textContent = "انضمام";
     }
   });
 
@@ -468,7 +515,7 @@ function renderChallengeState() {
 
   const titleWrap = document.createElement("div");
   const title = document.createElement("h3");
-  title.textContent = `${currentChallengeState.quiz?.icon || "🎯"} ${currentChallengeState.quiz?.title || currentChallengeState.quiz_id}`;
+  title.textContent = `${currentChallengeState.quiz?.icon || "🎯"} ${activityTitle(currentChallengeState.quiz_id, currentChallengeState.quiz?.title)}`;
   const meta = document.createElement("p");
   meta.className = "progress-meta";
   meta.textContent = formatChallengeStatus(currentChallengeState.status);
@@ -481,7 +528,7 @@ function renderChallengeState() {
     const startButton = document.createElement("button");
     startButton.className = "primary-action";
     startButton.type = "button";
-    startButton.textContent = "Start";
+    startButton.textContent = "ابدأ";
     startButton.disabled = (currentChallengeState.players || []).length !== 2;
     startButton.addEventListener("click", startCurrentChallenge);
     actions.append(startButton);
@@ -491,7 +538,7 @@ function renderChallengeState() {
     const cancelButton = document.createElement("button");
     cancelButton.className = "mini-action";
     cancelButton.type = "button";
-    cancelButton.textContent = "Leave";
+    cancelButton.textContent = "مغادرة";
     cancelButton.addEventListener("click", abandonCurrentChallenge);
     actions.append(cancelButton);
   }
@@ -524,7 +571,7 @@ function createChallengePlayerCard(player) {
   name.textContent = `${player.avatar || "⭐"} ${player.display_name}`;
   const meta = document.createElement("span");
   meta.className = "progress-meta";
-  meta.textContent = `${player.is_host ? "Host" : "Player"} · ${player.wrong_count}/3 wrong`;
+  meta.textContent = `${player.is_host ? "المضيف" : "لاعب"} · الأخطاء ${player.wrong_count}/3`;
   card.append(name, meta);
   return card;
 }
@@ -533,10 +580,10 @@ function createWaitingPlayerCard() {
   const card = document.createElement("article");
   card.className = "challenge-player is-empty";
   const name = document.createElement("strong");
-  name.textContent = "Waiting";
+  name.textContent = "بانتظار لاعب";
   const meta = document.createElement("span");
   meta.className = "progress-meta";
-  meta.textContent = "Open to assigned players";
+  meta.textContent = "متاحة لمن عنده نفس الاختبار";
   card.append(name, meta);
   return card;
 }
@@ -546,7 +593,7 @@ function createChallengeStatusPanel(state) {
   panel.className = "challenge-status-panel";
 
   if (state.status === "waiting") {
-    panel.append(createEmptyState("Waiting for another player."));
+    panel.append(createEmptyState("بانتظار لاعب آخر."));
     return panel;
   }
 
@@ -555,8 +602,8 @@ function createChallengeStatusPanel(state) {
     const message = document.createElement("p");
     message.className = "challenge-turn-message";
     message.textContent = state.current_answering_user_id === currentProfile.id
-      ? "Your turn"
-      : `${currentPlayer?.display_name || "Other player"}'s turn`;
+      ? "دورك"
+      : `دور ${currentPlayer?.display_name || "اللاعب الآخر"}`;
     panel.append(message, createChallengeLaunchLink(state));
     return panel;
   }
@@ -565,12 +612,12 @@ function createChallengeStatusPanel(state) {
     const winner = (state.players || []).find((player) => player.user_id === state.winner_id);
     const message = document.createElement("p");
     message.className = "challenge-turn-message";
-    message.textContent = winner ? `🎉 ${winner.display_name} wins!` : "🎉 Challenge finished!";
+    message.textContent = winner ? `🎉 فاز ${winner.display_name}!` : "🎉 انتهى التحدي!";
     panel.append(message, createChallengeScoreSummary(state));
     return panel;
   }
 
-  panel.append(createEmptyState("Challenge ended."));
+  panel.append(createEmptyState("انتهى التحدي."));
   return panel;
 }
 
@@ -578,7 +625,7 @@ function createChallengeScoreSummary(state) {
   const summary = document.createElement("div");
   summary.className = "progress-meta";
   summary.textContent = (state.players || [])
-    .map((player) => `${player.display_name}: ${player.wrong_count}/3 wrong`)
+    .map((player) => `${player.display_name}: الأخطاء ${player.wrong_count}/3`)
     .join(" · ");
   return summary;
 }
@@ -598,7 +645,7 @@ function createChallengeLaunchLink(state) {
   const link = document.createElement("a");
   link.className = "primary-action";
   link.href = buildChallengeQuizUrl(state);
-  link.textContent = "Open quiz";
+  link.textContent = "افتح الاختبار";
   return link;
 }
 
@@ -616,7 +663,7 @@ async function startCurrentChallenge() {
   });
 
   if (error) {
-    window.alert(error.message || "Could not start challenge.");
+    window.alert(arabicError(error, "تعذر بدء التحدي."));
     return;
   }
 
@@ -631,7 +678,7 @@ async function abandonCurrentChallenge() {
   });
 
   if (error) {
-    window.alert(error.message || "Could not leave challenge.");
+    window.alert(arabicError(error, "تعذرت مغادرة التحدي."));
     return;
   }
 
@@ -644,10 +691,10 @@ async function abandonCurrentChallenge() {
 }
 
 function formatChallengeStatus(status) {
-  if (status === "waiting") return "Waiting";
-  if (status === "active") return "Live";
-  if (status === "finished") return "Finished";
-  return "Ended";
+  if (status === "waiting") return "بالانتظار";
+  if (status === "active") return "جارية الآن";
+  if (status === "finished") return "انتهت";
+  return "منتهية";
 }
 
 async function renderAdmin() {
@@ -662,7 +709,7 @@ async function renderAdmin() {
 
 function renderAssignmentCheckboxes(container, assignments) {
   const legend = container.querySelector("legend") || document.createElement("legend");
-  legend.textContent = "Activity access";
+  legend.textContent = "الأنشطة المتاحة";
   container.replaceChildren(legend);
   const assignmentMap = createAssignmentMap(assignments);
 
@@ -687,7 +734,7 @@ async function createUser(event) {
   const formData = new FormData(form);
   const quizConfigs = getAssignmentConfigs(document.querySelector("#newUserAssignments"));
 
-  setMessage(message, "Creating…");
+  setMessage(message, "جاري الإنشاء…");
 
   try {
     const response = await fetch(`${config.supabaseUrl}/functions/v1/admin-users`, {
@@ -708,11 +755,11 @@ async function createUser(event) {
 
     const payload = await response.json();
     if (!response.ok) {
-      throw new Error(payload.error || "Could not create user.");
+      throw new Error(arabicError(payload.error, "تعذر إنشاء المستخدم."));
     }
 
     form.reset();
-    setMessage(message, "User created.");
+    setMessage(message, "تم إنشاء المستخدم.");
     await renderAdminUsers();
   } catch (error) {
     setMessage(message, error.message, true);
@@ -721,7 +768,7 @@ async function createUser(event) {
 
 async function renderAdminUsers() {
   const list = document.querySelector("#adminUsersList");
-  list.replaceChildren(createEmptyState("Loading…"));
+  list.replaceChildren(createEmptyState("جاري التحميل…"));
 
   const { data: users, error } = await supabaseClient
     .from("profiles")
@@ -729,7 +776,7 @@ async function renderAdminUsers() {
     .order("display_name");
 
   if (error) {
-    list.replaceChildren(createEmptyState("Could not load users."));
+    list.replaceChildren(createEmptyState("تعذر تحميل المستخدمين."));
     return;
   }
 
@@ -745,36 +792,36 @@ async function renderAdminUsers() {
     name.textContent = `${user.avatar || "⭐"} ${user.display_name}`;
     const meta = document.createElement("div");
     meta.className = "progress-meta";
-    meta.textContent = `@${user.username} · ${user.role}`;
+    meta.textContent = `@${user.username} · ${user.role === "admin" ? "مدير" : "طفل"}`;
     const fieldset = document.createElement("fieldset");
     const passwordReset = document.createElement("label");
     passwordReset.className = "password-reset";
     const passwordText = document.createElement("span");
-    passwordText.textContent = "New password";
+    passwordText.textContent = "كلمة مرور جديدة";
     const passwordInput = document.createElement("input");
     passwordInput.type = "password";
     passwordInput.autocomplete = "new-password";
-    passwordInput.placeholder = "New password";
+    passwordInput.placeholder = "كلمة مرور جديدة";
     passwordReset.append(passwordText, passwordInput);
     const actions = document.createElement("div");
     actions.className = "assignment-actions";
     const saveButton = document.createElement("button");
     saveButton.className = "mini-action save-access";
     saveButton.type = "button";
-    saveButton.textContent = "Save access";
+    saveButton.textContent = "حفظ الأنشطة";
     const passwordButton = document.createElement("button");
     passwordButton.className = "mini-action";
     passwordButton.type = "button";
-    passwordButton.textContent = "Change password";
+    passwordButton.textContent = "تغيير كلمة المرور";
     const deleteButton = document.createElement("button");
     deleteButton.className = "mini-action danger-action";
     deleteButton.type = "button";
-    deleteButton.textContent = "Delete";
+    deleteButton.textContent = "حذف";
     deleteButton.hidden = user.id === currentProfile.id;
     const adaptiveButton = document.createElement("button");
     adaptiveButton.className = "mini-action";
     adaptiveButton.type = "button";
-    adaptiveButton.textContent = "Adaptive levels";
+    adaptiveButton.textContent = "المستوى التكيفي";
     const passwordMessage = document.createElement("p");
     passwordMessage.className = "form-message compact-message";
     actions.append(saveButton, passwordButton, deleteButton, adaptiveButton);
@@ -806,7 +853,7 @@ async function saveAssignments(userId, fieldset, button) {
   const quizConfigs = getAssignmentConfigs(fieldset);
   const originalText = button.textContent;
   button.disabled = true;
-  button.textContent = "Saving…";
+  button.textContent = "جاري الحفظ…";
 
   const { error } = await supabaseClient.rpc("admin_set_assignments", {
     target_user_id: userId,
@@ -816,7 +863,7 @@ async function saveAssignments(userId, fieldset, button) {
   if (error) {
     button.disabled = false;
     button.textContent = originalText;
-    window.alert(error.message || "Could not save quiz access.");
+    window.alert(arabicError(error, "تعذر حفظ الأنشطة."));
     return;
   }
 
@@ -844,10 +891,10 @@ function createAssignmentMap(assignments) {
 
 async function updateUserPassword(userId, input, message) {
   const password = input.value;
-  setMessage(message, "Saving…");
+  setMessage(message, "جاري الحفظ…");
 
   if (!password) {
-    setMessage(message, "Password is required.", true);
+    setMessage(message, "كلمة المرور مطلوبة.", true);
     return;
   }
 
@@ -867,21 +914,21 @@ async function updateUserPassword(userId, input, message) {
 
     const payload = await response.json();
     if (!response.ok) {
-      throw new Error(payload.error || "Could not change password.");
+      throw new Error(arabicError(payload.error, "تعذر تغيير كلمة المرور."));
     }
 
     input.value = "";
-    setMessage(message, "Password changed.");
+    setMessage(message, "تم تغيير كلمة المرور.");
   } catch (error) {
-    setMessage(message, error.message || "Could not change password.", true);
+    setMessage(message, error.message || "تعذر تغيير كلمة المرور.", true);
   }
 }
 
 async function deleteUserAccount(user, message) {
-  const confirmed = window.confirm(`Delete ${user.display_name}'s account and all stored progress?`);
+  const confirmed = window.confirm(`حذف حساب ${user.display_name} وكل نتائجه المحفوظة؟`);
   if (!confirmed) return;
 
-  setMessage(message, "Deleting…");
+  setMessage(message, "جاري الحذف…");
 
   try {
     const { error } = await supabaseClient.rpc("admin_delete_user", {
@@ -895,13 +942,13 @@ async function deleteUserAccount(user, message) {
     await renderAdminUsers();
     await renderAdminActivity();
   } catch (error) {
-    setMessage(message, error.message || "Could not delete account.", true);
+    setMessage(message, arabicError(error, "تعذر حذف الحساب."), true);
   }
 }
 
 async function renderAdminActivity() {
   const list = document.querySelector("#adminActivityList");
-  list.replaceChildren(createEmptyState("Loading…"));
+  list.replaceChildren(createEmptyState("جاري التحميل…"));
 
   const [profiles, quizzes, index] = await Promise.all([
     fetchProfilesForActivity(),
@@ -910,7 +957,7 @@ async function renderAdminActivity() {
   ]);
 
   if (!profiles.length) {
-    list.replaceChildren(createEmptyState("Could not load activity."));
+    list.replaceChildren(createEmptyState("تعذر تحميل النشاط."));
     return;
   }
 
@@ -950,8 +997,8 @@ function createUserActivityGroup(profile, stats, quizMap) {
   const meta = document.createElement("span");
   meta.className = "progress-meta";
   meta.textContent = stats
-    ? `${stats.count} ${stats.count === 1 ? "attempt" : "attempts"} · last ${formatDateTime(stats.last)}`
-    : "No activity";
+    ? `${countLabel(stats.count, "محاولة واحدة", "محاولتان", "محاولات", "محاولة")} · آخرها ${formatDateTime(stats.last)}`
+    : "لا يوجد نشاط";
   summary.append(name, meta);
 
   const body = document.createElement("div");
@@ -959,7 +1006,7 @@ function createUserActivityGroup(profile, stats, quizMap) {
   group.append(summary, body);
 
   if (!stats) {
-    body.append(createEmptyState("No activity yet."));
+    body.append(createEmptyState("لا يوجد نشاط بعد."));
     return group;
   }
 
@@ -968,7 +1015,7 @@ function createUserActivityGroup(profile, stats, quizMap) {
   group.addEventListener("toggle", async () => {
     if (!group.open || loaded) return;
     loaded = true;
-    body.replaceChildren(createEmptyState("Loading…"));
+    body.replaceChildren(createEmptyState("جاري التحميل…"));
 
     const { data, error } = await supabaseClient
       .from("quiz_progress")
@@ -979,7 +1026,7 @@ function createUserActivityGroup(profile, stats, quizMap) {
 
     if (error) {
       loaded = false;
-      body.replaceChildren(createEmptyState("Could not load activity."));
+      body.replaceChildren(createEmptyState("تعذر تحميل النشاط."));
       return;
     }
 
@@ -1016,10 +1063,10 @@ function createActivityItem(item, quiz) {
 
   const header = document.createElement("div");
   const title = document.createElement("strong");
-  title.textContent = quiz?.title || item.quiz_id;
+  title.textContent = activityTitle(item.quiz_id, quiz?.title);
   const meta = document.createElement("div");
   meta.className = "progress-meta";
-  meta.textContent = `${item.level || "Practice"} · ${formatDateTime(item.completed_at)}`;
+  meta.textContent = `${levelLabels[item.level || "Practice"] || item.level} · ${formatDateTime(item.completed_at)}`;
   header.append(title, meta);
 
   const score = document.createElement("div");
@@ -1040,7 +1087,7 @@ function createActivityItem(item, quiz) {
     const details = document.createElement("details");
     details.className = "activity-details";
     const detailsSummary = document.createElement("summary");
-    detailsSummary.textContent = "Answer details";
+    detailsSummary.textContent = "تفاصيل الإجابات";
     const pre = document.createElement("pre");
     pre.textContent = JSON.stringify(item.details, null, 2);
     details.append(detailsSummary, pre);
@@ -1058,11 +1105,16 @@ function summarizeProgressDetails(details) {
   if (Array.isArray(details.answers)) {
     const correct = details.answers.filter((answer) => answer.correct).length;
     const wrong = details.answers.length - correct;
-    return `${correct} correct · ${wrong} wrong`;
+    return `صحيحة ${correct} · خاطئة ${wrong}`;
+  }
+
+  if (Array.isArray(details.question_results)) {
+    const correct = details.question_results.filter((result) => result.correct).length;
+    return `صحيحة ${correct} · خاطئة ${details.question_results.length - correct}`;
   }
 
   if (Number.isFinite(details.wrongCount)) {
-    return `${details.wrongCount} wrong`;
+    return `خاطئة ${details.wrongCount}`;
   }
 
   return "";
@@ -1094,11 +1146,11 @@ function createAdaptivePanel(userId, assignments) {
   panel.dataset.userId = userId;
 
   const heading = document.createElement("h4");
-  heading.textContent = "Adaptive level";
+  heading.textContent = "المستوى التكيفي";
   panel.append(heading);
 
   if (!gradedAssignments.length) {
-    panel.append(createEmptyState("No quizzes assigned."));
+    panel.append(createEmptyState("لا توجد اختبارات مسندة."));
     return panel;
   }
 
@@ -1112,7 +1164,7 @@ function createAdaptivePanel(userId, assignments) {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "mini-action" + (i === 0 ? " active-tab" : "");
-    btn.textContent = a.quiz_id;
+    btn.textContent = activityTitle(a.quiz_id);
     btn.dataset.quizId = a.quiz_id;
     btn.addEventListener("click", () => {
       tabBar.querySelectorAll("button").forEach(b => b.classList.remove("active-tab"));
@@ -1134,7 +1186,7 @@ async function loadAdaptiveAnalytics(userId, panel) {
 }
 
 async function renderAdaptiveTabContent(container, userId, quizId) {
-  container.replaceChildren(createEmptyState("Loading…"));
+  container.replaceChildren(createEmptyState("جاري التحميل…"));
 
   const { data, error } = await supabaseClient.rpc("admin_get_adaptive_analytics", {
     p_user_id: userId,
@@ -1142,7 +1194,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
   });
 
   if (error || !data) {
-    container.replaceChildren(createEmptyState("No data yet."));
+    container.replaceChildren(createEmptyState("لا توجد بيانات بعد."));
     return;
   }
 
@@ -1152,16 +1204,16 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
   const stats = document.createElement("div");
   stats.className = "adaptive-stats";
 
-  const lvl = createAdaptiveStat("Level", `${data.current_level ?? "-"} / 100`);
+  const lvl = createAdaptiveStat("المستوى", `${data.current_level ?? "-"} / 100`);
   const ema = createAdaptiveStat(
-    "EMA score",
+    "متوسط الأداء",
     data.ema_score != null ? `${Math.round(data.ema_score * 100)}%` : "-"
   );
   const conf = createAdaptiveStat(
-    "Confidence",
+    "الثقة",
     data.confidence != null ? `${Math.round(data.confidence * 100)}%` : "-"
   );
-  const sessions = createAdaptiveStat("Sessions", data.total_sessions ?? 0);
+  const sessions = createAdaptiveStat("الجولات", data.total_sessions ?? 0);
 
   stats.append(lvl, ema, conf, sessions);
   container.append(stats);
@@ -1170,13 +1222,13 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
   if (data.weak_topics?.length) {
     const wt = document.createElement("p");
     wt.className = "progress-meta";
-    wt.textContent = `Weak topics: ${data.weak_topics.join(", ")}`;
+    wt.textContent = `يحتاج تقوية: ${data.weak_topics.map((topic) => topicLabels[topic] || topic).join("، ")}`;
     container.append(wt);
   }
   if (data.strong_topics?.length) {
     const st = document.createElement("p");
     st.className = "progress-meta";
-    st.textContent = `Strong topics: ${data.strong_topics.join(", ")}`;
+    st.textContent = `نقاط قوة: ${data.strong_topics.map((topic) => topicLabels[topic] || topic).join("، ")}`;
     container.append(st);
   }
 
@@ -1185,7 +1237,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
     const agg = data.today_aggregate;
     const today = document.createElement("p");
     today.className = "progress-meta";
-    today.textContent = `Today: ${agg.attempt_count} attempts · ${agg.correct_qs}/${agg.total_qs} correct${agg.evaluated ? " (evaluated)" : " (pending)"}`;
+    today.textContent = `اليوم: ${countLabel(agg.attempt_count, "محاولة واحدة", "محاولتان", "محاولات", "محاولة")} · صحيحة ${agg.correct_qs}/${agg.total_qs}${agg.evaluated ? " (تم التقييم)" : " (بانتظار التقييم)"}`;
     container.append(today);
   }
 
@@ -1193,7 +1245,7 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
   const overrideSection = document.createElement("div");
   overrideSection.className = "adaptive-override";
   const overrideLabel = document.createElement("label");
-  overrideLabel.textContent = "Override level ";
+  overrideLabel.textContent = "تعديل المستوى ";
   const overrideInput = document.createElement("input");
   overrideInput.type = "number";
   overrideInput.min = 1;
@@ -1202,22 +1254,22 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
   overrideInput.style.width = "4rem";
   const noteInput = document.createElement("input");
   noteInput.type = "text";
-  noteInput.placeholder = "Reason (optional)";
-  noteInput.style.marginLeft = "0.5rem";
+  noteInput.placeholder = "السبب (اختياري)";
+  noteInput.style.marginInlineStart = "0.5rem";
   const overrideBtn = document.createElement("button");
   overrideBtn.type = "button";
   overrideBtn.className = "mini-action";
-  overrideBtn.textContent = "Apply";
+  overrideBtn.textContent = "تطبيق";
   const overrideMsg = document.createElement("span");
   overrideMsg.className = "form-message compact-message";
   overrideBtn.addEventListener("click", async () => {
     const level = parseInt(overrideInput.value, 10);
     if (!level || level < 1 || level > 100) {
-      overrideMsg.textContent = "Enter a number between 1 and 100.";
+      overrideMsg.textContent = "أدخل رقما من 1 إلى 100.";
       return;
     }
     overrideBtn.disabled = true;
-    overrideMsg.textContent = "Saving…";
+    overrideMsg.textContent = "جاري الحفظ…";
     const { error: overrideError } = await supabaseClient.rpc("admin_override_quiz_level", {
       p_user_id: userId,
       p_quiz_id: quizId,
@@ -1226,9 +1278,9 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
     });
     overrideBtn.disabled = false;
     if (overrideError) {
-      overrideMsg.textContent = overrideError.message || "Could not apply override.";
+      overrideMsg.textContent = arabicError(overrideError, "تعذر تعديل المستوى.");
     } else {
-      overrideMsg.textContent = `Level set to ${level}.`;
+      overrideMsg.textContent = `تم ضبط المستوى على ${level}.`;
       renderAdaptiveTabContent(container, userId, quizId);
     }
   });
@@ -1239,12 +1291,12 @@ async function renderAdaptiveTabContent(container, userId, quizId) {
   // Adjustment history table
   if (data.recent_adjustments?.length) {
     const histHeading = document.createElement("h5");
-    histHeading.textContent = "Adjustment history";
+    histHeading.textContent = "سجل التعديلات";
     const table = document.createElement("table");
     table.className = "adaptive-history-table";
     const thead = document.createElement("thead");
     const headRow = document.createElement("tr");
-    ["Date", "Before", "After", "Trigger", "Accuracy", "Note"].forEach(label => {
+    ["التاريخ", "قبل", "بعد", "السبب", "الدقة", "ملاحظة"].forEach(label => {
       const th = document.createElement("th");
       th.textContent = label;
       headRow.append(th);
