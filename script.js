@@ -63,6 +63,13 @@ const quizCatalog = [
     icon: "🔬",
     color: "#dcecfb",
     url: "https://ahmad9077.github.io/science-grade1-quiz/boys/"
+  },
+  {
+    id: "english-grade1",
+    title: "English",
+    icon: "🔤",
+    color: "#ffe9b8",
+    url: "https://ahmad9077.github.io/english-grade1-quiz/"
   }
 ];
 
@@ -99,7 +106,12 @@ const topicLabels = {
   topic_covering: "الغطاء",
   topic_food: "الغذاء",
   topic_breathing: "التنفس",
-  topic_reproduction: "التكاثر"
+  topic_reproduction: "التكاثر",
+  english_grade1: "English",
+  topic_case: "الحرف الكبير والصغير",
+  topic_letters: "الحرف والصورة",
+  topic_numbers: "الأرقام والعد",
+  topic_missing: "الحرف الناقص"
 };
 
 // Messages that come back from Supabase and the admin-users function are in English.
