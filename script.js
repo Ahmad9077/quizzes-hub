@@ -52,10 +52,17 @@ const quizCatalog = [
   },
   {
     id: "science-grade1",
-    title: "علوم",
+    title: "علوم - بنات",
     icon: "🔬",
     color: "#e3f6dc",
     url: "https://ahmad9077.github.io/science-grade1-quiz/"
+  },
+  {
+    id: "science-grade1-boys",
+    title: "علوم - أولاد",
+    icon: "🔬",
+    color: "#dcecfb",
+    url: "https://ahmad9077.github.io/science-grade1-quiz/boys/"
   }
 ];
 
