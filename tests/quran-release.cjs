@@ -24,6 +24,7 @@ async function fixture(page, user='test-a', assigned=true) {
   await fixture(page,'test-a',[group==='hamoud'?'quran-al-balad':'quran-deema']);await page.route('https://api.quran.com/**',r=>r.abort());page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'/quran/?group='+group);await page.locator('#surahList .surah-card').first().waitFor();await page.evaluate(()=>document.fonts.ready);
   assert.equal(await page.locator('#backHub').getAttribute('href'),'../');
+  assert.equal((await page.locator('#backHub').textContent()).trim(),'الصفحة الرئيسية');
   assert.deepEqual(await page.locator('#surahList .surah-card').evaluateAll(cards=>cards.map(c=>c.getAttribute('href'))),expectedIds.map(id=>'#surah-'+id));
   async function fit(label) {
    const box=await page.evaluate(()=>({width:innerWidth,scrollWidth:document.documentElement.scrollWidth,height:innerHeight,scrollHeight:document.documentElement.scrollHeight}));
