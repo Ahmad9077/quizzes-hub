@@ -18,7 +18,7 @@ const entries=JSON.parse(fs.readFileSync('quran/data/surahs.json'));
  });
  await page.goto(base+'/quran/');await page.locator('.surah-card').first().waitFor();
  for(const entry of entries){
-  await page.goto(base+'/quran/?group='+([1,114].includes(entry.id)?'deema':'hamoud')+'#surah-'+entry.id);await page.locator('#reader').waitFor({state:'visible'});
+  await page.goto(base+'/quran/?group='+([1,114,113,112,111,110,109,108].includes(entry.id)?'deema':'hamoud')+'#surah-'+entry.id);await page.locator('#reader').waitFor({state:'visible'});
   await page.evaluate(()=>{selectVerse(1);proof.played=[];proof.ended=[]});
   await page.locator('#listen').click();await page.waitForFunction(()=>proof.ended.length===1&&!playing,{},{timeout:30000});
   const played=await page.evaluate(()=>structuredClone(proof));const expected=String(entry.id).padStart(3,'0')+'001.mp3';

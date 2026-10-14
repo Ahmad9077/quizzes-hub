@@ -76,6 +76,8 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:20px;ma
  body[data-screen=reader] .verse-stage{flex:1;min-height:0}
  body[data-screen=reader] .reader-heading,body[data-screen=reader] .verse-meta,body[data-screen=reader] .verse-navigation,body[data-screen=reader] .audio-panel{flex-shrink:0}
  body[data-screen=reader] footer{display:none}body[data-screen=home] footer{flex-shrink:0;margin-top:10px}
+ /* A longer list (Grade 1 has eight surahs) scrolls inside the page instead of running under the footer. */
+ body[data-screen=home] main{overflow-y:auto;-webkit-overflow-scrolling:touch}
  body[data-screen] .message:not(:empty){flex-shrink:0;font-size:14px;padding-block:6px;line-height:1.6}
 }
 @media(max-width:360px){.wordmark{font-size:21px}.reader-heading h1{font-size:29px}.mode-switch button{font-size:15px;padding-inline:9px}.verse-navigation button{font-size:15px}.audio-actions button{font-size:15px}.home-intro h1{font-size:35px}}
@@ -91,6 +93,3 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:20px;ma
 
 /* Content becomes available after the existing Hub access check. */
 #main[aria-busy="true"] #surahList{display:none}
-
-.hadith-section{margin-top:26px}.hadith-section h2{font-size:25px;margin-bottom:10px}.hadith-card{max-width:none}
-@media(max-width:720px){.hadith-section{margin-top:22px}.hadith-section h2{font-size:25px;margin-bottom:8px}}

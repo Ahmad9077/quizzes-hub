@@ -1,0 +1,22 @@
+{
+  "reader": "مشاري راشد العفاسي",
+  "readerId": 7,
+  "provider": "Quran Foundation",
+  "retrieved": "2026-10-14T08:53:02.328862+00:00",
+  "expires": "2026-10-21T08:53:02.328862+00:00",
+  "verses": [
+    {
+      "id": 1,
+      "url": "https://verses.quran.com/Alafasy/mp3/110001.mp3"
+    },
+    {
+      "id": 2,
+      "url": "https://verses.quran.com/Alafasy/mp3/110002.mp3"
+    },
+    {
+      "id": 3,
+      "url": "https://verses.quran.com/Alafasy/mp3/110003.mp3"
+    }
+  ],
+  "basmala": "https://verses.quran.com/Alafasy/mp3/001001.mp3"
+}

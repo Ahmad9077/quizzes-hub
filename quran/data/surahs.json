@@ -12,6 +12,42 @@
     "audio": "data/audio-114.json"
   },
   {
+    "id": 113,
+    "name": "الفلق",
+    "text": "data/113.json",
+    "audio": "data/audio-113.json"
+  },
+  {
+    "id": 112,
+    "name": "الإخلاص",
+    "text": "data/112.json",
+    "audio": "data/audio-112.json"
+  },
+  {
+    "id": 111,
+    "name": "المسد",
+    "text": "data/111.json",
+    "audio": "data/audio-111.json"
+  },
+  {
+    "id": 110,
+    "name": "النصر",
+    "text": "data/110.json",
+    "audio": "data/audio-110.json"
+  },
+  {
+    "id": 109,
+    "name": "الكافرون",
+    "text": "data/109.json",
+    "audio": "data/audio-109.json"
+  },
+  {
+    "id": 108,
+    "name": "الكوثر",
+    "text": "data/108.json",
+    "audio": "data/audio-108.json"
+  },
+  {
     "id": 90,
     "name": "البلد",
     "text": "data/90.json",

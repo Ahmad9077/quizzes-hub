@@ -4,7 +4,7 @@ const fs=require('node:fs'), assert=require('node:assert/strict');
 const base=process.env.QURAN_TEST_BASE || 'http://127.0.0.1:8871';
 const entries=JSON.parse(fs.readFileSync('quran/data/surahs.json'));
 const chapters=entries.map(entry=>JSON.parse(fs.readFileSync('quran/'+entry.text)));
-const expectedIds=[1,114,90,89,88,87,86,85,84];
+const expectedIds=[1,114,113,112,111,110,109,108,90,89,88,87,86,85,84];
 assert.deepEqual(entries.map(e=>e.id),expectedIds);
 const out=[];
 async function fixture(page, user='test-a', assigned=true) {
@@ -19,7 +19,7 @@ async function fixture(page, user='test-a', assigned=true) {
 }
 (async()=>{
  for(const group of ['hamoud','deema']) for(const [viewportName,type,w,h] of [['small-phone',webkit,320,568],['iphone-small',webkit,375,548],['iphone',webkit,390,664],['ipad',webkit,820,1180],['desktop',chromium,1440,1000]]) {
-  const name=group+'-'+viewportName, expectedIds=group==='hamoud'?[90,89,88,87,86,85,84]:[1,114], chapters=entries.filter(e=>expectedIds.includes(e.id)).map(e=>JSON.parse(fs.readFileSync('quran/'+e.text)));
+  const name=group+'-'+viewportName, expectedIds=group==='hamoud'?[90,89,88,87,86,85,84]:[1,114,113,112,111,110,109,108], chapters=entries.filter(e=>expectedIds.includes(e.id)).map(e=>JSON.parse(fs.readFileSync('quran/'+e.text)));
   const browser=await type.launch(), context=await browser.newContext({viewport:{width:w,height:h},isMobile:w<721,hasTouch:w<1000}), page=await context.newPage(),errors=[];
   await fixture(page,'test-a',[group==='hamoud'?'quran-al-balad':'quran-deema']);await page.route('https://api.quran.com/**',r=>r.abort());page.on('pageerror',e=>errors.push(e.message));
   await page.goto(base+'/quran/?group='+group);await page.locator('#surahList .surah-card').first().waitFor();await page.evaluate(()=>document.fonts.ready);
@@ -30,6 +30,8 @@ async function fixture(page, user='test-a', assigned=true) {
    assert(box.scrollWidth<=box.width, name+' '+label+' horizontal '+JSON.stringify(box));if(w<721)assert(box.scrollHeight<=box.height+1,name+' '+label+' scroll '+JSON.stringify(box));
   }
   await fit('home');
+  // Quran surahs only: the Grade 1 group no longer has a hadith section.
+  assert.equal(await page.locator('#hadithSection, .hadith-card').count(), 0, name + ' hadith removed');
   await page.screenshot({path:'/tmp/quran-eight-'+name+'-home.png',fullPage:true});
   let checked=0;
   for(const surah of chapters) {
