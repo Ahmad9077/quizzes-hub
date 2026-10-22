@@ -70,6 +70,13 @@ const quizCatalog = [
     icon: "🔤",
     color: "#ffe9b8",
     url: "https://ahmad9077.github.io/english-grade1-quiz/"
+  },
+  {
+    id: "arabic-grade1",
+    title: "اللغة العربية - الأول الابتدائي",
+    icon: "ع",
+    color: "#d9f1ef",
+    url: "https://ahmad9077.github.io/arabic-grade1-quiz/"
   }
 ];
 
@@ -111,7 +118,13 @@ const topicLabels = {
   topic_case: "الحرف الكبير والصغير",
   topic_letters: "الحرف والصورة",
   topic_numbers: "الأرقام والعد",
-  topic_missing: "الحرف الناقص"
+  topic_missing: "الحرف الناقص",
+  arabic_grade1: "اللغة العربية",
+  topic_picture: "الحرف والصورة",
+  topic_find: "الحرف في الكلمة",
+  topic_form: "شكل الحرف",
+  topic_blend: "تركيب الكلمة",
+  topic_copy: "نسخ الحرفين"
 };
 
 // Messages that come back from Supabase and the admin-users function are in English.
