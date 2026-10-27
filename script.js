@@ -77,6 +77,13 @@ const quizCatalog = [
     icon: "ع",
     color: "#d9f1ef",
     url: "https://ahmad9077.github.io/arabic-grade1-quiz/"
+  },
+  {
+    id: "math-grade1",
+    title: "الرياضيات - الأول الابتدائي",
+    icon: "🔢",
+    color: "#dcefff",
+    url: "https://ahmad9077.github.io/math-grade1-quiz/"
   }
 ];
 
@@ -124,7 +131,13 @@ const topicLabels = {
   topic_find: "الحرف في الكلمة",
   topic_form: "شكل الحرف",
   topic_blend: "تركيب الكلمة",
-  topic_copy: "نسخ الحرفين"
+  topic_copy: "نسخ الحرفين",
+  math_grade1: "الرياضيات",
+  topic_count: "العد والأعداد",
+  topic_order: "ترتيب الأعداد",
+  topic_compare: "مقارنة الأعداد",
+  topic_clock: "الساعة",
+  topic_calendar: "التقويم وأيام الأسبوع"
 };
 
 // Messages that come back from Supabase and the admin-users function are in English.
