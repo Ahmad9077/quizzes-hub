@@ -84,6 +84,13 @@ const quizCatalog = [
     icon: "🔢",
     color: "#dcefff",
     url: "https://ahmad9077.github.io/math-grade1-quiz/"
+  },
+  {
+    id: "social-grade1",
+    title: "الاجتماعيات - الأول الابتدائي",
+    icon: "🇰🇼",
+    color: "#e3f4ea",
+    url: "https://ahmad9077.github.io/social-grade1-quiz/"
   }
 ];
 
@@ -137,7 +144,11 @@ const topicLabels = {
   topic_order: "ترتيب الأعداد",
   topic_compare: "مقارنة الأعداد",
   topic_clock: "الساعة",
-  topic_calendar: "التقويم وأيام الأسبوع"
+  topic_calendar: "التقويم وأيام الأسبوع",
+  social_grade1: "الاجتماعيات",
+  topic_amir: "أمير وطني",
+  topic_home: "بيتي في وطني",
+  topic_flag: "علم وطني"
 };
 
 // Messages that come back from Supabase and the admin-users function are in English.
