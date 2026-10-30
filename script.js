@@ -91,6 +91,13 @@ const quizCatalog = [
     icon: "🇰🇼",
     color: "#e3f4ea",
     url: "https://ahmad9077.github.io/social-grade1-quiz/"
+  },
+  {
+    id: "islamic-grade1",
+    title: "التربية الإسلامية - الأول الابتدائي",
+    icon: "🕌",
+    color: "#e2f3ee",
+    url: "https://ahmad9077.github.io/islamic-grade1-quiz/"
   }
 ];
 
@@ -148,7 +155,13 @@ const topicLabels = {
   social_grade1: "الاجتماعيات",
   topic_amir: "أمير وطني",
   topic_home: "بيتي في وطني",
-  topic_flag: "علم وطني"
+  topic_flag: "علم وطني",
+  islamic_grade1: "التربية الإسلامية",
+  topic_rabbi: "ربنا الله تعالى",
+  topic_arkan: "أركان الإسلام",
+  topic_ibada: "العبادة",
+  topic_rasul: "الرسول محمد ﷺ",
+  topic_walidain: "حب الوالدين وبرهما"
 };
 
 // Messages that come back from Supabase and the admin-users function are in English.

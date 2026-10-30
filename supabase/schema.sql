@@ -59,7 +59,8 @@ values
   ('english-grade1', 'English', 'https://ahmad9077.github.io/english-grade1-quiz/', '🔤', '#ffe9b8', 120),
   ('arabic-grade1', 'اللغة العربية - الأول الابتدائي', 'https://ahmad9077.github.io/arabic-grade1-quiz/', 'ع', '#d9f1ef', 130),
   ('math-grade1', 'الرياضيات - الأول الابتدائي', 'https://ahmad9077.github.io/math-grade1-quiz/', '🔢', '#dcefff', 140),
-  ('social-grade1', 'الاجتماعيات - الأول الابتدائي', 'https://ahmad9077.github.io/social-grade1-quiz/', '🇰🇼', '#e3f4ea', 150)
+  ('social-grade1', 'الاجتماعيات - الأول الابتدائي', 'https://ahmad9077.github.io/social-grade1-quiz/', '🇰🇼', '#e3f4ea', 150),
+  ('islamic-grade1', 'التربية الإسلامية - الأول الابتدائي', 'https://ahmad9077.github.io/islamic-grade1-quiz/', '🕌', '#e2f3ee', 160)
 on conflict (id) do update set
   title = excluded.title,
   url = excluded.url,

@@ -18,6 +18,7 @@ const SITES = [
   'arabic-grade1-quiz',
   'math-grade1-quiz',
   'social-grade1-quiz',
+  'islamic-grade1-quiz',
 ]
 const TEXT = /^(text\/|application\/(javascript|json|manifest\+json|xml)|image\/svg\+xml)/
 const FORWARDED = ['accept', 'accept-language', 'range', 'if-none-match', 'if-modified-since']
