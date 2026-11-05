@@ -129,6 +129,8 @@ function countLabel(count, one, two, few, many) {
 const levelLabels = { adaptive: "تكيفي", Practice: "تدريب", practice: "تدريب" };
 const topicLabels = {
   science_grade1: "علوم",
+  topic_habitats: "أين تعيش الكائنات الحية",
+  topic_protect: "حماية أماكن عيش الكائنات الحية",
   topic_plants: "النبات",
   topic_movement: "الحركة",
   topic_covering: "الغطاء",
