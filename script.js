@@ -6,6 +6,7 @@ const quizCatalog = [
     title: "أعلام الدول",
     icon: "🌍",
     color: "#dff5ff",
+    book: "#2563a8",
     url: "https://ahmad9077.github.io/world-flags-quiz/"
   },
   {
@@ -13,6 +14,7 @@ const quizCatalog = [
     title: "خريطة الدول",
     icon: "🗺️",
     color: "#e0faee",
+    book: "#2f7d4f",
     url: "https://ahmad9077.github.io/country-map-quiz/"
   },
   {
@@ -20,6 +22,7 @@ const quizCatalog = [
     title: "تهجئة الكلمات",
     icon: "🔤",
     color: "#fff0bf",
+    book: "#a15c0d",
     url: "https://ahmad9077.github.io/spelling-quiz/"
   },
   {
@@ -27,6 +30,7 @@ const quizCatalog = [
     title: "اقرأ الصورة",
     icon: "📖",
     color: "#ffe4da",
+    book: "#b03a6e",
     url: "https://ahmad9077.github.io/little-words-picture-quiz/"
   },
   {
@@ -34,6 +38,7 @@ const quizCatalog = [
     title: "اختر الكلمة الإنجليزية",
     icon: "🔠",
     color: "#e8ebff",
+    book: "#4f46a5",
     url: "https://ahmad9077.github.io/english-word-choice-quiz/"
   },
   {
@@ -41,6 +46,7 @@ const quizCatalog = [
     title: "محقق الحدود",
     icon: "🧭",
     color: "#e8f2ff",
+    book: "#b0521c",
     url: "https://ahmad9077.github.io/country-border-letter-quiz/"
   },
   {
@@ -48,6 +54,7 @@ const quizCatalog = [
     title: "صدى الحروف",
     icon: "أ",
     color: "#efe8ff",
+    book: "#8f3b3b",
     url: "https://ahmad9077.github.io/arabic-phonics-quiz/"
   },
   {
@@ -55,6 +62,8 @@ const quizCatalog = [
     title: "علوم - بنات",
     icon: "🔬",
     color: "#e3f6dc",
+    book: "#0e7490",
+    cover: "art-sprout",
     url: "https://ahmad9077.github.io/science-grade1-quiz/"
   },
   {
@@ -62,6 +71,8 @@ const quizCatalog = [
     title: "علوم - أولاد",
     icon: "🔬",
     color: "#dcecfb",
+    book: "#0e7490",
+    cover: "art-sprout",
     url: "https://ahmad9077.github.io/science-grade1-quiz/boys/"
   },
   {
@@ -69,6 +80,8 @@ const quizCatalog = [
     title: "English",
     icon: "🔤",
     color: "#ffe9b8",
+    book: "#6e5aa6",
+    cover: "Abc",
     url: "https://ahmad9077.github.io/english-grade1-quiz/"
   },
   {
@@ -76,6 +89,8 @@ const quizCatalog = [
     title: "اللغة العربية - الأول الابتدائي",
     icon: "ع",
     color: "#d9f1ef",
+    book: "#cc4338",
+    cover: "أ ب",
     url: "https://ahmad9077.github.io/arabic-grade1-quiz/"
   },
   {
@@ -83,6 +98,9 @@ const quizCatalog = [
     title: "الرياضيات - الأول الابتدائي",
     icon: "🔢",
     color: "#dcefff",
+    book: "#f4c95d",
+    cover: "١٢٣",
+    lightBook: true,
     url: "https://ahmad9077.github.io/math-grade1-quiz/"
   },
   {
@@ -90,6 +108,8 @@ const quizCatalog = [
     title: "الاجتماعيات - الأول الابتدائي",
     icon: "🇰🇼",
     color: "#e3f4ea",
+    book: "#151c2e",
+    cover: "art-flag",
     url: "https://ahmad9077.github.io/social-grade1-quiz/"
   },
   {
@@ -97,6 +117,8 @@ const quizCatalog = [
     title: "التربية الإسلامية - الأول الابتدائي",
     icon: "🕌",
     color: "#e2f3ee",
+    book: "#1f7a63",
+    cover: "art-mosque",
     url: "https://ahmad9077.github.io/islamic-grade1-quiz/"
   }
 ];
@@ -276,6 +298,15 @@ function renderLogin() {
   renderTemplate("loginTemplate");
   const form = document.querySelector("#loginForm");
   const message = document.querySelector("#loginMessage");
+  const toggle = document.querySelector("#togglePassword");
+
+  toggle.addEventListener("click", () => {
+    const input = form.elements.password;
+    const showing = input.type === "text";
+    input.type = showing ? "password" : "text";
+    toggle.setAttribute("aria-pressed", String(!showing));
+    toggle.setAttribute("aria-label", showing ? "إظهار كلمة المرور" : "إخفاء كلمة المرور");
+  });
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
@@ -408,11 +439,30 @@ function getAllowedQuizzes(assignments) {
 function createQuizTile(quiz) {
   const tile = document.querySelector("#quizTileTemplate").content.firstElementChild.cloneNode(true);
   tile.href = quiz.url;
-  tile.style.setProperty("--tile-color", quiz.color);
+  tile.style.setProperty("--tile-color", quiz.book);
+  tile.classList.toggle("is-light", Boolean(quiz.lightBook));
   tile.setAttribute("aria-label", `ابدأ ${quiz.title}`);
-  tile.querySelector(".quiz-icon").textContent = quiz.icon;
+  fillBookCover(tile.querySelector(".quiz-icon"), quiz.cover || quiz.icon);
   tile.querySelector(".quiz-name").textContent = quiz.title;
   return tile;
+}
+
+// A cover is a picture from the page's art library, or a few letters.
+function fillBookCover(node, cover) {
+  if (!cover.startsWith("art-")) {
+    node.textContent = cover;
+    return;
+  }
+  const svgNs = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgNs, "svg");
+  const use = document.createElementNS(svgNs, "use");
+  use.setAttribute("href", `#${cover}`);
+  svg.append(use);
+  if (cover === "art-flag") {
+    svg.setAttribute("viewBox", "0 0 60 30");
+    svg.classList.add("art-flag");
+  }
+  node.replaceChildren(svg);
 }
 
 function renderChallengeMode(assignments) {

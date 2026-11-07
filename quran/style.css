@@ -1,6 +1,6 @@
 @font-face{font-family:Naskh;src:url('fonts/noto-naskh-arabic.ttf');font-weight:400 700;font-display:swap}
 @font-face{font-family:Quran;src:url('fonts/scheherazade-new.ttf');font-weight:400;font-display:swap}
-:root{--ink:#183e35;--muted:#64766f;--accent:#2d705a;--mint:#e8f0e9;--canvas:#f4f6f2;--paper:#fffefa;--line:#dfe6df}
+:root{--ink:#151c2e;--muted:#5d5560;--accent:#cc4338;--mint:#fbf1e9;--canvas:#fff;--paper:#fff;--line:#eadfd8;--wood:#b9804d;--wood-top:#d39c68;--facets:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 600' preserveAspectRatio='none'%3E%3Crect width='1000' height='600' fill='%23fed6a5'/%3E%3Cpath fill='%23f9b8b4' d='M0 0H300L0 360Z'/%3E%3Cpath fill='%23fed6a5' d='M300 0L330 300L0 360Z'/%3E%3Cpath fill='%23fdec9c' d='M300 0H640L700 260L330 300Z'/%3E%3Cpath fill='%23c8a9d2' d='M640 0H1000L700 260Z'/%3E%3Cpath fill='%23f9b8b4' d='M1000 0V330L700 260Z'/%3E%3Cpath fill='%239adedf' d='M700 260L1000 330V600H420Z'/%3E%3Cpath fill='%23c8a9d2' d='M330 300L700 260L420 600Z'/%3E%3Cpath fill='%23bde3b2' d='M0 360L330 300L420 600H0Z'/%3E%3C/svg%3E")}
 *{box-sizing:border-box}[hidden]{display:none!important}
 html,body{touch-action:manipulation}
 body{margin:0;color:var(--ink);background:var(--canvas);font:16px/1.85 Naskh,serif;-webkit-font-smoothing:antialiased}
@@ -93,3 +93,22 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:20px;ma
 
 /* Content becomes available after the existing Hub access check. */
 #main[aria-busy="true"] #surahList{display:none}
+
+/* The Hub's wall and shelf behind the top of the page. The band hangs behind the header, so the
+   header keeps its height and the phone reading layout stays on one screen. */
+body{overflow-x:hidden;overflow-x:clip}
+.site-header{position:relative;isolation:isolate;border-bottom:0}
+.site-header::before{content:"";position:absolute;z-index:-1;inset:0 calc(50% - 50vw) -6px;background:linear-gradient(to top,var(--wood) 0 5px,var(--wood-top) 5px 7px,transparent 7px) bottom/100% 7px no-repeat,var(--facets) center/100% 100% no-repeat}
+.wordmark{border-radius:12px;background:#fff;box-shadow:0 3px 0 rgba(21,28,46,.1);line-height:1.5;padding:0 14px 2px}
+.text-link{border-radius:999px;background:#fff;box-shadow:0 3px 0 rgba(21,28,46,.1);padding-inline:14px}
+.text-link:hover{background:#fff;color:var(--accent)}
+.surah-card{border-width:2px;border-radius:18px}.surah-card:hover{border-color:var(--accent)}
+button:hover{border-color:var(--line)}
+.primary:hover{border-color:var(--accent)}
+.mode-switch,#verseList button,.audio-panel{background:var(--mint)}
+.reveal-button{border-color:var(--mint)}
+.cumulative-button{background:#fff}
+.verse-stage{border:2px solid var(--line);box-shadow:none}
+button:focus-visible,a:focus-visible,select:focus-visible{outline-color:var(--ink)}
+main{padding-top:calc(34px + 6px)}
+@media(max-width:720px){main{padding-top:calc(12px + 6px)}}

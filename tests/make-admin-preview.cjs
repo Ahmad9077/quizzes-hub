@@ -22,4 +22,5 @@ swap('<body>', '<body>\n    <p class="preview-banner">معاينة ببيانا�
 fs.writeFileSync(path.join(out, 'index.html'), html);
 for (const file of ['script.js', 'styles.css']) fs.copyFileSync(path.join(root, file), path.join(out, file));
 fs.copyFileSync(path.join(__dirname, 'admin-groups-mock.js'), path.join(out, 'admin-groups-mock.js'));
+fs.cpSync(path.join(root, 'story-thumbnails'), path.join(out, 'story-thumbnails'), { recursive: true });
 console.log(`Preview written to ${out}`);

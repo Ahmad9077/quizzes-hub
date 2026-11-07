@@ -44,6 +44,20 @@
     ]
   };
   window.__previewDb = db;
+  // ?view=login opens signed out, ?view=child opens as a child who has every activity,
+  // and with neither the page opens on Admin.
+  const view = new URLSearchParams(window.location.search).get("view");
+  const CHILD_ID = "u-1";
+  let signedInAs = view === "login" ? null : view === "child" ? CHILD_ID : ADMIN_ID;
+  const sessionFor = (id) => ({ user: { id }, access_token: "preview" });
+  const giveChildEverything = () => {
+    // eslint-disable-next-line no-undef
+    assignmentCatalog.forEach((item) => {
+      if (!db.quiz_assignments.some((a) => a.user_id === CHILD_ID && a.quiz_id === item.id)) {
+        db.quiz_assignments.push({ user_id: CHILD_ID, quiz_id: item.id, difficulty: "medium", direct: true });
+      }
+    });
+  };
   let nextId = 100;
 
   function quizzesRows() {
@@ -98,7 +112,25 @@
   };
 
   const rpcs = {
-    list_open_challenge_sessions: () => ({ data: [], error: null }),
+    list_open_challenge_sessions: () => ({
+      data: [{ session_id: "c-open", quiz_id: "math-grade1", quiz_title: "", quiz_icon: "🔢", host_display_name: "فهد سالم" }],
+      error: null
+    }),
+    create_challenge_session: ({ p_quiz_id }) => ({
+      data: {
+        id: "c-new",
+        quiz_id: p_quiz_id,
+        status: "waiting",
+        host_id: signedInAs,
+        current_answering_user_id: null,
+        players: [{ user_id: signedInAs, display_name: "نورة أحمد", avatar: "🚀", is_host: true, wrong_count: 0 }]
+      },
+      error: null
+    }),
+    resolve_login: ({ requested_username }) => {
+      const person = db.profiles.find((user) => user.username === requested_username);
+      return { data: person ? [{ login_email: `${person.username}@preview.invalid` }] : [], error: null };
+    },
     admin_get_adaptive_analytics: () => fail("غير متاح في المعاينة."),
     admin_create_group({ group_name }) {
       const issue = nameIssue(group_name);
@@ -156,8 +188,20 @@
   window.supabase = {
     createClient: () => ({
       auth: {
-        getSession: async () => ({ data: { session: { user: { id: ADMIN_ID }, access_token: "preview" } } }),
-        signOut: async () => ({})
+        getSession: async () => {
+          if (view === "child") giveChildEverything();
+          return { data: { session: signedInAs ? sessionFor(signedInAs) : null } };
+        },
+        signInWithPassword: async ({ email, password }) => {
+          if (password !== "preview-password") return { data: { session: null }, error: { message: "Invalid login credentials" } };
+          const person = db.profiles.find((user) => `${user.username}@preview.invalid` === email);
+          signedInAs = person.id;
+          return { data: { session: sessionFor(person.id) }, error: null };
+        },
+        signOut: async () => {
+          signedInAs = null;
+          return {};
+        }
       },
       from: (table) => new Query(table),
       rpc: async (name, args) => (rpcs[name] ? rpcs[name](args) : fail(`Not in the preview: ${name}`)),
@@ -188,5 +232,5 @@
     if (button) button.click();
     else setTimeout(openAdmin, 30);
   };
-  window.addEventListener("DOMContentLoaded", openAdmin);
+  if (!view) window.addEventListener("DOMContentLoaded", openAdmin);
 })();

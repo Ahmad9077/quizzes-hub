@@ -12,6 +12,12 @@ Quizzes Hub is now structured as a private quiz dashboard:
 - admin view for creating users and assigning quizzes
 - progress tracking from the quiz websites
 
+## Visual identity
+
+The Hub's pages share one look: a wall of soft facets (`--facets` in `styles.css`), a wooden shelf under it, a white page below, and activities as books standing on shelves. The sign-in page writes only the site's name, the six school subjects and the sign-in fields. Each activity's book colour and cover are `book`, `cover` and `lightBook` in `quizCatalog`; `color` stays as it is in the `quizzes` table and nothing on screen reads it. The stories list and the Quran pages use the same wall and colours in their own stylesheets (the verse fonts do not change). Quiz sites and the story reader keep their own designs.
+
+`tests/identity.cjs` drives the sign-in page, the shelf, Challenge and Admin on the stand-in backend at phone, tablet and computer sizes.
+
 ## Groups
 
 The Admin page has three tabs: groups, users, activity. A group holds members and activities, and every

@@ -3,14 +3,20 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="هيا نتعلم: صفحة خاصة لكل طفل فيها اختباراته وقصصه.">
+    <meta name="description" content="هيا نتعلم: التربية الإسلامية، اللغة العربية، English، الرياضيات، العلوم، الاجتماعيات.">
     <title>هيا نتعلم</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='5' y='3' width='22' height='26' rx='3' fill='%23cc4338'/%3E%3Crect x='21' y='3' width='6' height='26' rx='2' fill='%23151c2e'/%3E%3Ccircle cx='13' cy='13' r='4' fill='%23f4c95d'/%3E%3C/svg%3E">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400..900&display=swap">
-    <link rel="stylesheet" href="styles.css?v=19">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+Bhaijaan+2:wght@800&family=Cairo:wght@400..900&display=swap">
+    <link rel="stylesheet" href="styles.css?v=20">
   </head>
   <body>
+    <svg class="art-library" aria-hidden="true">
+      <symbol id="art-mosque" viewBox="0 0 48 48"><path fill="currentColor" d="M24.6 2.5a5 5 0 1 0 3.9 8.4 4 4 0 1 1-3.9-8.4z"/><rect fill="currentColor" x="23.2" y="12" width="1.6" height="7"/><path fill="currentColor" d="M9.5 37c0-8.8 6.4-13.1 14.5-19 8.1 5.9 14.5 10.2 14.5 19z"/><path fill="currentColor" fill-rule="evenodd" d="M6 38.5h36V45H6zM24 40a3 3 0 0 0-3 3v2h6v-2a3 3 0 0 0-3-3z"/></symbol>
+      <symbol id="art-sprout" viewBox="0 0 48 48"><path fill="currentColor" d="M22.5 45V25h3v20z"/><path fill="currentColor" d="M25 26c-.2-10 6.300-16 18-16 .2 10.500-6.300 16-18 16z"/><path fill="currentColor" d="M23 33c.2-7.800-5-12.500-16-12.500-.2 8.500 5 12.500 16 12.500z"/></symbol>
+      <symbol id="art-flag" viewBox="0 0 60 30"><rect width="60" height="10" fill="#007a3d"/><rect y="10" width="60" height="10" fill="#fff"/><rect y="20" width="60" height="10" fill="#ce1126"/><path d="M0 0l15 10v10L0 30z" fill="#000"/></symbol>
+    </svg>
     <main id="app" class="app-shell" aria-live="polite">
       <section class="loading-screen">
         <p>جاري التحميل…</p>
@@ -31,47 +37,38 @@
     </template>
 
     <template id="loginTemplate">
-      <section class="auth-layout">
-        <div class="auth-panel">
-          <div class="auth-copy">
-            <div>
-              <p class="brand">هيا نتعلم</p>
-              <h1>هيا نلعب ونتعلم!</h1>
-              <p class="hero-copy">صفحة مرحة لكل طفل، توصله بسرعة لاختباراته وقصصه.</p>
-            </div>
-            <div class="trivia-board" aria-hidden="true">
-              <span class="trivia-card card-main">
-                <b>أعلام</b>
-                <i>الدول</i>
-              </span>
-              <span class="trivia-card card-dark">
-                <b>خرائط</b>
-                <i>العالم</i>
-              </span>
-              <span class="trivia-card card-yellow">
-                <b>كلمات</b>
-                <i>تهجئة</i>
-              </span>
-              <span class="trivia-card card-light">
-                <b>علوم</b>
-                <i>الصف الأول</i>
-              </span>
-            </div>
+      <section class="login">
+        <div class="wall login-wall">
+          <div class="sign-space">
+            <h1 class="brand brand-large">هيا نتعلم</h1>
           </div>
-          <form class="auth-card" id="loginForm">
-            <div class="form-heading">
-              <h2>تسجيل الدخول</h2>
-              <p>اكتب اسم المستخدم وكلمة المرور.</p>
-            </div>
-            <label>
+          <div class="shelf">
+            <ul class="books" aria-label="المواد">
+              <li><div class="book" style="--c:#1f7a63;--h:104px;--i:0"><span class="art" aria-hidden="true"><svg><use href="#art-mosque"></use></svg></span><span class="name">التربية الإسلامية</span></div></li>
+              <li><div class="book" style="--c:#cc4338;--h:96px;--i:1"><span class="art" aria-hidden="true">أ ب</span><span class="name">اللغة العربية</span></div></li>
+              <li><div class="book" style="--c:#6e5aa6;--h:108px;--i:2"><span class="art" aria-hidden="true">Abc</span><span class="name">English</span></div></li>
+              <li><div class="book is-light" style="--c:#f4c95d;--h:100px;--i:3"><span class="art" aria-hidden="true">١٢٣</span><span class="name">الرياضيات</span></div></li>
+              <li><div class="book" style="--c:#0e7490;--h:108px;--i:4"><span class="art" aria-hidden="true"><svg><use href="#art-sprout"></use></svg></span><span class="name">العلوم</span></div></li>
+              <li><div class="book" style="--c:#151c2e;--h:98px;--i:5"><span class="art" aria-hidden="true"><svg class="art-flag" viewBox="0 0 60 30"><use href="#art-flag"></use></svg></span><span class="name">الاجتماعيات</span></div></li>
+            </ul>
+          </div>
+        </div>
+        <div class="gate">
+          <form class="login-form" id="loginForm">
+            <label class="field">
               <span>اسم المستخدم</span>
-              <input name="username" autocomplete="username" required>
+              <input name="username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" required>
             </label>
-            <label>
+            <label class="field">
               <span>كلمة المرور</span>
-              <input name="password" type="password" autocomplete="current-password" required>
+              <span class="input-wrap">
+                <input class="pw" name="password" type="password" autocomplete="current-password" required>
+                <button class="eye" id="togglePassword" type="button" aria-label="إظهار كلمة المرور" aria-pressed="false">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.600-7 10-7 10 7 10 7-3.600 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+              </span>
             </label>
-            <button class="primary-action" type="submit">دخول</button>
+            <button class="primary-action go" type="submit">دخول</button>
             <p class="form-message" id="loginMessage"></p>
           </form>
         </div>
@@ -80,36 +77,34 @@
 
     <template id="dashboardTemplate">
       <section class="dashboard">
-        <header class="topbar">
-          <p class="brand">هيا نتعلم</p>
-          <div class="topbar-actions">
-            <button class="ghost-action" id="adminViewButton" type="button" hidden>الإدارة</button>
-            <button class="ghost-action" id="logoutButton" type="button">تسجيل الخروج</button>
-          </div>
-        </header>
+        <div class="wall-band">
+          <header class="topbar">
+            <p class="brand">هيا نتعلم</p>
+            <div class="topbar-actions">
+              <button class="ghost-action" id="adminViewButton" type="button" hidden>الإدارة</button>
+              <button class="ghost-action" id="logoutButton" type="button">تسجيل الخروج</button>
+            </div>
+          </header>
 
-        <section class="student-hero">
-          <div>
-            <p class="student-kicker">صفحتي</p>
-            <h1 id="dashboardTitle" class="page-title"></h1>
-          </div>
-          <div class="profile-mark" aria-hidden="true">
-            <span></span>
-            <span></span>
-            <span></span>
-          </div>
-          <nav class="dashboard-tabs" aria-label="أقسام الصفحة">
-            <button class="tab-action active-tab" id="quizzesTabButton" type="button">الأنشطة</button>
-            <button class="tab-action" id="challengeTabButton" type="button">التحدي</button>
-          </nav>
-        </section>
+          <section class="student-hero">
+            <div>
+              <p class="student-kicker">صفحتي</p>
+              <h1 id="dashboardTitle" class="page-title"></h1>
+            </div>
+            <nav class="dashboard-tabs" aria-label="أقسام الصفحة">
+              <button class="tab-action active-tab" id="quizzesTabButton" type="button">الأنشطة</button>
+              <button class="tab-action" id="challengeTabButton" type="button">التحدي</button>
+            </nav>
+          </section>
+        </div>
 
+        <div class="page-body">
         <section id="quizzesPanel">
           <h2 class="section-title">اختر اختبارا أو قصة</h2>
           <div class="quiz-grid" id="assignedQuizGrid"></div>
         </section>
 
-        <section id="challengePanel" hidden>
+        <section id="challengePanel" class="panel-gutter" hidden>
           <h2 class="section-title">وضع التحدي</h2>
           <div class="challenge-layout">
             <section class="challenge-card">
@@ -137,6 +132,7 @@
             <div class="challenge-list" id="openChallengesList"></div>
           </section>
         </section>
+        </div>
       </section>
     </template>
 
@@ -166,21 +162,26 @@
 
     <template id="adminTemplate">
       <section class="dashboard admin-dashboard">
-        <header class="topbar">
-          <p class="brand">هيا نتعلم</p>
-          <div class="topbar-actions">
-            <button class="ghost-action" id="backToDashboardButton" type="button">صفحتي</button>
-            <button class="ghost-action" id="adminLogoutButton" type="button">تسجيل الخروج</button>
+        <div class="wall-band">
+          <header class="topbar">
+            <p class="brand">هيا نتعلم</p>
+            <div class="topbar-actions">
+              <button class="ghost-action" id="backToDashboardButton" type="button">صفحتي</button>
+              <button class="ghost-action" id="adminLogoutButton" type="button">تسجيل الخروج</button>
+            </div>
+          </header>
+
+          <div class="student-hero">
+            <h1 class="page-title">الإدارة</h1>
+            <nav class="dashboard-tabs admin-tabs" aria-label="أقسام الإدارة">
+              <button class="tab-action active-tab" data-admin-tab="groups" type="button">المجموعات</button>
+              <button class="tab-action" data-admin-tab="users" type="button">المستخدمون</button>
+              <button class="tab-action" data-admin-tab="activity" type="button">النشاط</button>
+            </nav>
           </div>
-        </header>
+        </div>
 
-        <h1 class="page-title">الإدارة</h1>
-
-        <nav class="dashboard-tabs admin-tabs" aria-label="أقسام الإدارة">
-          <button class="tab-action active-tab" data-admin-tab="groups" type="button">المجموعات</button>
-          <button class="tab-action" data-admin-tab="users" type="button">المستخدمون</button>
-          <button class="tab-action" data-admin-tab="activity" type="button">النشاط</button>
-        </nav>
+        <div class="page-body admin-body">
 
         <section id="adminGroupsPanel" class="admin-card">
           <h2>المجموعات</h2>
@@ -242,11 +243,12 @@
           </div>
           <div id="adminActivityList" class="activity-list"></div>
         </section>
+        </div>
       </section>
     </template>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js?v=4"></script>
-    <script src="script.js?v=42"></script>
+    <script src="script.js?v=43"></script>
   </body>
 </html>
