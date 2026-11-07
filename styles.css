@@ -1641,3 +1641,204 @@ input[type="password"] {
 .admin-dashboard > .page-title {
   color: var(--ink);
 }
+
+/* Admin: tabs and groups */
+/* The dashboard's tabs are white on its dark header; here they sit on the light page. */
+.admin-tabs {
+  grid-template-columns: repeat(3, minmax(92px, 1fr));
+  border-color: var(--navy);
+  background: var(--navy);
+  margin-bottom: 14px;
+}
+
+.admin-hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.inline-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.inline-form input {
+  flex: 1 1 240px;
+  width: auto;
+}
+
+.inline-form .primary-action {
+  flex: 0 0 auto;
+}
+
+.admin-filter {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(130px, 200px);
+  gap: 10px;
+}
+
+.admin-filter input,
+.admin-filter select {
+  min-height: 42px;
+}
+
+.admin-row-body {
+  display: grid;
+  gap: 16px;
+  padding: 16px;
+}
+
+.group-columns {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+  align-items: start;
+}
+
+.group-section {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.group-heading {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 900;
+}
+
+.member-chips,
+.group-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.group-chips {
+  flex-basis: 100%;
+}
+
+.member-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface-soft);
+  font-size: 0.88rem;
+  font-weight: 800;
+  padding: 3px 12px 3px 4px;
+}
+
+.member-chip button {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 1.1rem;
+  line-height: 1;
+}
+
+.member-chip button:hover,
+.member-chip button:focus-visible {
+  background: var(--danger-soft);
+  color: var(--danger);
+}
+
+.group-chip {
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent-strong);
+  font-size: 0.76rem;
+  font-weight: 850;
+  padding: 1px 10px;
+}
+
+.member-adder > summary {
+  width: fit-content;
+  color: var(--accent-strong);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 850;
+  margin: 4px 0 8px;
+}
+
+.member-adder input[type="search"] {
+  min-height: 40px;
+  margin-bottom: 8px;
+}
+
+.member-adder > .mini-action {
+  margin-bottom: 8px;
+}
+
+.member-candidates {
+  display: grid;
+  gap: 6px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.is-from-group,
+.is-from-group:hover {
+  border-color: transparent;
+  background: var(--success-soft);
+}
+
+.checkbox-row .assignment-source {
+  flex: 0 1 auto;
+  color: var(--success);
+  font-size: 0.76rem;
+  font-weight: 850;
+}
+
+.group-settings {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px;
+  border-top: 1px solid var(--line);
+  padding-top: 14px;
+}
+
+.group-settings label {
+  flex: 1 1 220px;
+}
+
+.group-settings input {
+  min-height: 38px;
+}
+
+.confirm-dialog {
+  width: min(420px, calc(100% - 32px));
+  border: 0;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  color: var(--ink);
+  padding: 20px;
+}
+
+.confirm-dialog::backdrop {
+  background: rgba(21, 28, 46, 0.45);
+}
+
+.confirm-dialog p {
+  margin: 0;
+  font-weight: 750;
+  line-height: 1.7;
+}
+
+@media (max-width: 680px) {
+  .group-columns,
+  .admin-filter {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

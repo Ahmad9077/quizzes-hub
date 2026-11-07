@@ -12,6 +12,19 @@ Quizzes Hub is now structured as a private quiz dashboard:
 - admin view for creating users and assigning quizzes
 - progress tracking from the quiz websites
 
+## Groups
+
+The Admin page has three tabs: groups, users, activity. A group holds members and activities, and every
+member gets the group's activities; an account can also have activities of its own.
+
+Triggers keep `quiz_assignments` filled from the groups (`supabase/migrations/026_admin_groups.sql`), so the
+access guard, dashboard, progress rules, adaptive engine and Challenge Mode keep reading that table unchanged.
+`quiz_assignments.direct` marks what the Admin gave the account itself; a row with `direct = false` exists only
+because of a group. `admin_set_assignments` saves an account's own list and leaves its group activities alone.
+
+Tests: `tests/admin-groups-sql.mjs` runs the rules on Postgres (PGlite) and `tests/admin-groups.cjs` drives the page
+on made-up accounts (`tests/admin-groups-mock.js`). `tests/make-admin-preview.cjs` writes a preview of it.
+
 ## Backend Requirement
 
 This cannot be secured by GitHub Pages alone. It requires Supabase.

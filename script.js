@@ -172,6 +172,9 @@ const topicLabels = {
 const errorTranslations = [
   [/invalid login credentials/i, "اسم المستخدم أو كلمة المرور غير صحيحة."],
   [/already been registered|already exists|duplicate key/i, "اسم المستخدم مستخدم من قبل."],
+  [/group name is taken/i, "توجد مجموعة بهذا الاسم."],
+  [/group name is required/i, "اكتب اسم المجموعة (حرفان على الأقل)."],
+  [/group was not found/i, "المجموعة غير موجودة."],
   [/password should be at least (\d+)/i, (match) => `كلمة المرور لازم تكون ${match[1]} أحرف على الأقل.`],
   [/username must be 3-32/i, "اسم المستخدم من 3 إلى 32 حرفا إنجليزيا صغيرا أو رقما أو _ فقط."],
   [/display name is required/i, "الاسم الظاهر مطلوب."],
@@ -212,6 +215,11 @@ let currentProfile = null;
 let currentChallengeState = null;
 let currentChallengeChannel = null;
 let dashboardAssignments = [];
+let adminData = { users: [], assignments: [], groups: [], members: [], groupQuizzes: [] };
+let adminTab = "groups";
+const adminOpenGroups = new Set();
+const adminOpenUsers = new Set();
+const adminFilters = { users: { search: "", group: "all" }, activity: { search: "", group: "all" } };
 
 // Dates are always shown as DD/MM/YYYY (en-GB), never US format.
 const dateFormatter = new Intl.DateTimeFormat("en-GB", {
@@ -770,21 +778,492 @@ function formatChallengeStatus(status) {
   return "منتهية";
 }
 
+// ─────────────────────────────────────────────────────────────────
+// ADMIN
+// Three tabs: groups, users, activity. A group holds members and activities; the database
+// fills quiz_assignments from it (supabase/migrations/026_admin_groups.sql), so everything else
+// on the site keeps reading quiz_assignments.
+// ─────────────────────────────────────────────────────────────────
 async function renderAdmin() {
   renderTemplate("adminTemplate");
   document.querySelector("#backToDashboardButton").addEventListener("click", renderDashboard);
   document.querySelector("#adminLogoutButton").addEventListener("click", logout);
-  renderAssignmentCheckboxes(document.querySelector("#newUserAssignments"), []);
+  document.querySelectorAll("[data-admin-tab]").forEach((button) => {
+    button.addEventListener("click", () => activateAdminTab(button.dataset.adminTab));
+  });
+  document.querySelector("#createGroupForm").addEventListener("submit", createGroup);
   document.querySelector("#createUserForm").addEventListener("submit", createUser);
-  await renderAdminUsers();
-  await renderAdminActivity();
+  renderAssignmentCheckboxes(document.querySelector("#newUserAssignments"), []);
+  setupAdminFilter("users", renderAdminUsersList);
+  setupAdminFilter("activity", applyAdminActivityFilter);
+  await activateAdminTab(adminTab);
 }
 
-function renderAssignmentCheckboxes(container, assignments) {
+async function activateAdminTab(tabName) {
+  adminTab = tabName;
+  document.querySelector("#adminGroupsPanel").hidden = tabName !== "groups";
+  document.querySelector("#adminUsersPanel").hidden = tabName !== "users";
+  document.querySelector("#adminActivityPanel").hidden = tabName !== "activity";
+  document.querySelectorAll("[data-admin-tab]").forEach((button) => {
+    button.classList.toggle("active-tab", button.dataset.adminTab === tabName);
+  });
+
+  if (tabName === "groups") await renderAdminGroups();
+  if (tabName === "users") await renderAdminUsers();
+  if (tabName === "activity") await renderAdminActivity();
+}
+
+/** Everything the Admin screens show, read at once instead of one request per account. */
+async function loadAdminData() {
+  const [users, assignments, groups, members, groupQuizzes] = await Promise.all([
+    supabaseClient.from("profiles").select("id, username, display_name, role, avatar, active").order("display_name"),
+    supabaseClient.from("quiz_assignments").select("user_id, quiz_id, difficulty, direct"),
+    supabaseClient.from("quiz_groups").select("id, name").order("name"),
+    supabaseClient.from("quiz_group_members").select("group_id, user_id"),
+    supabaseClient.from("quiz_group_quizzes").select("group_id, quiz_id")
+  ]);
+
+  const failed = [users, assignments, groups, members, groupQuizzes].find((result) => result.error);
+  if (failed) throw failed.error;
+
+  adminData = {
+    users: users.data || [],
+    assignments: assignments.data || [],
+    groups: groups.data || [],
+    members: members.data || [],
+    groupQuizzes: groupQuizzes.data || []
+  };
+}
+
+function groupMemberIds(groupId) {
+  return adminData.members.filter((row) => row.group_id === groupId).map((row) => row.user_id);
+}
+
+function groupQuizIds(groupId) {
+  return adminData.groupQuizzes.filter((row) => row.group_id === groupId).map((row) => row.quiz_id);
+}
+
+function groupsOfUser(userId) {
+  const ids = new Set(adminData.members.filter((row) => row.user_id === userId).map((row) => row.group_id));
+  return adminData.groups.filter((group) => ids.has(group.id));
+}
+
+/** For one account: each activity its groups give it, and the names of those groups. */
+function groupSourcesOfUser(userId) {
+  const sources = new Map();
+  groupsOfUser(userId).forEach((group) => {
+    groupQuizIds(group.id).forEach((quizId) => {
+      sources.set(quizId, [...(sources.get(quizId) || []), group.name]);
+    });
+  });
+  return sources;
+}
+
+function membersLabel(count) {
+  return count ? countLabel(count, "عضو واحد", "عضوان", "أعضاء", "عضوًا") : "بدون أعضاء";
+}
+
+function activitiesLabel(count) {
+  return count ? countLabel(count, "نشاط واحد", "نشاطان", "أنشطة", "نشاطًا") : "بدون أنشطة";
+}
+
+/** A question inside the page; the browser's own confirm box is blocked in some views. */
+function confirmDialog(message, confirmLabel = "تأكيد") {
+  return new Promise((resolve) => {
+    const dialog = document.createElement("dialog");
+    dialog.className = "confirm-dialog";
+    const text = document.createElement("p");
+    text.textContent = message;
+    const actions = document.createElement("div");
+    actions.className = "assignment-actions";
+    const finish = (answer) => {
+      dialog.close();
+      dialog.remove();
+      resolve(answer);
+    };
+    const yes = document.createElement("button");
+    yes.className = "mini-action danger-action";
+    yes.type = "button";
+    yes.textContent = confirmLabel;
+    yes.addEventListener("click", () => finish(true));
+    const no = document.createElement("button");
+    no.className = "mini-action";
+    no.type = "button";
+    no.textContent = "إلغاء";
+    no.addEventListener("click", () => finish(false));
+    actions.append(yes, no);
+    dialog.append(text, actions);
+    dialog.addEventListener("cancel", (event) => {
+      event.preventDefault();
+      finish(false);
+    });
+    document.body.append(dialog);
+    dialog.showModal();
+    no.focus();
+  });
+}
+
+// ── Filters (users and activity tabs) ─────────────────────────────
+function setupAdminFilter(name, onChange) {
+  const root = document.querySelector(`[data-admin-filter="${name}"]`);
+  const search = root.querySelector("input");
+  const select = root.querySelector("select");
+  search.value = adminFilters[name].search;
+  search.addEventListener("input", () => {
+    adminFilters[name].search = search.value;
+    onChange();
+  });
+  select.addEventListener("change", () => {
+    adminFilters[name].group = select.value;
+    onChange();
+  });
+}
+
+function fillGroupFilter(name) {
+  const select = document.querySelector(`[data-admin-filter="${name}"] select`);
+  select.replaceChildren(new Option("كل المجموعات", "all"), new Option("بدون مجموعة", "none"));
+  adminData.groups.forEach((group) => select.append(new Option(group.name, group.id)));
+  const wanted = adminFilters[name].group;
+  const stillThere = wanted === "all" || wanted === "none" || adminData.groups.some((group) => group.id === wanted);
+  adminFilters[name].group = stillThere ? wanted : "all";
+  select.value = adminFilters[name].group;
+}
+
+function matchesAdminFilter(user, filter) {
+  const query = filter.search.trim().toLowerCase();
+  if (query && !user.display_name.toLowerCase().includes(query) && !user.username.includes(query)) return false;
+  if (filter.group === "all") return true;
+  const groups = groupsOfUser(user.id);
+  return filter.group === "none" ? groups.length === 0 : groups.some((group) => group.id === filter.group);
+}
+
+// ── Groups tab ────────────────────────────────────────────────────
+async function renderAdminGroups() {
+  const list = document.querySelector("#adminGroupsList");
+  if (!list.childElementCount) list.replaceChildren(createEmptyState("جاري التحميل…"));
+
+  try {
+    await loadAdminData();
+  } catch {
+    list.replaceChildren(createEmptyState("تعذر تحميل المجموعات."));
+    return;
+  }
+
+  if (!adminData.groups.length) {
+    list.replaceChildren(createEmptyState("لا توجد مجموعات بعد. اكتب اسم أول مجموعة في الأعلى."));
+    return;
+  }
+
+  list.replaceChildren(...adminData.groups.map(createGroupCard));
+}
+
+async function createGroup(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const message = document.querySelector("#createGroupMessage");
+  const name = String(new FormData(form).get("groupName") || "");
+
+  setMessage(message, "جاري الإنشاء…");
+  const { data, error } = await supabaseClient.rpc("admin_create_group", { group_name: name });
+
+  if (error) {
+    setMessage(message, arabicError(error, "تعذر إنشاء المجموعة."), true);
+    return;
+  }
+
+  form.reset();
+  setMessage(message, "");
+  adminOpenGroups.add(data);
+  await renderAdminGroups();
+}
+
+function createGroupCard(group) {
+  const card = document.createElement("details");
+  card.className = "user-activity group-card";
+  card.dataset.groupId = group.id;
+
+  const summary = document.createElement("summary");
+  const name = document.createElement("strong");
+  name.textContent = group.name;
+  const meta = document.createElement("span");
+  meta.className = "progress-meta";
+  const renderMeta = () => {
+    meta.textContent = `${membersLabel(groupMemberIds(group.id).length)} · ${activitiesLabel(groupQuizIds(group.id).length)}`;
+  };
+  renderMeta();
+  summary.append(name, meta);
+
+  const body = document.createElement("div");
+  body.className = "admin-row-body";
+  card.append(summary, body);
+
+  let built = false;
+  const build = () => {
+    if (built) return;
+    built = true;
+    buildGroupBody(group, body, renderMeta);
+  };
+
+  card.open = adminOpenGroups.has(group.id);
+  if (card.open) build();
+  card.addEventListener("toggle", () => {
+    if (card.open) {
+      adminOpenGroups.add(group.id);
+      build();
+    } else {
+      adminOpenGroups.delete(group.id);
+    }
+  });
+  return card;
+}
+
+function buildGroupBody(group, body, renderMeta) {
+  const message = document.createElement("p");
+  message.className = "form-message compact-message";
+
+  const columns = document.createElement("div");
+  columns.className = "group-columns";
+  columns.append(buildGroupQuizzes(group, message, renderMeta), buildGroupMembers(group, message, renderMeta));
+
+  body.append(message, columns, buildGroupSettings(group, message));
+}
+
+function buildGroupQuizzes(group, message, renderMeta) {
+  const fieldset = document.createElement("fieldset");
+  fieldset.className = "group-section";
+  const legend = document.createElement("legend");
+  legend.textContent = "أنشطة المجموعة";
+  fieldset.append(legend);
+
+  const chosen = new Set(groupQuizIds(group.id));
+  assignmentCatalog.forEach((quiz) => {
+    const label = document.createElement("label");
+    label.className = "checkbox-row";
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = quiz.id;
+    input.checked = chosen.has(quiz.id);
+    const text = document.createElement("span");
+    text.textContent = `${quiz.icon} ${quiz.title}`;
+    label.append(input, text);
+    fieldset.append(label);
+
+    input.addEventListener("change", async () => {
+      const enabled = input.checked;
+      const memberCount = groupMemberIds(group.id).length;
+      if (!enabled && memberCount) {
+        const sure = await confirmDialog(
+          `إزالة «${quiz.title}» من «${group.name}»؟ لن يظهر لأعضاء المجموعة، إلا من أُعطي له مباشرة أو من مجموعة أخرى. النتائج تبقى محفوظة.`,
+          "إزالة النشاط"
+        );
+        if (!sure) {
+          input.checked = true;
+          return;
+        }
+      }
+
+      input.disabled = true;
+      setMessage(message, "جاري الحفظ…");
+      const { error } = await supabaseClient.rpc("admin_set_group_quizzes", {
+        target_group_id: group.id,
+        quiz_ids: [quiz.id],
+        enabled
+      });
+      input.disabled = false;
+
+      if (error) {
+        input.checked = !enabled;
+        setMessage(message, arabicError(error, "تعذر الحفظ."), true);
+        return;
+      }
+
+      await loadAdminData();
+      renderMeta();
+      setMessage(message, enabled ? `أصبح «${quiz.title}» متاحًا لكل أعضاء المجموعة.` : `أُزيل «${quiz.title}» من المجموعة.`);
+    });
+  });
+
+  return fieldset;
+}
+
+function buildGroupMembers(group, message, renderMeta) {
+  const section = document.createElement("div");
+  section.className = "group-section";
+
+  const heading = document.createElement("p");
+  heading.className = "group-heading";
+  const chips = document.createElement("div");
+  chips.className = "member-chips";
+
+  const adder = document.createElement("details");
+  adder.className = "member-adder";
+  const adderTitle = document.createElement("summary");
+  adderTitle.textContent = "إضافة أعضاء من المستخدمين الحاليين";
+  const search = document.createElement("input");
+  search.type = "search";
+  search.placeholder = "ابحث بالاسم";
+  search.setAttribute("aria-label", "ابحث عن مستخدم لإضافته");
+  const candidates = document.createElement("div");
+  candidates.className = "member-candidates";
+  const addAll = document.createElement("button");
+  addAll.className = "mini-action";
+  addAll.type = "button";
+  adder.append(adderTitle, search, addAll, candidates);
+
+  const setMembers = async (userIds, enabled, done) => {
+    setMessage(message, "جاري الحفظ…");
+    const { error } = await supabaseClient.rpc("admin_set_group_members", {
+      target_group_id: group.id,
+      user_ids: userIds,
+      enabled
+    });
+
+    if (error) {
+      setMessage(message, arabicError(error, "تعذر الحفظ."), true);
+      return;
+    }
+
+    await loadAdminData();
+    render();
+    renderMeta();
+    setMessage(message, done);
+  };
+
+  const renderCandidates = () => {
+    const inGroup = new Set(groupMemberIds(group.id));
+    const query = search.value.trim().toLowerCase();
+    const shown = adminData.users.filter((user) => {
+      return !inGroup.has(user.id) && (!query || user.display_name.toLowerCase().includes(query) || user.username.includes(query));
+    });
+
+    addAll.hidden = shown.length < 2;
+    addAll.textContent = `إضافة الكل (${shown.length})`;
+    addAll.onclick = () => setMembers(shown.map((user) => user.id), true, "أُضيف الأعضاء إلى المجموعة.");
+
+    if (!shown.length) {
+      candidates.replaceChildren(createEmptyState("لا يوجد مستخدمون آخرون."));
+      return;
+    }
+
+    candidates.replaceChildren(...shown.map((user) => {
+      const label = document.createElement("label");
+      label.className = "checkbox-row";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      const text = document.createElement("span");
+      text.textContent = `${user.avatar || "⭐"} ${user.display_name}`;
+      const username = document.createElement("span");
+      username.className = "progress-meta";
+      username.dir = "ltr";
+      username.textContent = `@${user.username}`;
+      label.append(input, text, username);
+      input.addEventListener("change", () => setMembers([user.id], true, `أُضيف ${user.display_name} إلى المجموعة.`));
+      return label;
+    }));
+  };
+
+  const render = () => {
+    const inGroup = new Set(groupMemberIds(group.id));
+    const members = adminData.users.filter((user) => inGroup.has(user.id));
+    heading.textContent = `أعضاء المجموعة (${members.length})`;
+
+    if (!members.length) {
+      chips.replaceChildren(createEmptyState("لا يوجد أعضاء بعد."));
+    } else {
+      chips.replaceChildren(...members.map((user) => {
+        const chip = document.createElement("span");
+        chip.className = "member-chip";
+        const name = document.createElement("span");
+        name.textContent = user.display_name;
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "×";
+        remove.setAttribute("aria-label", `إزالة ${user.display_name} من المجموعة`);
+        remove.addEventListener("click", async () => {
+          const sure = await confirmDialog(
+            `إزالة ${user.display_name} من «${group.name}»؟ لن تظهر له أنشطة المجموعة، وتبقى أنشطته الخاصة وحسابه ونتائجه.`,
+            "إزالة العضو"
+          );
+          if (sure) await setMembers([user.id], false, `أُزيل ${user.display_name} من المجموعة.`);
+        });
+        chip.append(name, remove);
+        return chip;
+      }));
+    }
+
+    renderCandidates();
+  };
+
+  search.addEventListener("input", renderCandidates);
+  render();
+  section.append(heading, chips, adder);
+  return section;
+}
+
+function buildGroupSettings(group, message) {
+  const section = document.createElement("form");
+  section.className = "group-settings";
+
+  const label = document.createElement("label");
+  const text = document.createElement("span");
+  text.textContent = "اسم المجموعة";
+  const input = document.createElement("input");
+  input.value = group.name;
+  input.maxLength = 60;
+  label.append(text, input);
+
+  const save = document.createElement("button");
+  save.className = "mini-action";
+  save.type = "submit";
+  save.textContent = "حفظ الاسم";
+
+  const remove = document.createElement("button");
+  remove.className = "mini-action danger-action";
+  remove.type = "button";
+  remove.textContent = "حذف المجموعة";
+
+  section.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    const { error } = await supabaseClient.rpc("admin_rename_group", { target_group_id: group.id, group_name: input.value });
+    if (error) {
+      setMessage(message, arabicError(error, "تعذر تغيير الاسم."), true);
+      return;
+    }
+    await renderAdminGroups();
+  });
+
+  remove.addEventListener("click", async () => {
+    const count = groupMemberIds(group.id).length;
+    const sure = await confirmDialog(
+      `حذف مجموعة «${group.name}»؟ ${count ? `يفقد ${membersLabel(count)} أنشطة هذه المجموعة، وتبقى حساباتهم ونتائجهم وأنشطتهم الخاصة.` : "لا يوجد فيها أعضاء."}`,
+      "حذف المجموعة"
+    );
+    if (!sure) return;
+
+    const { error } = await supabaseClient.rpc("admin_delete_group", { target_group_id: group.id });
+    if (error) {
+      setMessage(message, arabicError(error, "تعذر حذف المجموعة."), true);
+      return;
+    }
+    adminOpenGroups.delete(group.id);
+    await renderAdminGroups();
+  });
+
+  section.append(label, save, remove);
+  return section;
+}
+
+// ── Users tab ─────────────────────────────────────────────────────
+/**
+ * The activities of one account. `groupSources` says which of them come from its groups: those
+ * are ticked and locked, because they change from the group. getAssignmentConfigs skips them, so
+ * what is saved is only what the Admin gave this account itself.
+ */
+function renderAssignmentCheckboxes(container, assignments, groupSources = new Map()) {
   const legend = container.querySelector("legend") || document.createElement("legend");
   legend.textContent = "الأنشطة المتاحة";
   container.replaceChildren(legend);
-  const assignmentMap = createAssignmentMap(assignments);
+  const own = new Set((assignments || []).filter((assignment) => assignment.direct !== false).map((assignment) => assignment.quiz_id));
 
   assignmentCatalog.forEach((quiz) => {
     const label = document.createElement("label");
@@ -792,11 +1271,204 @@ function renderAssignmentCheckboxes(container, assignments) {
     const input = document.createElement("input");
     input.type = "checkbox";
     input.value = quiz.id;
-    input.checked = assignmentMap.has(quiz.id);
+    const fromGroups = groupSources.get(quiz.id);
+    input.checked = own.has(quiz.id) || Boolean(fromGroups);
+    input.disabled = !own.has(quiz.id) && Boolean(fromGroups);
     const text = document.createElement("span");
     text.textContent = `${quiz.icon} ${quiz.title}`;
     label.append(input, text);
+    if (fromGroups) {
+      label.classList.toggle("is-from-group", input.disabled);
+      const source = document.createElement("span");
+      source.className = "assignment-source";
+      source.textContent = `من مجموعة ${fromGroups.join("، ")}`;
+      label.append(source);
+    }
     container.append(label);
+  });
+}
+
+async function renderAdminUsers() {
+  const list = document.querySelector("#adminUsersList");
+  if (!list.childElementCount) list.replaceChildren(createEmptyState("جاري التحميل…"));
+
+  try {
+    await loadAdminData();
+  } catch {
+    list.replaceChildren(createEmptyState("تعذر تحميل المستخدمين."));
+    return;
+  }
+
+  fillGroupFilter("users");
+  renderNewUserGroups();
+  renderAdminUsersList();
+}
+
+function renderNewUserGroups() {
+  const fieldset = document.querySelector("#newUserGroups");
+  const legend = document.createElement("legend");
+  legend.textContent = "المجموعات";
+  fieldset.hidden = !adminData.groups.length;
+  fieldset.replaceChildren(legend, ...adminData.groups.map((group) => {
+    const label = document.createElement("label");
+    label.className = "checkbox-row";
+    const input = document.createElement("input");
+    input.type = "checkbox";
+    input.value = group.id;
+    const text = document.createElement("span");
+    text.textContent = group.name;
+    label.append(input, text);
+    return label;
+  }));
+}
+
+function renderAdminUsersList() {
+  const list = document.querySelector("#adminUsersList");
+  const shown = adminData.users.filter((user) => matchesAdminFilter(user, adminFilters.users));
+  document.querySelector("#adminUsersCount").textContent = `${shown.length} من ${adminData.users.length}`;
+
+  if (!shown.length) {
+    list.replaceChildren(createEmptyState("لا يوجد مستخدم بهذا البحث."));
+    return;
+  }
+
+  list.replaceChildren(...shown.map(createUserRow));
+}
+
+function createUserRow(user) {
+  const row = document.createElement("details");
+  row.className = "user-activity admin-user";
+  row.dataset.userId = user.id;
+
+  const summary = document.createElement("summary");
+  const name = document.createElement("strong");
+  name.textContent = `${user.avatar || "⭐"} ${user.display_name}`;
+  const meta = document.createElement("span");
+  meta.className = "progress-meta";
+  const groups = groupsOfUser(user.id);
+  const count = adminData.assignments.filter((assignment) => assignment.user_id === user.id).length;
+  meta.textContent = `@${user.username} · ${user.role === "admin" ? "مدير" : "طفل"} · ${activitiesLabel(count)}`;
+  summary.append(name, meta);
+  if (groups.length) {
+    const chips = document.createElement("span");
+    chips.className = "group-chips";
+    groups.forEach((group) => {
+      const chip = document.createElement("span");
+      chip.className = "group-chip";
+      chip.textContent = group.name;
+      chips.append(chip);
+    });
+    summary.append(chips);
+  }
+
+  const body = document.createElement("div");
+  body.className = "admin-row-body";
+  row.append(summary, body);
+
+  let built = false;
+  const build = () => {
+    if (built) return;
+    built = true;
+    buildUserBody(user, body);
+  };
+
+  row.open = adminOpenUsers.has(user.id);
+  if (row.open) build();
+  row.addEventListener("toggle", () => {
+    if (row.open) {
+      adminOpenUsers.add(user.id);
+      build();
+    } else {
+      adminOpenUsers.delete(user.id);
+    }
+  });
+  return row;
+}
+
+function buildUserBody(user, body) {
+  const assignments = adminData.assignments.filter((assignment) => assignment.user_id === user.id);
+  const message = document.createElement("p");
+  message.className = "form-message compact-message";
+
+  const groupsField = document.createElement("fieldset");
+  if (adminData.groups.length) {
+    const legend = document.createElement("legend");
+    legend.textContent = "المجموعات";
+    groupsField.append(legend);
+    const inGroups = new Set(groupsOfUser(user.id).map((group) => group.id));
+    adminData.groups.forEach((group) => {
+      const label = document.createElement("label");
+      label.className = "checkbox-row";
+      const input = document.createElement("input");
+      input.type = "checkbox";
+      input.checked = inGroups.has(group.id);
+      const text = document.createElement("span");
+      text.textContent = group.name;
+      label.append(input, text);
+      groupsField.append(label);
+      input.addEventListener("change", async () => {
+        const enabled = input.checked;
+        input.disabled = true;
+        setMessage(message, "جاري الحفظ…");
+        const { error } = await supabaseClient.rpc("admin_set_group_members", {
+          target_group_id: group.id,
+          user_ids: [user.id],
+          enabled
+        });
+        if (error) {
+          input.disabled = false;
+          input.checked = !enabled;
+          setMessage(message, arabicError(error, "تعذر الحفظ."), true);
+          return;
+        }
+        await renderAdminUsers();
+      });
+    });
+  }
+
+  const fieldset = document.createElement("fieldset");
+  renderAssignmentCheckboxes(fieldset, assignments, groupSourcesOfUser(user.id));
+
+  const passwordReset = document.createElement("label");
+  passwordReset.className = "password-reset";
+  const passwordText = document.createElement("span");
+  passwordText.textContent = "كلمة مرور جديدة";
+  const passwordInput = document.createElement("input");
+  passwordInput.type = "password";
+  passwordInput.autocomplete = "new-password";
+  passwordInput.placeholder = "كلمة مرور جديدة";
+  passwordReset.append(passwordText, passwordInput);
+
+  const actions = document.createElement("div");
+  actions.className = "assignment-actions";
+  const saveButton = document.createElement("button");
+  saveButton.className = "mini-action save-access";
+  saveButton.type = "button";
+  saveButton.textContent = "حفظ الأنشطة";
+  const passwordButton = document.createElement("button");
+  passwordButton.className = "mini-action";
+  passwordButton.type = "button";
+  passwordButton.textContent = "تغيير كلمة المرور";
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "mini-action danger-action";
+  deleteButton.type = "button";
+  deleteButton.textContent = "حذف";
+  deleteButton.hidden = user.id === currentProfile.id;
+  const adaptiveButton = document.createElement("button");
+  adaptiveButton.className = "mini-action";
+  adaptiveButton.type = "button";
+  adaptiveButton.textContent = "المستوى التكيفي";
+  actions.append(saveButton, passwordButton, deleteButton, adaptiveButton);
+
+  const adaptivePanel = createAdaptivePanel(user.id, assignments);
+  body.append(groupsField, fieldset, passwordReset, actions, message, adaptivePanel);
+
+  saveButton.addEventListener("click", () => saveAssignments(user.id, fieldset, saveButton, message));
+  passwordButton.addEventListener("click", () => updateUserPassword(user.id, passwordInput, message));
+  deleteButton.addEventListener("click", () => deleteUserAccount(user, message));
+  adaptiveButton.addEventListener("click", () => {
+    adaptivePanel.hidden = !adaptivePanel.hidden;
+    if (!adaptivePanel.hidden) loadAdaptiveAnalytics(user.id, adaptivePanel);
   });
 }
 
@@ -806,6 +1478,7 @@ async function createUser(event) {
   const message = document.querySelector("#createUserMessage");
   const formData = new FormData(form);
   const quizConfigs = getAssignmentConfigs(document.querySelector("#newUserAssignments"));
+  const groupIds = [...document.querySelectorAll("#newUserGroups input:checked")].map((input) => input.value);
 
   setMessage(message, "جاري الإنشاء…");
 
@@ -831,87 +1504,21 @@ async function createUser(event) {
       throw new Error(arabicError(payload.error, "تعذر إنشاء المستخدم."));
     }
 
+    for (const groupId of groupIds) {
+      const { error } = await supabaseClient.rpc("admin_set_group_members", {
+        target_group_id: groupId,
+        user_ids: [payload.id],
+        enabled: true
+      });
+      if (error) throw new Error("أُنشئ المستخدم لكن تعذرت إضافته إلى المجموعة.");
+    }
+
     form.reset();
+    renderAssignmentCheckboxes(document.querySelector("#newUserAssignments"), []);
     setMessage(message, "تم إنشاء المستخدم.");
     await renderAdminUsers();
   } catch (error) {
     setMessage(message, arabicError(error, error.message), true);
-  }
-}
-
-async function renderAdminUsers() {
-  const list = document.querySelector("#adminUsersList");
-  list.replaceChildren(createEmptyState("جاري التحميل…"));
-
-  const { data: users, error } = await supabaseClient
-    .from("profiles")
-    .select("id, username, display_name, role, avatar, active")
-    .order("display_name");
-
-  if (error) {
-    list.replaceChildren(createEmptyState("تعذر تحميل المستخدمين."));
-    return;
-  }
-
-  list.replaceChildren();
-
-  for (const user of users) {
-    const assignments = await fetchAssignments(user.id);
-    const row = document.createElement("article");
-    row.className = "user-row";
-
-    const content = document.createElement("div");
-    const name = document.createElement("strong");
-    name.textContent = `${user.avatar || "⭐"} ${user.display_name}`;
-    const meta = document.createElement("div");
-    meta.className = "progress-meta";
-    meta.textContent = `@${user.username} · ${user.role === "admin" ? "مدير" : "طفل"}`;
-    const fieldset = document.createElement("fieldset");
-    const passwordReset = document.createElement("label");
-    passwordReset.className = "password-reset";
-    const passwordText = document.createElement("span");
-    passwordText.textContent = "كلمة مرور جديدة";
-    const passwordInput = document.createElement("input");
-    passwordInput.type = "password";
-    passwordInput.autocomplete = "new-password";
-    passwordInput.placeholder = "كلمة مرور جديدة";
-    passwordReset.append(passwordText, passwordInput);
-    const actions = document.createElement("div");
-    actions.className = "assignment-actions";
-    const saveButton = document.createElement("button");
-    saveButton.className = "mini-action save-access";
-    saveButton.type = "button";
-    saveButton.textContent = "حفظ الأنشطة";
-    const passwordButton = document.createElement("button");
-    passwordButton.className = "mini-action";
-    passwordButton.type = "button";
-    passwordButton.textContent = "تغيير كلمة المرور";
-    const deleteButton = document.createElement("button");
-    deleteButton.className = "mini-action danger-action";
-    deleteButton.type = "button";
-    deleteButton.textContent = "حذف";
-    deleteButton.hidden = user.id === currentProfile.id;
-    const adaptiveButton = document.createElement("button");
-    adaptiveButton.className = "mini-action";
-    adaptiveButton.type = "button";
-    adaptiveButton.textContent = "المستوى التكيفي";
-    const passwordMessage = document.createElement("p");
-    passwordMessage.className = "form-message compact-message";
-    actions.append(saveButton, passwordButton, deleteButton, adaptiveButton);
-    content.append(name, meta, fieldset, passwordReset, actions, passwordMessage);
-
-    const adaptivePanel = createAdaptivePanel(user.id, assignments);
-    row.append(content, adaptivePanel);
-
-    renderAssignmentCheckboxes(fieldset, assignments);
-    saveButton.addEventListener("click", () => saveAssignments(user.id, fieldset, saveButton));
-    passwordButton.addEventListener("click", () => updateUserPassword(user.id, passwordInput, passwordMessage));
-    deleteButton.addEventListener("click", () => deleteUserAccount(user, passwordMessage));
-    adaptiveButton.addEventListener("click", () => {
-      adaptivePanel.hidden = !adaptivePanel.hidden;
-      if (!adaptivePanel.hidden) loadAdaptiveAnalytics(user.id, adaptivePanel);
-    });
-    list.append(row);
   }
 }
 
@@ -922,7 +1529,7 @@ function createEmptyState(message) {
   return empty;
 }
 
-async function saveAssignments(userId, fieldset, button) {
+async function saveAssignments(userId, fieldset, button, message) {
   const quizConfigs = getAssignmentConfigs(fieldset);
   const originalText = button.textContent;
   button.disabled = true;
@@ -936,7 +1543,7 @@ async function saveAssignments(userId, fieldset, button) {
   if (error) {
     button.disabled = false;
     button.textContent = originalText;
-    window.alert(arabicError(error, "تعذر حفظ الأنشطة."));
+    setMessage(message, arabicError(error, "تعذر حفظ الأنشطة."), true);
     return;
   }
 
@@ -944,7 +1551,7 @@ async function saveAssignments(userId, fieldset, button) {
 }
 
 function getAssignmentConfigs(container) {
-  return [...container.querySelectorAll("input[type='checkbox']:checked")].map((input) => {
+  return [...container.querySelectorAll("input[type='checkbox']:checked:not(:disabled)")].map((input) => {
     return {
       quiz_id: input.value,
       difficulty: "medium"
@@ -998,7 +1605,7 @@ async function updateUserPassword(userId, input, message) {
 }
 
 async function deleteUserAccount(user, message) {
-  const confirmed = window.confirm(`حذف حساب ${user.display_name} وكل نتائجه المحفوظة؟`);
+  const confirmed = await confirmDialog(`حذف حساب ${user.display_name} وكل نتائجه المحفوظة؟`, "حذف الحساب");
   if (!confirmed) return;
 
   setMessage(message, "جاري الحذف…");
@@ -1013,7 +1620,6 @@ async function deleteUserAccount(user, message) {
     }
 
     await renderAdminUsers();
-    await renderAdminActivity();
   } catch (error) {
     setMessage(message, arabicError(error, "تعذر حذف الحساب."), true);
   }
@@ -1026,8 +1632,10 @@ async function renderAdminActivity() {
   const [profiles, quizzes, index] = await Promise.all([
     fetchProfilesForActivity(),
     fetchQuizzesForActivity(),
-    fetchActivityIndex()
+    fetchActivityIndex(),
+    loadAdminData().catch(() => undefined)
   ]);
+  fillGroupFilter("activity");
 
   if (!profiles.length) {
     list.replaceChildren(createEmptyState("تعذر تحميل النشاط."));
@@ -1046,7 +1654,16 @@ async function renderAdminActivity() {
 
   list.replaceChildren();
   profiles.forEach((profile) => {
-    list.append(createUserActivityGroup(profile, statsByUser.get(profile.id), quizMap));
+    const group = createUserActivityGroup(profile, statsByUser.get(profile.id), quizMap);
+    group.adminProfile = profile;
+    list.append(group);
+  });
+  applyAdminActivityFilter();
+}
+
+function applyAdminActivityFilter() {
+  document.querySelectorAll("#adminActivityList .user-activity").forEach((group) => {
+    group.hidden = !matchesAdminFilter(group.adminProfile, adminFilters.activity);
   });
 }
 

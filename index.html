@@ -8,7 +8,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400..900&display=swap">
-    <link rel="stylesheet" href="styles.css?v=18">
+    <link rel="stylesheet" href="styles.css?v=19">
   </head>
   <body>
     <main id="app" class="app-shell" aria-live="polite">
@@ -176,7 +176,24 @@
 
         <h1 class="page-title">الإدارة</h1>
 
-        <section class="admin-grid">
+        <nav class="dashboard-tabs admin-tabs" aria-label="أقسام الإدارة">
+          <button class="tab-action active-tab" data-admin-tab="groups" type="button">المجموعات</button>
+          <button class="tab-action" data-admin-tab="users" type="button">المستخدمون</button>
+          <button class="tab-action" data-admin-tab="activity" type="button">النشاط</button>
+        </nav>
+
+        <section id="adminGroupsPanel" class="admin-card">
+          <h2>المجموعات</h2>
+          <p class="admin-hint">كل مجموعة فيها أعضاء وأنشطة، وكل عضو تظهر له أنشطة مجموعته تلقائيًا.</p>
+          <form class="inline-form" id="createGroupForm">
+            <input name="groupName" maxlength="60" required placeholder="اسم المجموعة، مثل: الأول الابتدائي" aria-label="اسم المجموعة">
+            <button class="primary-action" type="submit">مجموعة جديدة</button>
+          </form>
+          <p class="form-message" id="createGroupMessage"></p>
+          <div id="adminGroupsList" class="admin-users-list"></div>
+        </section>
+
+        <section id="adminUsersPanel" class="admin-grid" hidden>
           <form class="admin-card" id="createUserForm">
             <h2>مستخدم جديد</h2>
             <label>
@@ -198,6 +215,7 @@
                 <option value="admin">مدير</option>
               </select>
             </label>
+            <fieldset id="newUserGroups" hidden></fieldset>
             <fieldset id="newUserAssignments">
               <legend>الأنشطة المتاحة</legend>
             </fieldset>
@@ -207,12 +225,21 @@
 
           <section class="admin-card users-card">
             <h2>المستخدمون</h2>
+            <div class="admin-filter" data-admin-filter="users">
+              <input type="search" placeholder="ابحث بالاسم أو اسم المستخدم" aria-label="ابحث عن مستخدم">
+              <select aria-label="تصفية حسب المجموعة"></select>
+            </div>
+            <p class="progress-meta" id="adminUsersCount"></p>
             <div id="adminUsersList" class="admin-users-list"></div>
           </section>
         </section>
 
-        <section class="admin-card activity-card">
+        <section id="adminActivityPanel" class="admin-card activity-card" hidden>
           <h2>النشاط</h2>
+          <div class="admin-filter" data-admin-filter="activity">
+            <input type="search" placeholder="ابحث بالاسم أو اسم المستخدم" aria-label="ابحث في النشاط">
+            <select aria-label="تصفية حسب المجموعة"></select>
+          </div>
           <div id="adminActivityList" class="activity-list"></div>
         </section>
       </section>
@@ -220,6 +247,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="config.js?v=4"></script>
-    <script src="script.js?v=41"></script>
+    <script src="script.js?v=42"></script>
   </body>
 </html>
