@@ -1,90 +1,83 @@
+/* قصص الأنبياء: the Hub's sky identity. A pink band like the story card on the child's page,
+   then a white sheet with the fifteen stories. */
 :root {
-  --ink: #151c2e;
-  --muted: #5d5560;
-  --line: #eadfd8;
-  --accent: #cc4338;
-  --accent-strong: #a93329;
-  --wood: #b9804d;
-  --wood-top: #d39c68;
-  --gutter: max(16px, calc((100% - 1180px) / 2));
-  --facets: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1000 600' preserveAspectRatio='none'%3E%3Crect width='1000' height='600' fill='%23fed6a5'/%3E%3Cpath fill='%23f9b8b4' d='M0 0H300L0 360Z'/%3E%3Cpath fill='%23fed6a5' d='M300 0L330 300L0 360Z'/%3E%3Cpath fill='%23fdec9c' d='M300 0H640L700 260L330 300Z'/%3E%3Cpath fill='%23c8a9d2' d='M640 0H1000L700 260Z'/%3E%3Cpath fill='%23f9b8b4' d='M1000 0V330L700 260Z'/%3E%3Cpath fill='%239adedf' d='M700 260L1000 330V600H420Z'/%3E%3Cpath fill='%23c8a9d2' d='M330 300L700 260L420 600Z'/%3E%3Cpath fill='%23bde3b2' d='M0 360L330 300L420 600H0Z'/%3E%3C/svg%3E");
+  --ink: #1c2050;
+  --ink-2: #5b6090;
+  --line: #e4e7f6;
+  --a: #e9568f;
+  --g: #c93b74;
+  --sun: #ffcb2e;
+  --sun-deep: #e09600;
+  --display: "Rubik", "Geeza Pro", Tahoma, sans-serif;
+  --text: "Readex Pro", "Geeza Pro", Tahoma, sans-serif;
+  --soft: cubic-bezier(.22, 1, .36, 1);
+  --spring: cubic-bezier(.34, 1.45, .64, 1);
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; color: var(--ink); background: var(--a); font: 400 16px/1.6 var(--text); -webkit-font-smoothing: antialiased; overflow-x: clip; }
+.wrap { width: 100%; max-width: 1180px; margin-inline: auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 
-body {
-  margin: 0;
-  min-width: 320px;
-  color: var(--ink);
-  background: #fff;
-  font-family: "Cairo", "Geeza Pro", Tahoma, sans-serif;
+.story-header { position: relative; overflow: hidden; color: #fff; padding-block: calc(12px + env(safe-area-inset-top, 0px)) 62px; }
+.story-header::before, .story-header::after { content: ""; position: absolute; border-radius: 50%; background: rgba(255, 255, 255, .12); animation: bob 6s ease-in-out infinite; }
+.story-header::before { width: 200px; height: 200px; left: -56px; top: -66px; }
+.story-header::after { width: 96px; height: 96px; left: 44%; top: -44px; animation-delay: -2.5s; }
+.story-header .wrap { position: relative; z-index: 1; }
+.story-header :focus-visible { outline-color: #fff; }
+.back-link { display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 50%; background: rgba(255, 255, 255, .22); color: #fff; text-decoration: none; transition: transform .2s var(--soft), background-color .2s ease; }
+.back-link:hover { background: rgba(255, 255, 255, .32); }
+.back-link:active { transform: scale(.9); }
+.back-link svg { width: 24px; height: 24px; }
+.title-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; margin-top: 14px; }
+.eyebrow { margin: 0; font: 500 14.5px/1.4 var(--text); opacity: .92; }
+h1 { margin: 2px 0 0; color: #fff; font: 800 clamp(32px, 9vw, 56px)/1.15 var(--display); text-wrap: balance; }
+.intro { margin: 6px 0 0; font: 500 15px/1.5 var(--text); opacity: .92; }
+.emblem { flex: none; width: 76px; height: 76px; border-radius: 26px; background: rgba(255, 255, 255, .2); display: grid; place-items: center; animation: pop-in .8s var(--spring) backwards .3s; }
+.emblem svg { width: 46px; height: 46px; }
+.emblem .page { transform-box: fill-box; transform-origin: 0% 50%; animation: page-turn 3.6s ease-in-out infinite; }
+
+.story-shell { position: relative; margin-top: -34px; border-radius: 34px 34px 0 0; background: #fff; padding-block: 24px calc(56px + env(safe-area-inset-bottom, 0px)); animation: sheet-in .8s var(--soft) backwards; }
+.story-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 14px; }
+.story-card { position: relative; display: flex; flex-direction: column; overflow: hidden; isolation: isolate; border-radius: 24px; background: #fff; box-shadow: 0 0 0 2px var(--line), 0 6px 0 var(--line); transition: transform .18s var(--soft), box-shadow .18s var(--soft); animation: rise .7s var(--spring) backwards; }
+.story-card:active { transform: translateY(4px); box-shadow: 0 0 0 2px var(--line), 0 2px 0 var(--line); }
+.story-art { display: block; aspect-ratio: 3 / 2; overflow: hidden; background: #fde3ee; }
+.story-art img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform .4s var(--soft); }
+.story-card-body { flex: 1; display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 0 12px 14px; }
+.story-number { position: relative; z-index: 1; min-width: 30px; height: 26px; margin: -13px 0 0; padding: 0 9px; border-radius: 999px; background: var(--a); color: #fff; box-shadow: 0 0 0 3px #fff; font: 800 13px/26px var(--display); text-align: center; }
+h2 { margin: 0; color: var(--ink); font: 800 15.5px/1.4 var(--display); }
+.story-card-body > p:not(.story-number) { display: none; margin: 0; color: var(--ink-2); font-size: 14px; line-height: 1.7; }
+.story-cta { margin-top: auto; display: inline-flex; align-items: center; gap: 6px; min-height: 36px; padding: 0 14px; border-radius: 999px; background: var(--sun); box-shadow: 0 3px 0 var(--sun-deep); color: var(--ink); font: 800 13.5px/1 var(--display); text-decoration: none; }
+/* The whole card opens the story. */
+.story-cta::after { content: ""; position: absolute; inset: 0; z-index: 2; }
+.story-cta span { font-family: system-ui, sans-serif; }
+
+@media (hover: hover) {
+  .story-card:hover { transform: translateY(-3px); box-shadow: 0 0 0 2px var(--line), 0 9px 0 var(--line); }
+  .story-card:hover .story-art img { transform: scale(1.05); }
 }
-
-.story-header {
-  display: grid;
-  justify-items: start;
-  gap: 4px;
-  background:
-    linear-gradient(to top, var(--wood) 0 10px, var(--wood-top) 10px 14px, transparent 14px) bottom / 100% 14px no-repeat,
-    var(--facets) center / 100% 100% no-repeat;
-  box-shadow: 0 10px 10px -8px rgba(91, 50, 26, 0.22);
-  padding: 14px var(--gutter) 34px;
+@media (min-width: 700px) {
+  .story-header { padding-bottom: 74px; }
+  .emblem { width: 98px; height: 98px; border-radius: 32px; }
+  .emblem svg { width: 58px; height: 58px; }
+  .story-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 22px; }
+  .story-card-body { gap: 8px; padding: 0 16px 18px; }
+  h2 { font-size: 18px; }
+  .story-card-body > p:not(.story-number) { display: block; }
 }
+@media (min-width: 1100px) { .story-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
 
-.story-shell {
-  width: min(1180px, calc(100% - 32px));
-  margin: 0 auto;
-  padding: 28px 0 72px;
+.story-card:nth-child(1) { animation-delay: .2s; } .story-card:nth-child(2) { animation-delay: .25s; }
+.story-card:nth-child(3) { animation-delay: .3s; } .story-card:nth-child(4) { animation-delay: .35s; }
+.story-card:nth-child(5) { animation-delay: .4s; } .story-card:nth-child(6) { animation-delay: .45s; }
+.story-card:nth-child(n + 7) { animation-delay: .5s; }
+
+@keyframes bob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes rise { from { opacity: 0; transform: translateY(38px) scale(.92); } }
+@keyframes pop-in { from { opacity: 0; transform: scale(.5); } }
+@keyframes sheet-in { from { transform: translateY(60vh); } }
+@keyframes page-turn { 0%, 45%, 100% { transform: scaleX(1); } 70% { transform: scaleX(-1); } 71% { transform: scaleX(1); opacity: 0; } 85% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; animation-delay: 0s !important; transition-duration: .01ms !important; }
 }
-
-.back-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: 42px;
-  margin-bottom: 14px;
-  border-radius: 999px;
-  background: #fff;
-  box-shadow: 0 5px 0 rgba(21, 28, 46, 0.1), 0 12px 22px rgba(21, 28, 46, 0.12);
-  color: var(--ink);
-  font-size: .95rem;
-  font-weight: 800;
-  text-decoration: none;
-  padding: 0 16px;
-}
-
-.back-link:hover, .back-link:focus-visible { color: var(--accent-strong); }
-
-.story-cta {
-  color: var(--accent);
-  font-weight: 800;
-  text-decoration: none;
-}
-
-.story-cta:hover, .story-cta:focus-visible { color: var(--accent-strong); }
-
-.eyebrow { margin: 0; color: var(--ink); font-size: 1rem; font-weight: 800; }
-h1, h2 { font-family: "Baloo Bhaijaan 2", "Cairo", Tahoma, sans-serif; font-weight: 800; }
-h1 { margin: 0; color: var(--ink); font-size: clamp(2.4rem, 7vw, 4.4rem); line-height: 1.2; }
-.intro { margin: 0; color: var(--ink); font-size: 1.05rem; font-weight: 600; }
-
-.story-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
-.story-card { overflow: hidden; border: 2px solid var(--line); border-radius: 18px; background: #fff; }
-.story-art { display: block; aspect-ratio: 3 / 2; overflow: hidden; background: #fed6a5; }
-.story-art img { display: block; width: 100%; height: 100%; object-fit: cover; transition: transform 300ms ease; }
-.story-art:hover img, .story-art:focus-visible img { transform: scale(1.04); }
-.story-card-body { padding: 20px 20px 22px; }
-.story-number { margin: 0 0 10px; color: var(--muted); font-size: .78rem; font-weight: 800; direction: ltr; }
-h2 { min-height: 3.2em; margin: 0; color: var(--ink); font-size: 1.35rem; line-height: 1.35; }
-.story-card-body > p:not(.story-number) { min-height: 4.5em; margin: 13px 0 20px; color: var(--muted); font-size: .91rem; line-height: 1.9; }
-.story-cta { display: inline-flex; gap: 8px; align-items: center; font-size: .92rem; }
-.story-cta span { font-family: system-ui, sans-serif; font-size: 1.15rem; }
-
-@media (max-width: 980px) { .story-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 560px) {
-  .story-shell { width: min(100% - 24px, 420px); padding-top: 18px; }
-  .story-grid { grid-template-columns: 1fr; gap: 16px; }
-  h2, .story-card-body > p:not(.story-number) { min-height: 0; }
-  .story-card-body { padding: 18px; }
-}
-
-@media (prefers-reduced-motion: reduce) { .story-art img { transition: none; } }

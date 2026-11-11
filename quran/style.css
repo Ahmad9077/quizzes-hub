@@ -94,21 +94,34 @@ footer{display:flex;align-items:center;justify-content:space-between;gap:20px;ma
 /* Content becomes available after the existing Hub access check. */
 #main[aria-busy="true"] #surahList{display:none}
 
-/* The Hub's wall and shelf behind the top of the page. The band hangs behind the header, so the
-   header keeps its height and the phone reading layout stays on one screen. */
+/* The Hub's sky identity: a green band hangs behind the header (so the header keeps its height and
+   the phone reading layout stays on one screen), soft green surfaces, and the sun-yellow main button. */
+:root{--accent:#0f8a62;--mint:#eaf6ef;--line:#d5ecdf;--ink:#1c2050;--muted:#5b6090}
 body{overflow-x:hidden;overflow-x:clip}
-.site-header{position:relative;isolation:isolate;border-bottom:0}
-.site-header::before{content:"";position:absolute;z-index:-1;inset:0 calc(50% - 50vw) -6px;background:linear-gradient(to top,var(--wood) 0 5px,var(--wood-top) 5px 7px,transparent 7px) bottom/100% 7px no-repeat,var(--facets) center/100% 100% no-repeat}
-.wordmark{border-radius:12px;background:#fff;box-shadow:0 3px 0 rgba(21,28,46,.1);line-height:1.5;padding:0 14px 2px}
-.text-link{border-radius:999px;background:#fff;box-shadow:0 3px 0 rgba(21,28,46,.1);padding-inline:14px}
-.text-link:hover{background:#fff;color:var(--accent)}
-.surah-card{border-width:2px;border-radius:18px}.surah-card:hover{border-color:var(--accent)}
+.site-header{position:relative;isolation:isolate;border-bottom:0;color:#fff}
+.site-header::before{content:"";position:absolute;z-index:-1;inset:0 calc(50% - 50vw) -6px;background:radial-gradient(circle at 12% -30%,rgba(255,255,255,.16) 0 110px,transparent 111px),radial-gradient(circle at 60% -70%,rgba(255,255,255,.12) 0 70px,transparent 71px),#0f8a62;border-radius:0 0 26px 26px}
+.site-header a:focus-visible,.site-header button:focus-visible{outline-color:#fff}
+.wordmark{color:#fff;line-height:1.5;padding:0 2px 2px}
+.text-link{border-radius:999px;background:rgba(255,255,255,.2);color:#fff;padding-inline:14px}
+.text-link:hover{background:rgba(255,255,255,.3);color:#fff;text-decoration:none}
+.surahs-link{background:rgba(255,255,255,.2);border-color:transparent;color:#fff;border-radius:50%}
+.surahs-link:hover{background:rgba(255,255,255,.3);border-color:transparent}
+.surah-card{border-width:2px;border-color:var(--line);border-radius:22px;box-shadow:0 4px 0 var(--line);transition:transform .16s cubic-bezier(.22,1,.36,1),box-shadow .16s,background .18s,border-color .18s;animation:surah-in .6s cubic-bezier(.34,1.45,.64,1) backwards}
+.surah-card:hover{background:var(--mint);border-color:var(--accent)}
+.surah-card:active{transform:translateY(3px);box-shadow:0 1px 0 var(--line)}
+.surah-card:nth-child(2){animation-delay:.05s}.surah-card:nth-child(3){animation-delay:.1s}.surah-card:nth-child(4){animation-delay:.15s}.surah-card:nth-child(5){animation-delay:.2s}.surah-card:nth-child(n+6){animation-delay:.25s}
 button:hover{border-color:var(--line)}
-.primary:hover{border-color:var(--accent)}
+.primary{background:#ffcb2e;border-color:#ffcb2e;color:var(--ink);box-shadow:0 4px 0 #e09600;font-weight:700}
+.primary:hover{background:#ffd447;border-color:#ffd447}
+.primary:active{transform:translateY(3px);box-shadow:0 1px 0 #e09600}
 .mode-switch,#verseList button,.audio-panel{background:var(--mint)}
+.mode-switch{border-radius:999px}.mode-switch button{border-radius:999px}
+.mode-switch button[aria-pressed=true]{background:var(--accent);color:#fff;box-shadow:none}
+#verseList button[aria-current=true]{background:var(--accent)}
 .reveal-button{border-color:var(--mint)}
 .cumulative-button{background:#fff}
-.verse-stage{border:2px solid var(--line);box-shadow:none}
+.verse-stage{border:2px solid var(--line);background:#f7fcf9;box-shadow:none;border-radius:28px}
 button:focus-visible,a:focus-visible,select:focus-visible{outline-color:var(--ink)}
 main{padding-top:calc(34px + 6px)}
-@media(max-width:720px){main{padding-top:calc(12px + 6px)}}
+@keyframes surah-in{from{opacity:0;transform:translateY(22px) scale(.96)}}
+@media(max-width:720px){main{padding-top:calc(12px + 6px)}.verse-stage{border-radius:22px}}

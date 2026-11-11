@@ -14,9 +14,20 @@ Quizzes Hub is now structured as a private quiz dashboard:
 
 ## Visual identity
 
-The Hub's pages share one look: a wall of soft facets (`--facets` in `styles.css`), a wooden shelf under it, a white page below, and activities as books standing on shelves. The sign-in page writes only the site's name, the six school subjects and the sign-in fields. Each activity's book colour and cover are `book`, `cover` and `lightBook` in `quizCatalog`; `color` stays as it is in the `quizzes` table and nothing on screen reads it. The stories list and the Quran pages use the same wall and colours in their own stylesheets (the verse fonts do not change). Quiz sites and the story reader keep their own designs.
+One sky sits behind every Hub page and follows the child's local time: morning, noon, sunset and night, with
+dunes and palms on the horizon (`.sky` in `index.html`; the mood is `data-mood` on `<body>`, the page is
+`data-screen`). A white sheet rises over it. The sign-in page writes only the site's name, the six school
+subjects and the sign-in fields. On the child's page each school subject is a small world that moves
+(`SCENES` in `script.js`: `world` and an optional short `card` name in `quizCatalog`); every other activity is
+a small tile with a moving icon (`glyph`). Tapping an activity grows its card over the screen before the page
+opens. A floating dock switches between the activities and Challenge; the avatar opens the account sheet
+(Admin, sign out). Admin, the stories list and the Quran pages use the same colours and shapes; the Quran
+pages change colours only, so the phone reader still fits one screen, and the verse fonts do not change.
+`color` and `book` stay as in the `quizzes` table; `book` colours the small tiles. Fonts: Rubik (names,
+greetings, buttons) and Readex Pro (text). Quiz sites and the story reader keep their own designs.
 
-`tests/identity.cjs` drives the sign-in page, the shelf, Challenge and Admin on the stand-in backend at phone, tablet and computer sizes.
+`tests/identity.cjs` drives the sign-in page, the child's page, Challenge and Admin on the stand-in backend at
+phone, tablet and computer sizes.
 
 ## Groups
 

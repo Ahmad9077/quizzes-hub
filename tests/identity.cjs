@@ -49,8 +49,11 @@ const rgb = (text) => text.match(/[\d.]+/g).slice(0, 3).map(Number);
 
     const password = page.locator('input[name="password"]');
     await password.fill('secret-words');
-    const padded = await password.evaluate((el) => parseFloat(getComputedStyle(el).paddingRight));
-    assert.ok(padded >= 50, `${label}: the password stays clear of the eye button`);
+    // The eye sits at the field's left end; the typing stays clear of it.
+    const padded = await password.evaluate((el) => parseFloat(getComputedStyle(el).paddingLeft));
+    const eyeBox = await page.locator('#togglePassword').boundingBox();
+    const fieldBox = await password.boundingBox();
+    assert.ok(padded >= 50 && eyeBox.x + eyeBox.width <= fieldBox.x + padded + 1, `${label}: the password stays clear of the eye button`);
     await page.locator('#togglePassword').click();
     assert.equal(await password.getAttribute('type'), 'text');
     assert.equal(await page.locator('#togglePassword').getAttribute('aria-pressed'), 'true');
@@ -73,15 +76,18 @@ const rgb = (text) => text.match(/[\d.]+/g).slice(0, 3).map(Number);
     await page.locator('.go').click();
     await page.locator('#dashboardTitle', { hasText: 'نورة أحمد' }).waitFor();
 
+    // Signing out is in the account sheet, behind the avatar.
+    await page.locator('#avatarButton').click();
     await page.locator('#logoutButton').click();
     await page.locator('#loginForm').waitFor();
 
-    // ── The child's shelf ──
+    // ── The child's page ──
     await open('?view=child');
     await page.locator('.quiz-tile').first().waitFor();
     await settled();
     const expected = await page.evaluate(() => {
-      const quizzes = quizCatalog.map((quiz) => [quiz.title, quiz.url]);
+      // School subjects show their short name on the card; the full title is in the link's label.
+      const quizzes = quizCatalog.map((quiz) => [quiz.card || quiz.title, quiz.url]);
       return { quizzes, count: assignmentCatalog.length };
     });
     const tiles = page.locator('.quiz-tile');
@@ -104,7 +110,7 @@ const rgb = (text) => text.match(/[\d.]+/g).slice(0, 3).map(Number);
       assert.ok(ratio >= 4.5, `${label}: ${book.name} contrast ${ratio.toFixed(2)}`);
     }
     await sideways('shelf');
-    await shot('2-shelf');
+    await shot('2-home');
 
     // ── Challenge ──
     await page.locator('#challengeTabButton').click();

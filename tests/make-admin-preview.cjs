@@ -18,7 +18,8 @@ swap('</head>', `<style>
       .preview-banner { background: #151c2e; color: #fff; font-family: "Cairo", "Geeza Pro", system-ui, sans-serif; font-size: 0.86rem; font-weight: 800; line-height: 1.6; padding: 8px 16px; text-align: center; }
     </style>
   </head>`);
-swap('<body>', '<body>\n    <p class="preview-banner">معاينة ببيانات تجريبية: الأسماء وهمية، ولا شيء هنا يغيّر الموقع الحقيقي. تحديث الصفحة يرجع البيانات كما كانت.</p>');
+html = html.replace(/<body([^>]*)>/, '<body$1>\n    <p class="preview-banner">معاينة ببيانات تجريبية: الأسماء وهمية، ولا شيء هنا يغيّر الموقع الحقيقي. تحديث الصفحة يرجع البيانات كما كانت.</p>');
+if (!html.includes('preview-banner">')) throw new Error('index.html no longer has a <body> tag');
 fs.writeFileSync(path.join(out, 'index.html'), html);
 for (const file of ['script.js', 'styles.css']) fs.copyFileSync(path.join(root, file), path.join(out, file));
 fs.copyFileSync(path.join(__dirname, 'admin-groups-mock.js'), path.join(out, 'admin-groups-mock.js'));
