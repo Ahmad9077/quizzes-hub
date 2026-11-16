@@ -142,7 +142,21 @@ const quranCollections = [
   { id: "quran-al-balad", title: "القرآن الكريم - حمود", icon: "ق", group: "hamoud", countLabel: "٧ سور" },
   { id: "quran-deema", title: "القرآن الكريم - الأول الابتدائي", icon: "ق", group: "deema", countLabel: "٨ سور" }
 ];
-const assignmentCatalog = [...quizCatalog, storyCollection, ...quranCollections];
+// Games are assigned and opened like a quiz site, but they are not scored questions: they stay out
+// of the adaptive panel and the Challenge list (only quizCatalog feeds those two).
+const gameCollection = [
+  {
+    id: "candy-shop",
+    glyph: "shop",
+    title: "البقالة",
+    icon: "🛒",
+    color: "#f1e6ff",
+    book: "#6a3fb0",
+    url: "https://ahmad9077.github.io/candy-shop/",
+    opening: "نفتح لك البقالة"
+  }
+];
+const assignmentCatalog = [...quizCatalog, ...gameCollection, storyCollection, ...quranCollections];
 
 // The interface is Arabic. Titles stored in the database are older English names, so screens
 // show the catalog title when the activity is known.
@@ -377,6 +391,7 @@ const moving = (body) => `<svg class="mv" viewBox="0 0 24 24" fill="none" stroke
 const MOVING = {
   stories: moving('<path d="M12 7C9.8 5.4 7 5 4 5.8v11.4c3-.8 5.8-.4 8 1.2"/><path d="M12 7v11.4"/><path d="M12 7c2.2-1.6 5-2 8-1.2v11.4c-3-.8-5.8-.4-8 1.2"/><path class="i-page" d="M12 7c2.2-1.6 5-2 8-1.2v11.4c-3-.8-5.8-.4-8 1.2z" fill="currentColor" fill-opacity=".35"/>'),
   quran: moving('<g class="i-turn"><rect x="6.2" y="6.2" width="11.6" height="11.6" rx="1.2"/></g><g class="i-turn back"><rect x="6.2" y="6.2" width="11.6" height="11.6" rx="1.2" transform="rotate(45 12 12)"/></g><circle class="i-dot" cx="12" cy="12" r="2" fill="currentColor"/>'),
+  shop: moving('<path d="M4.2 9.8 5.8 5.2h12.4l1.6 4.6"/><path d="M4.2 9.8a1.95 1.95 0 0 0 3.9 0 1.95 1.95 0 0 0 3.9 0 1.95 1.95 0 0 0 3.9 0 1.95 1.95 0 0 0 3.9 0"/><path d="M5.6 12.6V19.6h12.8v-7"/><path d="M9.9 19.6v-3.8h4.2v3.8"/><circle class="i-bounce" cx="12" cy="13.2" r="1.15" fill="currentColor" stroke="none"/>'),
   flags: moving('<path d="M6 21V4"/><path class="i-flag" d="M6 5h11l-2.4 3.5L17 12H6z"/>'),
   map: moving('<ellipse class="i-shadow" cx="12" cy="21" rx="4" ry="1.2" fill="currentColor" stroke="none" opacity=".4"/><g class="i-pin"><path d="M12 19.5s-5.8-5-5.8-9.6a5.8 5.8 0 0 1 11.6 0c0 4.6-5.8 9.6-5.8 9.6z"/><circle cx="12" cy="9.8" r="2.1"/></g>'),
   phonics: moving('<path d="M4 10v4h3l4.5 3.5v-11L7 10z"/><path class="i-w" d="M15.5 9.5a3.6 3.6 0 0 1 0 5"/><path class="i-w b" d="M18.2 7a7.2 7.2 0 0 1 0 10"/>'),
@@ -741,6 +756,13 @@ function renderAssignedQuizzes(assignments) {
   const allowed = quizCatalog.filter((quiz) => assignmentMap.has(quiz.id));
 
   const tiles = allowed.map(createQuizTile);
+  for (const game of gameCollection) {
+    if (!assignmentMap.has(game.id)) continue;
+    const tile = createQuizTile(game);
+    tile.setAttribute("aria-label", `العب ${game.title}`);
+    tile.dataset.opening = game.opening;
+    tiles.push(tile);
+  }
   if (assignmentMap.has(storyCollection.id)) {
     const stories = document.querySelector("#storiesTileTemplate").content.firstElementChild.cloneNode(true);
     stories.dataset.opening = "نفتح لك القصص";

@@ -19,7 +19,9 @@ dunes and palms on the horizon (`.sky` in `index.html`; the mood is `data-mood` 
 `data-screen`). A white sheet rises over it. The sign-in page writes only the site's name, the six school
 subjects and the sign-in fields. On the child's page each school subject is a small world that moves
 (`SCENES` in `script.js`: `world` and an optional short `card` name in `quizCatalog`); every other activity is
-a small tile with a moving icon (`glyph`). Tapping an activity grows its card over the screen before the page
+a small tile with a moving icon (`glyph`). Games (`gameCollection` in `script.js`, the first is «البقالة») are
+assigned and opened like a quiz site but are not scored questions: they are in `assignmentCatalog` and stay out
+of the adaptive panel and Challenge, which only read `quizCatalog`. Tapping an activity grows its card over the screen before the page
 opens. A floating dock switches between the activities and Challenge; the avatar opens the account sheet
 (Admin, sign out). Admin, the stories list and the Quran pages use the same colours and shapes; the Quran
 pages change colours only, so the phone reader still fits one screen, and the verse fonts do not change.
