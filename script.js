@@ -153,7 +153,9 @@ const gameCollection = [
     color: "#f1e6ff",
     book: "#6a3fb0",
     url: "https://ahmad9077.github.io/candy-shop/",
-    opening: "نفتح لك البقالة"
+    opening: "نفتح لك البقالة",
+    // The game's points goal: the Admin shows a child's balance out of it.
+    goal: 100
   }
 ];
 const assignmentCatalog = [...quizCatalog, ...gameCollection, storyCollection, ...quranCollections];
@@ -2108,10 +2110,11 @@ async function renderAdminActivity() {
   const list = document.querySelector("#adminActivityList");
   list.replaceChildren(createEmptyState("جاري التحميل…"));
 
-  const [profiles, quizzes, index] = await Promise.all([
+  const [profiles, quizzes, index, balances] = await Promise.all([
     fetchProfilesForActivity(),
     fetchQuizzesForActivity(),
     fetchActivityIndex(),
+    fetchGameBalances(),
     loadAdminData().catch(() => undefined)
   ]);
   fillGroupFilter("activity");
@@ -2131,9 +2134,14 @@ async function renderAdminActivity() {
     statsByUser.set(row.user_id, stats);
   });
 
+  const balancesByUser = new Map();
+  balances.forEach((row) => {
+    balancesByUser.set(row.user_id, [...(balancesByUser.get(row.user_id) || []), row]);
+  });
+
   list.replaceChildren();
   profiles.forEach((profile) => {
-    const group = createUserActivityGroup(profile, statsByUser.get(profile.id), quizMap);
+    const group = createUserActivityGroup(profile, statsByUser.get(profile.id), quizMap, balancesByUser.get(profile.id) || []);
     group.adminProfile = profile;
     list.append(group);
   });
@@ -2156,7 +2164,65 @@ async function fetchActivityIndex() {
   return error ? [] : data || [];
 }
 
-function createUserActivityGroup(profile, stats, quizMap) {
+// A child's balance in each game (the points toward the game's goal). Empty where the balances
+// table is not there yet or nobody has played.
+async function fetchGameBalances() {
+  const { data, error } = await supabaseClient
+    .from("game_balances")
+    .select("user_id, game_id, points, updated_at");
+
+  return error ? [] : data || [];
+}
+
+// One game's balance for one child, with the Admin's reset.
+function createGameBalanceItem(profile, balance) {
+  const game = gameCollection.find((item) => item.id === balance.game_id);
+  const title = activityTitle(balance.game_id);
+  const row = document.createElement("article");
+  row.className = "activity-item game-balance";
+
+  const header = document.createElement("div");
+  const name = document.createElement("strong");
+  name.textContent = `رصيد ${title}`;
+  const meta = document.createElement("div");
+  meta.className = "progress-meta";
+  const reset = document.createElement("button");
+  reset.type = "button";
+  reset.className = "mini-action danger-action";
+  reset.textContent = "تصفير الرصيد";
+  header.append(name, meta, reset);
+
+  const score = document.createElement("div");
+  score.className = "progress-score";
+
+  const show = (points, note) => {
+    score.textContent = game?.goal ? `${points}/${game.goal}` : String(points);
+    meta.textContent = note;
+    reset.disabled = points === 0;
+  };
+  show(balance.points, `آخر تحديث ${formatDateTime(balance.updated_at)}`);
+
+  reset.addEventListener("click", async () => {
+    const confirmed = await confirmDialog(`تصفير رصيد ${profile.display_name} في «${title}»؟ ترجع النقاط إلى صفر.`, "تصفير الرصيد");
+    if (!confirmed) return;
+    reset.disabled = true;
+    const { error } = await supabaseClient.rpc("admin_reset_game_balance", {
+      target_user_id: profile.id,
+      p_game_id: balance.game_id
+    });
+    if (error) {
+      show(balance.points, "تعذر تصفير الرصيد. حاول مرة ثانية.");
+      return;
+    }
+    balance.points = 0;
+    show(0, "تم التصفير. يظهر في اللعبة عند فتحها.");
+  });
+
+  row.append(header, score);
+  return row;
+}
+
+function createUserActivityGroup(profile, stats, quizMap, balances = []) {
   const group = document.createElement("details");
   group.className = "user-activity";
 
@@ -2170,9 +2236,14 @@ function createUserActivityGroup(profile, stats, quizMap) {
     : "لا يوجد نشاط";
   summary.append(name, meta);
 
+  // Balances stay on top; the attempts below them load on the first expand.
+  const container = document.createElement("div");
+  container.className = "activity-list user-activity-items";
+  balances.forEach((balance) => container.append(createGameBalanceItem(profile, balance)));
   const body = document.createElement("div");
-  body.className = "activity-list user-activity-items";
-  group.append(summary, body);
+  body.className = "activity-list";
+  container.append(body);
+  group.append(summary, container);
 
   if (!stats) {
     body.append(createEmptyState("لا يوجد نشاط بعد."));

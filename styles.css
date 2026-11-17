@@ -1050,6 +1050,11 @@ legend {
   align-items: start;
 }
 
+/* A game's balance on top of a child's results, with the Admin's reset under its date. */
+.game-balance .mini-action {
+  margin-top: 10px;
+}
+
 .progress-score {
   display: grid;
   place-items: center;
