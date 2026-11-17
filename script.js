@@ -2138,6 +2138,16 @@ async function renderAdminActivity() {
   balances.forEach((row) => {
     balancesByUser.set(row.user_id, [...(balancesByUser.get(row.user_id) || []), row]);
   });
+  // A child who has a game but has not opened it since balances began still gets its row, so the
+  // Admin can find it, and reset it before the game's first sync.
+  const gameIds = new Set(gameCollection.map((game) => game.id));
+  adminData.assignments
+    .filter((row) => gameIds.has(row.quiz_id))
+    .forEach((row) => {
+      const rows = balancesByUser.get(row.user_id) || [];
+      if (rows.some((balance) => balance.game_id === row.quiz_id)) return;
+      balancesByUser.set(row.user_id, [...rows, { user_id: row.user_id, game_id: row.quiz_id, points: 0, updated_at: null }]);
+    });
 
   list.replaceChildren();
   profiles.forEach((profile) => {
@@ -2195,12 +2205,14 @@ function createGameBalanceItem(profile, balance) {
   const score = document.createElement("div");
   score.className = "progress-score";
 
+  // No row on the server yet: the points are still only on the child's device.
+  let pending = !balance.updated_at;
   const show = (points, note) => {
-    score.textContent = game?.goal ? `${points}/${game.goal}` : String(points);
+    score.textContent = pending ? "—" : game?.goal ? `${points}/${game.goal}` : String(points);
     meta.textContent = note;
-    reset.disabled = points === 0;
+    reset.disabled = !pending && points === 0;
   };
-  show(balance.points, `آخر تحديث ${formatDateTime(balance.updated_at)}`);
+  show(balance.points, pending ? "لم تُفتح اللعبة منذ التحديث. يظهر الرصيد هنا عند فتحها." : `آخر تحديث ${formatDateTime(balance.updated_at)}`);
 
   reset.addEventListener("click", async () => {
     const confirmed = await confirmDialog(`تصفير رصيد ${profile.display_name} في «${title}»؟ ترجع النقاط إلى صفر.`, "تصفير الرصيد");
@@ -2215,6 +2227,7 @@ function createGameBalanceItem(profile, balance) {
       return;
     }
     balance.points = 0;
+    pending = false;
     show(0, "تم التصفير. يظهر في اللعبة عند فتحها.");
   });
 
