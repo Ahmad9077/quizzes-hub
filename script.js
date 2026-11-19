@@ -218,7 +218,12 @@ const topicLabels = {
   topic_arkan: "أركان الإسلام",
   topic_ibada: "العبادة",
   topic_rasul: "الرسول محمد ﷺ",
-  topic_walidain: "حب الوالدين وبرهما"
+  topic_walidain: "حب الوالدين وبرهما",
+  topic_khaliq: "الله تعالى الخالق المصور",
+  topic_iman: "أركان الإيمان",
+  topic_tawhid: "كلمة التوحيد",
+  topic_masad: "سورة المسد",
+  topic_nasr: "سورة النصر"
 };
 
 // Messages that come back from Supabase and the admin-users function are in English.
